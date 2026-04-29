@@ -1,0 +1,23 @@
+[package]
+name = "atlas-verifier"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas Verifier — onchain Groth16 verifier wrapping sp1-solana for Solana programs"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "atlas_verifier"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang.workspace = true
+sp1-solana.workspace = true
+solana-program.workspace = true

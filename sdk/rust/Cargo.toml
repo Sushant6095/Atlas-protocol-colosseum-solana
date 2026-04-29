@@ -1,0 +1,16 @@
+[package]
+name = "atlas-sdk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas SDK — Rust client for the Atlas verifier + vault programs"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+anchor-lang.workspace = true
+solana-sdk.workspace = true
+solana-client.workspace = true
+serde.workspace = true
+thiserror.workspace = true

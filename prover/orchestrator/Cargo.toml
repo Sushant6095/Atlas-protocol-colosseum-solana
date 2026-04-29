@@ -1,0 +1,23 @@
+[package]
+name = "atlas-orchestrator"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas Orchestrator — fetch state, prove, submit rebalance tx"
+
+[dependencies]
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+sp1-sdk.workspace = true
+solana-client.workspace = true
+solana-sdk.workspace = true
+ndarray.workspace = true
+
+[[bin]]
+name = "atlas-orchestrator"
+path = "src/main.rs"

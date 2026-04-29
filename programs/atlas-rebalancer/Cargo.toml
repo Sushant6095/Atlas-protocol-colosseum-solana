@@ -1,0 +1,25 @@
+[package]
+name = "atlas-rebalancer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas Rebalancer — proof-gated allocator across Kamino, Drift, Jupiter, marginfi"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "atlas_rebalancer"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang.workspace = true
+anchor-spl.workspace = true
+atlas-verifier = { path = "../atlas-verifier", features = ["cpi"] }
+atlas-vault = { path = "../atlas-vault", features = ["cpi"] }
+atlas-registry = { path = "../atlas-registry", features = ["cpi"] }

@@ -1,0 +1,15 @@
+[package]
+name = "atlas-zkvm-program"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "SP1 guest program — proves MLP inference over committed model + onchain state"
+
+[dependencies]
+sp1-zkvm.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[[bin]]
+name = "atlas-zkvm-program"
+path = "src/main.rs"

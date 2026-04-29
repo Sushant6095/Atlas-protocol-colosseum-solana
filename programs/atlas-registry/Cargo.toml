@@ -1,0 +1,23 @@
+[package]
+name = "atlas-registry"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas Registry — compressed merkle of approved model commitments + prover stakes"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "atlas_registry"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang.workspace = true
+anchor-spl.workspace = true
+spl-account-compression.workspace = true

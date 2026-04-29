@@ -1,0 +1,21 @@
+app = "atlas-orchestrator"
+primary_region = "iad"
+
+[build]
+  dockerfile = "../runpod/Dockerfile"
+
+[env]
+  RUST_LOG = "info,atlas_orchestrator=debug"
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+[mounts]
+  source = "atlas_data"
+  destination = "/data"

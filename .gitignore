@@ -1,0 +1,42 @@
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Anchor
+.anchor/
+test-ledger/
+
+# Node
+node_modules/
+.next/
+dist/
+build/
+*.log
+.pnpm-store/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# SP1
+prover/zkvm-program/elf/
+prover/zkvm-program/proofs/
+*.bin
+
+# Solana
+.keys/
+*-keypair.json
+
+# Docs (exclude all md except root README.md)
+docs/
+

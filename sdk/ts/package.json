@@ -1,0 +1,24 @@
+{
+  "name": "@atlas/sdk",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p .",
+    "gen": "node scripts/codama.mjs"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./pda": "./dist/pda.js",
+    "./constants": "./dist/constants.js"
+  },
+  "dependencies": {
+    "@solana/kit": "^2.1.0",
+    "@solana/web3-compat": "^2.1.0",
+    "codama": "^1.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

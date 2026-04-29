@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
-import { AmbientBackground } from "@/components/AmbientBackground";
 import { Navbar } from "@/components/Navbar";
 import { TxToastHost } from "@/components/TxToast";
 
@@ -17,7 +16,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen antialiased">
         <Providers>
-          <AmbientBackground />
           <Navbar />
           {children}
           <TxToastHost />

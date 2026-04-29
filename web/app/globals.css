@@ -52,14 +52,19 @@ html, body {
   -webkit-text-fill-color: transparent;
 }
 
-/* animated grid background */
+/* Birdeye-style full-coverage grid */
 .grid-bg {
   background-image:
-    linear-gradient(rgba(124, 92, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 92, 255, 0.06) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%);
+    linear-gradient(rgba(150, 130, 255, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(150, 130, 255, 0.18) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.grid-bg-fine {
+  background-image:
+    linear-gradient(rgba(120, 220, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 220, 255, 0.06) 1px, transparent 1px);
+  background-size: 12px 12px;
 }
 
 @keyframes pulse-glow {

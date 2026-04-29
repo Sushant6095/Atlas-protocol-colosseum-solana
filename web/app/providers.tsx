@@ -7,6 +7,8 @@ import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
+import { WalletConnectWalletAdapter } from "@solana/wallet-adapter-walletconnect";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 import { WalletPickerModal } from "@/components/WalletPickerModal";
 
@@ -21,7 +23,39 @@ export function Providers({ children }: { children: ReactNode }) {
   );
 
   const wallets = useMemo(
-    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
+    () => {
+      const wcId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+      const list: any[] = [
+        new PhantomWalletAdapter(),
+        new SolflareWalletAdapter(),
+      ];
+      if (wcId) {
+        list.push(
+          new WalletConnectWalletAdapter({
+            network:
+              (process.env.NEXT_PUBLIC_CLUSTER as WalletAdapterNetwork) ??
+              WalletAdapterNetwork.Devnet,
+            options: {
+              projectId: wcId,
+              metadata: {
+                name: "Atlas",
+                description: "Verifiable AI DeFi for Solana",
+                url:
+                  typeof window !== "undefined"
+                    ? window.location.origin
+                    : "https://atlas.fyi",
+                icons: [
+                  typeof window !== "undefined"
+                    ? `${window.location.origin}/favicon.ico`
+                    : "https://atlas.fyi/favicon.ico",
+                ],
+              },
+            },
+          }),
+        );
+      }
+      return list;
+    },
     [],
   );
 

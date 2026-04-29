@@ -12,8 +12,36 @@ import { Showcase } from "@/components/Showcase";
 export default function Home() {
   return (
     <main className="relative">
-      {/* hero */}
-      <section className="mx-auto max-w-6xl px-6 pt-12 pb-32">
+      {/* hero w/ Birdeye-style grid (grid contained to this block only) */}
+      <section className="relative pt-12 pb-16 overflow-hidden">
+        {/* grid bg — contained to hero only */}
+        <div
+          className="absolute inset-0 -z-10 pointer-events-none"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(150,130,255,0.22) 1px, transparent 1px), linear-gradient(90deg, rgba(150,130,255,0.22) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+            maskImage: "radial-gradient(ellipse 80% 90% at 50% 40%, #000 30%, transparent 90%)",
+            WebkitMaskImage: "radial-gradient(ellipse 80% 90% at 50% 40%, #000 30%, transparent 90%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 -z-10 pointer-events-none"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(120,220,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(120,220,255,0.07) 1px, transparent 1px)",
+            backgroundSize: "12px 12px",
+            maskImage: "radial-gradient(ellipse 80% 90% at 50% 40%, #000 20%, transparent 80%)",
+            WebkitMaskImage: "radial-gradient(ellipse 80% 90% at 50% 40%, #000 20%, transparent 80%)",
+          }}
+        />
+        {/* subtle accent blob inside hero only */}
+        <div
+          className="absolute top-[-10%] left-[10%] h-[400px] w-[400px] rounded-full blur-[140px] -z-10 pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(124,92,255,0.30) 0%, transparent 70%)" }}
+        />
+
+        <div className="mx-auto max-w-6xl px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -39,7 +67,7 @@ export default function Home() {
 
             <div className="flex flex-wrap gap-3 pt-2">
               <Link
-                href="/vault"
+                href="/vaults/atUSDC-v1"
                 className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#7c5cff] to-[#29d3ff] px-6 py-3 font-medium text-white glow-accent hover:opacity-95 transition"
               >
                 Open the vault
@@ -69,10 +97,11 @@ export default function Home() {
             <HeroOrb />
           </motion.div>
         </div>
+        </div>
       </section>
 
       {/* feature pillars */}
-      <section className="mx-auto max-w-6xl px-6 py-16">
+      <section className="mx-auto max-w-6xl px-6 py-16 mt-16">
         <SectionHead
           eyebrow="Three layers · one product"
           title="Infra, DeFi, Consumer."
@@ -178,7 +207,7 @@ export default function Home() {
           </p>
           <div className="flex justify-center gap-3 mt-8">
             <Link
-              href="/vault"
+              href="/vaults/atUSDC-v1"
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#7c5cff] to-[#29d3ff] px-6 py-3 font-medium text-white glow-accent"
             >
               Open vault

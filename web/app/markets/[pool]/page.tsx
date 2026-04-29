@@ -298,7 +298,7 @@ export default function PoolDetailPage() {
                 risk-adjusted yield wins. Every move arrives with an SP1 proof.
               </p>
               <Link
-                href="/vault"
+                href="/vaults/atUSDC-v1"
                 className="block w-full text-center py-3 rounded-xl bg-gradient-to-r from-[#7c5cff] to-[#29d3ff] text-white font-medium glow-accent hover:opacity-95 transition"
               >
                 Open Atlas Vault

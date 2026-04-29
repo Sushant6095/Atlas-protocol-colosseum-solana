@@ -182,7 +182,7 @@ function ExtensionTab({
         </>
       )}
 
-      {/* MetaMask Solana Snap hint */}
+      {/* MetaMask honest disclosure */}
       <div className="mt-5 rounded-xl border border-[color:var(--color-border)] bg-black/30 p-3">
         <div className="flex items-start gap-3">
           <img
@@ -193,7 +193,7 @@ function ExtensionTab({
           <div className="flex-1">
             <div className="text-sm font-medium">MetaMask</div>
             <div className="text-xs text-[color:var(--color-muted)] mt-0.5 leading-relaxed">
-              Use MetaMask on Solana via the official Snap. Once installed it appears here as a detected wallet.
+              MetaMask Mobile doesn&apos;t sign Solana txs natively (only EVM). For Solana from MetaMask use the desktop <strong>Solana Snap</strong>; for QR-mobile use the <em>Mobile QR</em> tab with Phantom or Solflare.
             </div>
             <a
               href="https://snaps.metamask.io/snap/npm/solflare-wallet/solana-snap/"
@@ -201,7 +201,7 @@ function ExtensionTab({
               rel="noreferrer"
               className="inline-flex items-center gap-1 mt-2 text-xs text-[color:var(--color-accent)] hover:underline"
             >
-              Install Solana Snap <ExternalLink className="h-3 w-3" />
+              Install desktop Solana Snap <ExternalLink className="h-3 w-3" />
             </a>
           </div>
         </div>

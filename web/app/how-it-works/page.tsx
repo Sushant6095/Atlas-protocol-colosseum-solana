@@ -250,7 +250,7 @@ if any: tx aborts BEFORE CPI`}
             first verified rebalance with a Solscan link.
           </p>
           <a
-            href="/vault"
+            href="/vaults/atUSDC-v1"
             className="inline-flex mt-8 items-center gap-2 rounded-xl bg-gradient-to-r from-[#7c5cff] to-[#29d3ff] px-6 py-3 font-medium text-white glow-accent"
           >
             Open vault

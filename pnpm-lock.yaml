@@ -29,6 +29,9 @@ importers:
       '@solana/wallet-adapter-react-ui':
         specifier: ^0.9.35
         version: 0.9.39(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6))(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@19.0.0(react@19.0.0))(react-native@0.85.2(@babel/core@7.29.0)(@types/react@19.0.0)(bufferutil@4.1.0)(react@19.0.0)(utf-8-validate@6.0.6))(react@19.0.0)(typescript@5.9.3)
+      '@solana/wallet-adapter-walletconnect':
+        specifier: ^0.1.18
+        version: 0.1.21(@react-native-async-storage/async-storage@1.24.0(react-native@0.85.2(@babel/core@7.29.0)(@types/react@19.0.0)(bufferutil@4.1.0)(react@19.0.0)(utf-8-validate@6.0.6)))(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6))(@types/react@19.0.0)(bufferutil@4.1.0)(react@19.0.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@3.22.4)
       '@solana/wallet-adapter-wallets':
         specifier: ^0.19.32
         version: 0.19.38(@babel/runtime@7.29.2)(@react-native-async-storage/async-storage@1.24.0(react-native@0.85.2(@babel/core@7.29.0)(@types/react@19.0.0)(bufferutil@4.1.0)(react@19.0.0)(utf-8-validate@6.0.6)))(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3))(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6))(@types/react@19.0.0)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@19.0.0(react@19.0.0))(react-native@0.85.2(@babel/core@7.29.0)(@types/react@19.0.0)(bufferutil@4.1.0)(react@19.0.0)(utf-8-validate@6.0.6))(react@19.0.0)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(ws@7.5.10(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@3.22.4)
@@ -10532,9 +10535,9 @@ snapshots:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@5.9.3)(zod@3.22.4)
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.2.3(typescript@5.9.3)(zod@3.22.4)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.9.3

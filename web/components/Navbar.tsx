@@ -25,7 +25,7 @@ export function Navbar() {
           <NavLink href="/how-it-works">How it works</NavLink>
           <NavLink href="/proofs">Proofs</NavLink>
           <Link
-            href="/vault"
+            href="/vaults/atUSDC-v1"
             className="ml-3 rounded-lg bg-gradient-to-r from-[#7c5cff] to-[#29d3ff] px-4 py-2 text-white text-sm font-medium hover:opacity-90 transition"
           >
             Launch app

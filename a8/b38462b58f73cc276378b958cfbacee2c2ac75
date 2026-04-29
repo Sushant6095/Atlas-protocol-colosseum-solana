@@ -1,0 +1,56 @@
+web/app/markets/[pool]/page.tsx
+  c3576656714da0ca 301
+web/components/Navbar.tsx
+  c3576656714da0ca 28
+web/components/WalletPickerModal.tsx
+  c3576656714da0ca 185,196,204
+README.md
+  c3576656714da0ca 1,3,5,7,9-13,15,17-145,147-166,169,171-305,309,313-314,318,324,329,331-352,356-410,412-432,434,436,440
+web/.env.local.example
+  c3576656714da0ca 1-13
+web/app/providers.tsx
+  c3576656714da0ca 10-11,26-58
+grant-application.md
+  c3576656714da0ca 1-117
+web/components/AmbientBackground.tsx
+  c3576656714da0ca 5-16,19-23,25,27-28,30,33-34,36,39-40,42
+web/app/globals.css
+  c3576656714da0ca 55,58-67
+web/app/page.tsx
+  c3576656714da0ca 15-44,70,100,104,210
+web/app/how-it-works/page.tsx
+  c3576656714da0ca 253
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "a8b38462b58f73cc276378b958cfbacee2c2ac75",
+  "prompts": {
+    "c3576656714da0ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 519,
+      "total_deletions": 268,
+      "accepted_lines": 650,
+      "overriden_lines": 0
+    },
+    "c6efe077a5cf0d04": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9fc7482f-4c7c-4711-8388-ae2aa4e10532",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 341,
+      "overriden_lines": 0
+    }
+  }
+}

@@ -33,6 +33,11 @@ import { Footer } from "@/components/Footer";
 import { findVault, type AtlasVaultMeta, type StrategyLeg } from "@/lib/vaults";
 import { fetchPoolChart, formatApy, formatTvl, type DLChartPoint } from "@/lib/markets";
 import { ConnectButton } from "@/components/ConnectButton";
+import { DepositCard } from "@/components/DepositCard";
+import { useSolBalance } from "@/hooks/useSolBalance";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { fmtSol, CLUSTER } from "@/lib/atlas";
+import { Droplet } from "lucide-react";
 
 const TABS = [
   { k: "performance", label: "Performance", icon: <Activity className="h-3.5 w-3.5" /> },
@@ -56,8 +61,8 @@ export default function VaultDetailPage() {
   const [tab, setTab] = useState<Tab>("performance");
   const [range, setRange] = useState<(typeof RANGES)[number]["k"]>("90d");
   const [depositMode, setDepositMode] = useState<"deposit" | "withdraw">("deposit");
-  const [lock, setLock] = useState<"unlocked" | "locked">("unlocked");
-  const [amount, setAmount] = useState("");
+  const { connected } = useWallet();
+  const { data: balance } = useSolBalance();
 
   if (!v) {
     return (
@@ -150,7 +155,7 @@ export default function VaultDetailPage() {
             </AnimatePresence>
           </div>
 
-          {/* sticky deposit */}
+          {/* sticky deposit — real wallet flow */}
           <aside>
             <div className="glass rounded-2xl p-6 sticky top-28">
               <div className="flex items-center justify-between mb-4">
@@ -158,8 +163,7 @@ export default function VaultDetailPage() {
                 <span className="text-xs text-[color:var(--color-muted)]">$0.00</span>
               </div>
 
-              {/* deposit/withdraw tabs */}
-              <div className="flex gap-1 p-1 bg-black/40 rounded-xl mb-4 border border-[color:var(--color-border)]">
+              <div className="flex gap-1 p-1 bg-black/40 rounded-xl mb-5 border border-[color:var(--color-border)]">
                 {(["deposit", "withdraw"] as const).map((m) => (
                   <button
                     key={m}
@@ -180,84 +184,36 @@ export default function VaultDetailPage() {
                 ))}
               </div>
 
-              {/* amount */}
-              <div className="mb-3">
-                <div className="flex justify-between text-xs text-[color:var(--color-muted)] mb-2">
-                  <span>Amount</span>
-                  <div className="flex gap-1">
-                    {["25%", "50%", "75%", "Max"].map((p) => (
-                      <button key={p} onClick={() => setAmount(p === "Max" ? "100" : p.replace("%", ""))} className="px-2 hover:text-white">
-                        {p}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex gap-2 rounded-xl border border-[color:var(--color-border)] bg-black/40 p-3">
-                  <input
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="0.00"
-                    inputMode="decimal"
-                    className="flex-1 bg-transparent outline-none text-2xl font-semibold tracking-tight"
-                  />
-                  <span className="self-center px-2 py-1 rounded-md bg-white/5 text-sm">
-                    {v.asset}
-                  </span>
-                </div>
-                <div className="text-xs text-[color:var(--color-muted)] mt-2">$0.00</div>
-              </div>
-
-              {/* lock toggle (Yearn-style) */}
-              {depositMode === "deposit" && (
-                <div className="mb-4">
-                  <div className="text-xs text-[color:var(--color-muted)] mb-2">Choose deposit type</div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => setLock("unlocked")}
-                      className={`rounded-xl border p-3 text-left transition ${
-                        lock === "unlocked"
-                          ? "border-[color:var(--color-accent)] bg-white/5"
-                          : "border-[color:var(--color-border)] hover:bg-white/5"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <Unlock className="h-3.5 w-3.5" /> Unlocked
-                      </div>
-                      <div className="text-[10px] text-[color:var(--color-muted)] mt-1">Withdraw anytime</div>
-                    </button>
-                    <button
-                      onClick={() => setLock("locked")}
-                      className={`rounded-xl border p-3 text-left transition ${
-                        lock === "locked"
-                          ? "border-[color:var(--color-accent)] bg-white/5"
-                          : "border-[color:var(--color-border)] hover:bg-white/5"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <Lock className="h-3.5 w-3.5" /> Locked
-                      </div>
-                      <div className="text-[10px] text-[color:var(--color-muted)] mt-1">14d cooldown · higher APY</div>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <Link
-                href="/vault"
-                className="block w-full text-center py-3 rounded-xl bg-gradient-to-r from-[#7c5cff] to-[#29d3ff] text-white font-medium glow-accent hover:opacity-95 transition"
-              >
-                {depositMode === "deposit" ? `Deposit ${v.asset}` : `Withdraw`}
-              </Link>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={depositMode}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <DepositCard mode={depositMode} />
+                </motion.div>
+              </AnimatePresence>
 
               <div className="mt-5 pt-5 border-t border-[color:var(--color-border)] text-xs space-y-2">
                 <Row k="You'll receive" v={<span className="font-mono">0.00 {v.symbol}</span>} />
-                <Row k="Share value" v="1.00 USDC" />
+                <Row k="Share value" v={`1.00 ${v.asset}`} />
                 <Row k="Performance fee" v={`${v.performanceFeeBps / 100}%`} />
+                <Row k="Cluster" v={<code className="text-[color:var(--color-accent-2)]">{CLUSTER}</code>} />
               </div>
 
-              <div className="mt-4">
-                <ConnectButton />
-              </div>
+              {CLUSTER === "devnet" && connected && balance !== null && balance !== undefined && balance < 1e7 && (
+                <a
+                  href="https://faucet.solana.com/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 flex items-center gap-2 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-warn)]/10 px-3 py-2 text-xs hover:bg-[color:var(--color-warn)]/15 transition"
+                >
+                  <Droplet className="h-3.5 w-3.5 text-[color:var(--color-warn)]" />
+                  <span>Low devnet SOL — get more from the faucet →</span>
+                </a>
+              )}
             </div>
           </aside>
         </div>
@@ -479,6 +435,7 @@ function protoColor(p: StrategyLeg["protocol"]): string {
     case "Sanctum": return "#ff5cf0";
     case "Cambrian": return "#a78bfa";
     case "Idle": return "#6b7280";
+    default: return "#6b7280";
   }
 }
 

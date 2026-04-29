@@ -1,0 +1,169 @@
+web/components/AmbientBackground.tsx
+  c6efe077a5cf0d04 1-30
+web/components/Showcase.tsx
+  c6efe077a5cf0d04 1-61
+web/lib/vaults.ts
+  c6efe077a5cf0d04 1-590
+sdk/ts/tsconfig.json
+  c6efe077a5cf0d04 1-13
+programs/atlas-vault/Cargo.toml
+  c6efe077a5cf0d04 1-22
+web/app/vaults/[symbol]/page.tsx
+  c6efe077a5cf0d04 1-575
+web/components/LogoBadge.tsx
+  c6efe077a5cf0d04 1-13
+prover/orchestrator/Cargo.toml
+  c6efe077a5cf0d04 1-23
+web/components/WalletPickerModal.tsx
+  c6efe077a5cf0d04 1-272
+web/app/globals.css
+  c6efe077a5cf0d04 1-105
+web/hooks/useSolBalance.ts
+  c6efe077a5cf0d04 1-20
+web/app/layout.tsx
+  c6efe077a5cf0d04 1-28
+Cargo.toml
+  c6efe077a5cf0d04 1-57
+prover/orchestrator/src/config.rs
+  c6efe077a5cf0d04 1-34
+web/app/api/actions/deposit/route.ts
+  c6efe077a5cf0d04 1-52
+web/.env.production.example
+  c6efe077a5cf0d04 1-6
+prover/zkvm-program/src/main.rs
+  c6efe077a5cf0d04 1-139
+web/components/TxToast.tsx
+  c6efe077a5cf0d04 1-92
+sdk/rust/Cargo.toml
+  c6efe077a5cf0d04 1-16
+web/components/DepositCard.tsx
+  c6efe077a5cf0d04 1-150
+prover/orchestrator/src/state.rs
+  c6efe077a5cf0d04 1-37
+package.json
+  c6efe077a5cf0d04 1-22
+web/components/Footer.tsx
+  c6efe077a5cf0d04 1-50
+web/app/vault/page.tsx
+  c6efe077a5cf0d04 1-221
+web/app/vaults/page.tsx
+  c6efe077a5cf0d04 1-251
+web/package.json
+  c6efe077a5cf0d04 1-41
+web/postcss.config.mjs
+  c6efe077a5cf0d04 1-3
+web/app/proofs/page.tsx
+  c6efe077a5cf0d04 1-106
+programs/atlas-registry/Cargo.toml
+  c6efe077a5cf0d04 1-23
+prover/orchestrator/src/prove.rs
+  c6efe077a5cf0d04 1-26
+web/next-env.d.ts
+  c6efe077a5cf0d04 1-6
+web/app/providers.tsx
+  c6efe077a5cf0d04 1-42
+web/app/how-it-works/page.tsx
+  c6efe077a5cf0d04 1-340
+programs/atlas-verifier/Cargo.toml
+  c6efe077a5cf0d04 1-23
+prover/zkvm-program/Cargo.toml
+  c6efe077a5cf0d04 1-15
+sdk/ts/src/index.ts
+  c6efe077a5cf0d04 1-3
+sdk/ts/src/pda.ts
+  c6efe077a5cf0d04 1-46
+web/components/Navbar.tsx
+  c6efe077a5cf0d04 1-48
+web/components/ProofFeed.tsx
+  c6efe077a5cf0d04 1-77
+web/hooks/useSolanaYields.ts
+  c6efe077a5cf0d04 1-13
+web/vercel.json
+  c6efe077a5cf0d04 1-21
+prover/model/requirements.txt
+  c6efe077a5cf0d04 1-3
+Anchor.toml
+  c6efe077a5cf0d04 1-41
+prover/orchestrator/src/main.rs
+  c6efe077a5cf0d04 1-58
+web/components/ProofPipeline.tsx
+  c6efe077a5cf0d04 1-104
+web/next.config.mjs
+  c6efe077a5cf0d04 1-7
+web/tsconfig.json
+  c6efe077a5cf0d04 1-21
+programs/atlas-rebalancer/Cargo.toml
+  c6efe077a5cf0d04 1-25
+.env.example
+  c6efe077a5cf0d04 1-17
+sdk/ts/src/constants.ts
+  c6efe077a5cf0d04 1-13
+infra/fly/fly.toml
+  c6efe077a5cf0d04 1-21
+sdk/ts/package.json
+  c6efe077a5cf0d04 1-24
+web/app/markets/[pool]/page.tsx
+  c6efe077a5cf0d04 1-470
+prover/model/train.py
+  c6efe077a5cf0d04 1-89
+programs/atlas-registry/src/lib.rs
+  c6efe077a5cf0d04 1-148
+web/components/AllocationChart.tsx
+  c6efe077a5cf0d04 1-82
+web/app/markets/page.tsx
+  c6efe077a5cf0d04 1-281
+web/lib/atlas.ts
+  c6efe077a5cf0d04 1-85
+web/components/ConnectButton.tsx
+  c6efe077a5cf0d04 1-82
+.gitignore
+  c6efe077a5cf0d04 1-42
+sdk/ts/src/types.ts
+  c6efe077a5cf0d04 1-34
+programs/atlas-verifier/src/lib.rs
+  c6efe077a5cf0d04 1-69
+prover/orchestrator/src/submit.rs
+  c6efe077a5cf0d04 1-18
+scripts/codama-gen.mjs
+  c6efe077a5cf0d04 1-7
+infra/runpod/Dockerfile
+  c6efe077a5cf0d04 1-20
+web/components/HeroOrb.tsx
+  c6efe077a5cf0d04 1-84
+README.md
+  c6efe077a5cf0d04 1-85
+pnpm-workspace.yaml
+  c6efe077a5cf0d04 1-2
+programs/atlas-vault/src/lib.rs
+  c6efe077a5cf0d04 1-318
+sdk/rust/src/lib.rs
+  c6efe077a5cf0d04 1-32
+programs/atlas-rebalancer/src/lib.rs
+  c6efe077a5cf0d04 1-134
+web/app/page.tsx
+  c6efe077a5cf0d04 1-282
+web/components/StatsCounter.tsx
+  c6efe077a5cf0d04 1-41
+web/lib/markets.ts
+  c6efe077a5cf0d04 1-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "7db2d3472e68775355bd624d0c13ce6f28fea50a",
+  "prompts": {
+    "c6efe077a5cf0d04": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9fc7482f-4c7c-4711-8388-ae2aa4e10532",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 6546,
+      "total_deletions": 0,
+      "accepted_lines": 6546,
+      "overriden_lines": 0
+    }
+  }
+}

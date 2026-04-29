@@ -76,23 +76,26 @@ flowchart TB
         JITO[Jito bundle relay]
     end
 
-    UI <-->|@solana/kit| WC
-    UI -->|deposit / withdraw| VAULT
-    BLK -->|share-to-deposit| VAULT
+    UI <-->|"@solana/kit"| WC
+    UI -->|"deposit / withdraw"| VAULT
+    BLK -->|"share-to-deposit"| VAULT
 
-    AGT -->|fetch state| KAM & DFT & JUP & MFI
+    AGT -->|"fetch state"| KAM
+    AGT -->|"fetch state"| DFT
+    AGT -->|"fetch state"| JUP
+    AGT -->|"fetch state"| MFI
     AGT --> SP1
     SP1 --> WRAP
     WRAP --> JITO
-    JITO -->|atomic tx| REB
+    JITO -->|"atomic tx"| REB
 
-    REB -->|CPI verify| VER
-    REB -->|CPI execute| KAM
-    REB -->|CPI execute| DFT
-    REB -->|CPI execute| JUP
-    REB -->|CPI execute| MFI
-    REB -->|CPI record| VAULT
-    VER -.read.-> REG
+    REB -->|"CPI verify"| VER
+    REB -->|"CPI execute"| KAM
+    REB -->|"CPI execute"| DFT
+    REB -->|"CPI execute"| JUP
+    REB -->|"CPI execute"| MFI
+    REB -->|"CPI record"| VAULT
+    VER -.->|"read"| REG
 
     classDef onchain fill:#1a1a2e,stroke:#7c5cff,stroke-width:2px,color:#fff
     classDef offchain fill:#0a1929,stroke:#29d3ff,stroke-width:2px,color:#fff
@@ -191,15 +194,15 @@ Mollusk regression suite in CI fails the build if any step blows its envelope.
 graph LR
     REB[atlas_rebalancer]
 
-    REB -->|deposit / withdraw| K1[Kamino main USDC]
-    REB -->|multiply 3x| K2[Kamino Multiply]
-    REB -->|insurance vault| D1[Drift v2]
-    REB -->|perp funding capture| D2[Drift perps]
-    REB -->|swap for rebalance| J1[Jupiter Aggregator v6]
-    REB -->|JLP| J2[Jupiter LP]
-    REB -->|lend / borrow| M1[marginfi v2]
-    REB -->|JitoSOL collateral| JT[Jito]
-    REB -->|LST basket| SC[Sanctum]
+    REB -->|"deposit / withdraw"| K1["Kamino main USDC"]
+    REB -->|"multiply 3x"| K2["Kamino Multiply"]
+    REB -->|"insurance vault"| D1["Drift v2"]
+    REB -->|"perp funding capture"| D2["Drift perps"]
+    REB -->|"swap for rebalance"| J1["Jupiter Aggregator v6"]
+    REB -->|"JLP"| J2["Jupiter LP"]
+    REB -->|"lend / borrow"| M1["marginfi v2"]
+    REB -->|"JitoSOL collateral"| JT["Jito"]
+    REB -->|"LST basket"| SC["Sanctum"]
 
     classDef p fill:#7c5cff22,stroke:#7c5cff,color:#fff
     class K1,K2,D1,D2,J1,J2,M1,JT,SC p
@@ -214,24 +217,24 @@ graph LR
 ```mermaid
 graph TB
     subgraph IMM["Immutable at vault creation"]
-        SC[strategy_commitment<br/>= Poseidon(model_hash,<br/>universe, cooldown,<br/>drift_threshold)]
-        AM[approved_model_hash]
+        SC["strategy_commitment<br/>Poseidon hash of: model_hash,<br/>universe, cooldown, drift_threshold"]
+        AM["approved_model_hash"]
     end
 
     subgraph MUT["Admin-mutable (limited)"]
-        PA[paused: bool]
-        TV[max_tvl &darr; only]
+        PA["paused: bool"]
+        TV["max_tvl (lower only)"]
     end
 
     subgraph FORBID["Cannot change post-init"]
-        F1[strategy commitment]
-        F2[approved model]
-        F3[allocation universe]
-        F4[cooldown / drift policy]
+        F1["strategy commitment"]
+        F2["approved model"]
+        F3["allocation universe"]
+        F4["cooldown / drift policy"]
     end
 
-    SC -.locked.-> F1
-    AM -.locked.-> F2
+    SC -.->|"locked"| F1
+    AM -.->|"locked"| F2
 
     classDef immutable fill:#1a3a1a,stroke:#29d391,color:#fff
     classDef mutable fill:#3a3a1a,stroke:#f7c948,color:#fff

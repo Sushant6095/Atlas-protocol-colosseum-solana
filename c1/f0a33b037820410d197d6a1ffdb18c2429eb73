@@ -1,0 +1,36 @@
+web/next.config.mjs
+  c6efe077a5cf0d04 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "c1f0a33b037820410d197d6a1ffdb18c2429eb73",
+  "prompts": {
+    "c3576656714da0ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 108,
+      "total_deletions": 51,
+      "accepted_lines": 82,
+      "overriden_lines": 0
+    },
+    "c6efe077a5cf0d04": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9fc7482f-4c7c-4711-8388-ae2aa4e10532",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 667,
+      "total_deletions": 14,
+      "accepted_lines": 273,
+      "overriden_lines": 7
+    }
+  }
+}

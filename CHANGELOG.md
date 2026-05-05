@@ -34,8 +34,6 @@
 
 - Stage 02 NormalizeMarket
 - Stage 04 PreprocessRisk (contagion graph + correlated-liquidation model)
-- Stage 05 EvaluateAgents (7-agent ensemble with veto authority)
-- Stage 06 ResolveConsensus
 - Stage 07 EnforceConstraints
 - Stage 09 ExplainDecision (canonical JSON, hash-committed)
 - Stage 11 ProveSp1 (sp1-recursion → Groth16 wrap)
@@ -45,3 +43,60 @@
 - `atlas-replay` binary for historical reconstruction + counterfactual + adversarial fuzz
 - `tests/adversarial` corpus (10 hostile scenarios from directive §12)
 - `ops/grafana` dashboards from §13 SLOs
+
+---
+
+## Unreleased — Phase 1.1 (2026-05-06)
+
+### Added
+
+- **Stage 03 ExtractFeatures — extended.** Full directive §4 feature catalog now lands typed:
+  `ProtocolUtilization`, `LiquidityDepth1Pct`, `LiquidityDepth5Pct`, `Volatility30m`,
+  `Volatility24h`, `ApyInstability`, `OracleDeviation`, `DrawdownVelocity`,
+  `LiquidityStress`, `RegimeLabel`, `CorrelationCell`. Features carry explicit
+  `(protocol_index, secondary_index)` so correlation-matrix cells round-trip via the
+  same merkle leaf format. Helpers added: `parkinson_volatility`, `stddev` (Bessel),
+  `correlation` (Pearson), `lower_triangular_cells`. Quantization is fixed-point i64
+  scale 1e6, `round_ties_even` (banker's rounding) — matches the SP1 guest path.
+- **Stage 05 EvaluateAgents.** `AgentId` enum (7 agents, stable u8 discriminants),
+  `VetoLevel` (Soft / Hard), `RejectionCode` (11 stable u16 codes),
+  `AgentProposal::validate` enforcing length, sum-to-10_000, confidence cap, and
+  veto-authority check (`YieldMax` may not hard-veto; `ExecEfficiency` may not
+  hard-veto; etc.). `proposal_commit` is a domain-tagged hash over the canonical
+  fields; `ensemble_root` is `merkle_with_tag(b"atlas.ensemble.v2", per_agent_model_hashes)`
+  and lands in `public_input.model_hash`.
+- **Stage 06 ResolveConsensus.** Hard-veto short-circuit: any authorized agent
+  raising `VetoLevel::Hard` collapses the rebalance to the pre-committed defensive
+  vector, byte-equal, regardless of any other proposal. Soft veto contributes
+  `weight × −1` to the weighted vote. Weighted aggregation = `confidence ×
+  historical_accuracy_ema` per agent. Disagreement metric =
+  `1 − cosine(median, mean)` in bps, computed entirely in integer fixed-point
+  via Newton's-method `isqrt_u128` — no float drift between off-chain pipeline
+  and SP1 guest. Magnitude clipping toward `current_allocation` activates when
+  disagreement exceeds `τ_disagree`. Renormalization to exactly 10_000 bps via
+  largest-remainder. Consensus root =
+  `hash_with_tag(b"atlas.consensus.v2", sorted_proposal_commits)`.
+
+### Tests
+
+- Unit tests across new stages: `parkinson_zero_for_empty`, `parkinson_zero_for_flat`,
+  `parkinson_increases_with_range`, `correlation_within_bounds`, `lower_triangular_count_correct`,
+  `stddev_sample_correction`, `correlation_matrix_in_feature_root`, agent
+  validate / commit / ensemble-root tests, consensus
+  `hard_veto_collapses_to_defensive_byte_equal`, `unanimous_proposals_yield_those_proposals`,
+  `final_allocation_always_sums_to_10000`, `cosine_orthogonal_is_zero`,
+  `cosine_identical_is_10000`, `isqrt_known_values`, `high_disagreement_clips_toward_current`,
+  `consensus_root_order_invariant`, `unauthorized_hard_veto_is_rejected_at_validation`.
+- **Property test (directive §5 acceptance gate).** `hard_veto_collapses_to_defensive`
+  in `tests/invariants` runs 256 randomized cases over `n ∈ [2,8]` protocols with
+  6 random clean proposals + 1 hard veto from a hard-veto-authorized agent. Asserts
+  the final allocation is byte-equal to the defensive vector in every case.
+
+### Test counts
+
+| Crate | Tests |
+|---|---|
+| atlas-public-input | 5 |
+| atlas-pipeline | 33 |
+| atlas-invariants-tests | 6 (incl. 256-case proptest) |
+| **Total** | **44** |

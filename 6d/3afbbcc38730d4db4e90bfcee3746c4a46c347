@@ -1,0 +1,55 @@
+crates/atlas-public-input/Cargo.toml
+  c3576656714da0ca 1-18
+tests/invariants/Cargo.toml
+  c3576656714da0ca 1-13
+Cargo.toml
+  c3576656714da0ca 3-7,9-13,37-41
+crates/atlas-pipeline/src/hashing.rs
+  c3576656714da0ca 1-45
+tests/invariants/src/lib.rs
+  c3576656714da0ca 1-83
+crates/atlas-pipeline/Cargo.toml
+  c3576656714da0ca 1-25
+crates/atlas-pipeline/src/lib.rs
+  c3576656714da0ca 1-27
+crates/atlas-pipeline/src/ctx.rs
+  c3576656714da0ca 1-89
+CHANGELOG.md
+  c3576656714da0ca 1-47
+crates/atlas-pipeline/src/stages/mod.rs
+  c3576656714da0ca 1-25
+crates/atlas-pipeline/src/stages/allocation.rs
+  c3576656714da0ca 1-59
+crates/atlas-public-input/src/lib.rs
+  c3576656714da0ca 1-234
+crates/atlas-pipeline/src/stage.rs
+  c3576656714da0ca 1-66
+crates/atlas-pipeline/src/stages/features.rs
+  c3576656714da0ca 1-152
+crates/atlas-pipeline/src/stages/ingest.rs
+  c3576656714da0ca 1-305
+crates/atlas-pipeline/src/stages/serialize.rs
+  c3576656714da0ca 1-82
+clippy.toml
+  c3576656714da0ca 1-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "6d3afbbcc38730d4db4e90bfcee3746c4a46c347",
+  "prompts": {
+    "c3576656714da0ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 1309,
+      "total_deletions": 8,
+      "accepted_lines": 1306,
+      "overriden_lines": 0
+    }
+  }
+}

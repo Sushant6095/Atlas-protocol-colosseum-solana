@@ -1,0 +1,41 @@
+.github/workflows/replay-parity.yml
+  c3576656714da0ca 1-58
+crates/atlas-telemetry/src/lib.rs
+  c3576656714da0ca 162-240
+CHANGELOG.md
+  c3576656714da0ca 3-118
+ops/prometheus/atlas-alerts.yaml
+  c3576656714da0ca 1-170
+Cargo.toml
+  c3576656714da0ca 65,72
+crates/atlas-bus/src/event.rs
+  c3576656714da0ca 166-182
+crates/atlas-bus/src/bus.rs
+  c3576656714da0ca 170,174-176,197-202
+crates/atlas-bus/src/adapters.rs
+  c3576656714da0ca 141,143-145,148-150,152,154-155,158-160,162,164,167-169,202-204
+crates/atlas-bus/src/bin/webhook_rx.rs
+  c3576656714da0ca 1-227
+crates/atlas-bus/Cargo.toml
+  c3576656714da0ca 14-17,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "4928aed55ab85b2e2e2d0316b546738b9f580dfb",
+  "prompts": {
+    "c3576656714da0ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 705,
+      "total_deletions": 13,
+      "accepted_lines": 705,
+      "overriden_lines": 0
+    }
+  }
+}

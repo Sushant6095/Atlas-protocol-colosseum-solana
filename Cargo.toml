@@ -11,6 +11,7 @@ members = [
     "crates/atlas-telemetry",
     "crates/atlas-replay",
     "crates/atlas-bus",
+    "crates/atlas-warehouse",
     "tests/invariants",
     "tests/adversarial",
 ]

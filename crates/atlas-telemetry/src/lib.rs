@@ -238,6 +238,63 @@ pub static INGEST_REPLAY_DRIFT_EVENTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
     v
 });
 
+// ─── Phase 03 — Warehouse SLOs (directive §8) ─────────────────────────────
+
+pub static WAREHOUSE_WRITE_LAG_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_warehouse_write_lag_ms",
+        "Wall-time latency of WarehouseClient inserts. p99 SLO ≤ 800 ms.",
+        exponential_buckets(50.0, 1.5, 10).unwrap_or_default()
+    );
+    let h = HistogramVec::new(opts, &["table"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static WAREHOUSE_ARCHIVE_FAILURE_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_warehouse_archive_failure_total",
+        "WarehouseClient writes that returned an error. Hard alert on any.",
+        &["table"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static WAREHOUSE_BUBBLEGUM_ANCHOR_LAG_SLOTS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_warehouse_bubblegum_anchor_lag_slots",
+        "Slots between the latest accepted rebalance receipt and its Bubblegum anchor leaf. p99 SLO ≤ 600.",
+        vec![32.0, 64.0, 128.0, 256.0, 512.0, 600.0, 1024.0, 2048.0]
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static WAREHOUSE_REPLAY_QUERY_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_warehouse_replay_query_ms",
+        "Wall-time of a replay range query. p99 SLO ≤ 5_000 ms for a 1h range.",
+        exponential_buckets(100.0, 1.5, 12).unwrap_or_default()
+    );
+    let h = HistogramVec::new(opts, &["range_class"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static WAREHOUSE_FEATURE_STORE_LEAKAGE_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_warehouse_feature_store_leakage_violations_total",
+        "Feature-store queries that returned data observable AFTER the requested as_of_slot. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

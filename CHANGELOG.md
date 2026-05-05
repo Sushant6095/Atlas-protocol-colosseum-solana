@@ -1,5 +1,123 @@
 # Atlas Changelog
 
+## Unreleased — Phase 3 (2026-05-06) — Intelligence Warehouse (directive 03)
+
+### atlas-warehouse crate
+
+- `schema` — typed Rust rows for all 7 directive §2 tables: `RebalanceRow`,
+  `AccountStateRow`, `OracleTickRow`, `PoolSnapshotRow`, `AgentProposalRow`,
+  `EventRow`, `FailureClassificationRow`. Stable `RebalanceStatus` enum
+  (Proposed/Submitted/Landed/Rejected/Aborted). `OracleSource` enum mirrors
+  the SQL `Enum8`. `tx_signature` is `Vec<u8>` because serde does not derive
+  `Deserialize` for `[u8; 64]`; insert path asserts `len() == 64`.
+- `client` — `WarehouseClient` async trait + `WriteReceipt`. Receipts include
+  `idempotent_hit` so callers (Phase 01 stage 16) can distinguish a fresh
+  write from a no-op replay. `WarehouseError` taxonomy: Unavailable /
+  SchemaMismatch / IdempotencyCollision / Rejected / Poisoned.
+- `mock` — `MockWarehouse` in-memory backend implementing the same
+  idempotency contract as the real DB. Used by Phase 1/2 tests and the
+  forensic API binary in development.
+- `bubblegum` — anchoring keeper. `merkle_root` over a leaf list w/ next-
+  power-of-two zero padding. `merkle_path` + `verify_path` for auditor-
+  side verification without trusting the warehouse API.
+  `BubblegumAnchorKeeper` batches receipts every N leaves, emits
+  `BubblegumAnchorReceipt { slot_low, slot_high, leaf_count, batch_root }`.
+  Domain-tagged hashes (`b"atlas.archive.leaf.v1\0"`,
+  `b"atlas.archive.node.v1\0"`) prevent cross-domain collisions.
+- `replay` — `replay(client, ReplayQuery { slot_lo, slot_hi })` returns
+  `ReplayResponse` w/ events sorted by `(slot, event_id)` for deterministic
+  consumption by Phase 02 `atlas-bus replay --archive`.
+- `feature_store` — `FeatureStoreClient` enforcing point-in-time discipline
+  (directive §5). `assert_no_leak()` rejects any candidate snapshot whose
+  `observed_at_slot > as_of_slot` and increments the
+  `atlas_warehouse_feature_store_leakage_violations_total` counter.
+- `views` — constants for the 4 named materialized views from §4.
+- `migrations` — `TABLE_VERSIONS` records the deployed schema version per
+  table per engine. Adding a column requires bumping the version + landing
+  a SQL migration; CI fails on drift.
+
+### atlas-warehouse-api binary
+
+- Read-only forensic HTTP surface (axum, port 9091 default).
+- `GET /vault/:id/rebalances?from=&to=`
+- `GET /rebalance/:hash`
+- `GET /rebalance/:hash/explanation`
+- `GET /rebalance/:hash/proof` — returns `archive_root_slot` + Merkle path
+  to the on-chain Bubblegum root. Auditors verify with `verify_path` w/o
+  trusting our API.
+- `GET /vault/:id/feature-snapshot?slot=`
+
+### SQL migrations
+
+- `db/clickhouse/V001__base_schema.sql` — 6 tables (rebalances, oracle_ticks,
+  pool_snapshots, agent_proposals, events, failure_classifications) +
+  4 materialized views (`mv_rebalance_summary_daily`,
+  `mv_agent_disagreement_distribution`, `mv_failure_class_rate`,
+  `mv_protocol_exposure_over_time`). ZSTD codec on JSONB columns.
+- `db/timescale/V001__base_schema.sql` — Timescale hypertables for
+  `rebalances`, `account_states`, `events`. Compression policies (6h for
+  account_states, 24h for events). Retention policy 30 days. Indexes for
+  `(vault_id, slot DESC)` and `(pubkey, slot DESC)`.
+
+### atlas-telemetry — Phase 03 SLO metrics (directive §8)
+
+- `atlas_warehouse_write_lag_ms` (histogram, label `table`) — SLO p99 ≤ 800.
+- `atlas_warehouse_archive_failure_total` (counter, label `table`) — hard alert.
+- `atlas_warehouse_bubblegum_anchor_lag_slots` (histogram) — SLO p99 ≤ 600.
+- `atlas_warehouse_replay_query_ms` (histogram, label `range_class`) —
+  SLO p99 ≤ 5_000 for 1h ranges.
+- `atlas_warehouse_feature_store_leakage_violations_total` (counter) —
+  hard alert.
+
+### Operations
+
+- `ops/runbooks/warehouse-restore.md` — daily backup procedure, monthly
+  restore drill checklist, full disaster recovery procedure including a
+  mandatory cryptographic-integrity check against the on-chain Bubblegum
+  root before any production restore.
+
+### Tests added (18)
+
+| Module | Tests |
+|---|---|
+| schema | 2 (serde round-trip, status_str) |
+| mock | 4 (idempotent rebalance writes, idempotency collision, oracle tick idempotency, range scan) |
+| bubblegum | 6 (empty root zero, single leaf, two leaves, proof round-trip 7 leaves, batches at threshold, partial flush, deterministic across runs) |
+| replay | 1 (range query sorted by slot) |
+| feature_store | 2 (leakage rejected, non-leaky passes) |
+| migrations | 2 (every directive table has a version, unknown returns None) |
+| api binary | — (axum, smoke-tested at runtime) |
+
+### Test counts
+
+| Crate | Tests |
+|---|---|
+| atlas-public-input | 5 |
+| atlas-pipeline | 82 |
+| atlas-telemetry | 3 |
+| atlas-replay | 20 |
+| atlas-bus | 59 |
+| atlas-warehouse | 18 |
+| atlas-invariants-tests | 6 |
+| atlas-adversarial-tests | 10 |
+| **Total** | **203** (up from 185) |
+
+### Directive 03 §10 deliverable checklist
+
+| Item | Status |
+|---|---|
+| ClickHouse schema migrations | ✓ `db/clickhouse/V001__base_schema.sql` |
+| Timescale hypertables | ✓ `db/timescale/V001__base_schema.sql` |
+| `WarehouseClient` Rust crate w/ typed inserts + idempotent writes | ✓ |
+| Bubblegum anchoring keeper, on-chain root account documented | ✓ off-chain side; on-chain CPI Phase 4 |
+| Forensic HTTP API w/ Merkle-proof responses | ✓ `atlas-warehouse-api` |
+| Replay API + integration w/ Phase 02 `atlas-bus replay` | ✓ |
+| Point-in-time feature store + leakage tests | ✓ |
+| Materialized views for the 4 named analytical questions | ✓ |
+| Daily backup + monthly restore drill documented | ✓ `ops/runbooks/warehouse-restore.md` |
+
+---
+
 ## Unreleased — Phase 2.2 (2026-05-06) — Ingestion fabric closeout (directive §7-§10)
 
 ### atlas-webhook-rx binary

@@ -10,6 +10,7 @@ members = [
     "crates/atlas-pipeline",
     "crates/atlas-telemetry",
     "crates/atlas-replay",
+    "crates/atlas-bus",
     "tests/invariants",
     "tests/adversarial",
 ]
@@ -62,6 +63,12 @@ ndarray = "0.16"
 # observability + cli
 prometheus = "0.13"
 clap = { version = "4.5", features = ["derive"] }
+
+# event bus
+blake3 = "1.5"
+bytes = "1.7"
+hmac = "0.12"
+sha2 = "0.10"
 
 [profile.release]
 overflow-checks = true

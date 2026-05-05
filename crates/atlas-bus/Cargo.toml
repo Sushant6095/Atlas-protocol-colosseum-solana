@@ -1,0 +1,32 @@
+[package]
+name = "atlas-bus"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas real-time data ingestion fabric — typed event bus, content-addressed dedup, quorum engine, anomaly CEP, replay-mode harness, Helius webhook receiver. Implements directive 02 — Real-Time Data Ingestion Fabric."
+
+[lib]
+
+[[bin]]
+name = "atlas-bus-replay"
+path = "src/bin/replay.rs"
+
+[dependencies]
+atlas-public-input = { path = "../atlas-public-input" }
+atlas-telemetry = { path = "../atlas-telemetry" }
+tokio = { workspace = true, features = ["full"] }
+async-trait = "0.1"
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+blake3.workspace = true
+bytes.workspace = true
+hmac.workspace = true
+sha2.workspace = true
+clap.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

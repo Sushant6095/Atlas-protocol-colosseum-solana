@@ -1,5 +1,88 @@
 # Atlas Changelog
 
+## Unreleased — Phase 2.1 (2026-05-06) — Ingestion fabric hardening (directive §3-§6)
+
+### atlas-bus extensions
+
+- `tier` module — `FailoverEngine` with hot/warm/cold tier per `SourceId`.
+  Promotion order is deterministic (lowest `SourceId` discriminant first) so
+  replay reproduces transitions byte-for-byte. Hot stalls demote to Cold and
+  promote a Warm in the same evaluation tick. Configurable via
+  `FailoverPolicy { hot_stall_slots, warm_poll_interval_slots, max_failures }`.
+- `replay_buffer` module — `SourceReplayBuffer` (256-slot ring per source) with
+  `last_acked_slot`, monotonic `ack`, and `rewind()` returning all entries
+  with `slot > last_acked_slot`. Adapters use this on reconnect to resume.
+- `backpressure` module — `BackpressureMonitor` tracks the gap between
+  `highest_published_slot` and `highest_consumed_slot`. Above
+  `degraded_threshold_slots` (default 64) the monitor flips to
+  `BusMode::Degraded { lag_slots }`. Hysteresis: returns to `Healthy` only
+  when lag drops below `recovery_threshold_slots` (default 16).
+  `block_rebalances()` is the gate the orchestrator polls before submitting.
+- `reorder` module — 32-deep min-heap reorder buffer for the commitment
+  channel. Out-of-order events with `seq < next_expected` but inside the
+  window are buffered; the heap drains contiguously when gaps fill. Events
+  outside the window emit `ReorderError::OutOfWindow` so the pipeline halts
+  and reconciles via replay.
+- `anomaly` module — three new triggers added to complete directive §5:
+  - `ProtocolUtilizationSpike` — when an account flagged in
+    `AccountDirectory::utilization_accounts` reads ≥ `utilization_spike_bps`
+    (default 9_500).
+  - `WhaleExit` — when a flagged wallet account's balance moves ≥
+    `whale_exit_protocol_tvl_bps` of TVL (default 100 = 1%).
+  - `RpcSplit` — emitted by `AnomalyEngine::observe_quorum_disagreement`
+    whenever the quorum engine returns Hard or Total. Sources are sorted +
+    deduplicated for replay parity.
+  - `AccountDirectory` is the per-vault registry caller pre-populates with
+    which accounts are utilization or wallet proxies.
+
+### atlas-bus-replay binary
+
+- New flag form: `--slot-range S0..S1` (with legacy `--slot-start`/`--slot-end`
+  kept as a fallback). Refuses inverted ranges.
+- New `--archive <path>` flag accepted; Phase 2 wires the warehouse decoder.
+
+### Tests added (21)
+
+| Module | Tests |
+|---|---|
+| tier | 4 (Hot stall demotion + Warm promotion, deterministic order, record_event clears failures, no Warm leaves Hot demoted) |
+| replay_buffer | 3 (capacity eviction, rewind post-ack, monotonic ack) |
+| backpressure | 4 (Healthy when keeping up, Degraded when over threshold, recovery hysteresis, hysteresis prevents thrash) |
+| reorder | 5 (in-order release, gap-fill release, out-of-window reject, duplicate already-passed drops, buffer-full rejects) |
+| anomaly | 5 (utilization spike fires/skips, whale exit on balance drop, RpcSplit emit, RpcSplit empty no trigger) |
+
+### Test counts
+
+| Crate | Tests |
+|---|---|
+| atlas-public-input | 5 |
+| atlas-pipeline | 82 |
+| atlas-telemetry | 3 |
+| atlas-replay | 20 |
+| atlas-bus | 56 (was 35) |
+| atlas-invariants-tests | 6 |
+| atlas-adversarial-tests | 10 |
+| **Total** | **182** (up from 161) |
+
+### Directive 02 §3-§6 coverage
+
+| § | Item | Status |
+|---|---|---|
+| §3 | Configurable quorum policy + 4 disagreement classes | ✓ Phase 2.0 |
+| §3 | RpcSplit event on Hard/Total | ✓ via `observe_quorum_disagreement` |
+| §3 | Reliability EMA + quarantine | ✓ Phase 2.0 |
+| §3 | AS region diversity guard | ✓ Phase 2.0 |
+| §4 | Hot/warm/cold tier, 1-slot promotion | ✓ |
+| §4 | 256-slot per-source replay buffer + rewind | ✓ |
+| §4 | Backpressure → Degraded mode at >64 slots | ✓ |
+| §4 | 32-deep out-of-order buffer + Reorder error | ✓ |
+| §5 | All 7 anomaly triggers | ✓ |
+| §5 | Replay parity for triggers | ✓ |
+| §6 | `atlas-bus replay --slot-range` flag form | ✓ |
+| §6 | `--archive <path>` flag accepted | ✓ (Phase 2 wires reader) |
+
+---
+
 ## Unreleased — Phase 2 (2026-05-06) — Real-Time Data Ingestion Fabric (directive 02)
 
 ### atlas-bus crate

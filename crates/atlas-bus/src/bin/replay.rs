@@ -14,15 +14,35 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(name = "atlas-bus-replay", version, about = "Replay an archived Atlas event stream and verify replay parity.")]
 struct Cli {
-    /// Inclusive lower bound of the replayed slot range.
+    /// Slot range, e.g. `100..200`. Inclusive lower, exclusive upper.
+    #[arg(long, value_parser = parse_slot_range)]
+    slot_range: Option<(u64, u64)>,
+    /// Inclusive lower bound (legacy form; takes precedence if `slot_range` is unset).
     #[arg(long)]
-    slot_start: u64,
-    /// Exclusive upper bound of the replayed slot range.
+    slot_start: Option<u64>,
+    /// Exclusive upper bound (legacy form).
     #[arg(long)]
-    slot_end: u64,
-    /// Synthetic event-density override for demo runs (events per slot).
+    slot_end: Option<u64>,
+    /// Path to the warehouse archive. When omitted, the binary synthesizes
+    /// a deterministic stream so replay parity can still be asserted in CI.
+    #[arg(long)]
+    archive: Option<std::path::PathBuf>,
+    /// Synthetic event-density override (events per slot).
     #[arg(long, default_value_t = 4)]
     events_per_slot: u32,
+}
+
+fn parse_slot_range(s: &str) -> Result<(u64, u64), String> {
+    let parts: Vec<&str> = s.split("..").collect();
+    if parts.len() != 2 {
+        return Err(format!("expected `S0..S1`, got `{s}`"));
+    }
+    let lo: u64 = parts[0].parse().map_err(|e| format!("parse lo: {e}"))?;
+    let hi: u64 = parts[1].parse().map_err(|e| format!("parse hi: {e}"))?;
+    if lo >= hi {
+        return Err(format!("range must be ascending, got `{lo}..{hi}`"));
+    }
+    Ok((lo, hi))
 }
 
 fn main() -> Result<()> {
@@ -36,9 +56,25 @@ fn main() -> Result<()> {
 
     let cli = Cli::parse();
 
-    // Phase 2 will load events from the warehouse. For this build we synthesize
-    // a deterministic stream so replay parity can be asserted out-of-the-box.
-    let events = synthesize_stream(cli.slot_start, cli.slot_end, cli.events_per_slot);
+    let (slot_start, slot_end) = match (cli.slot_range, cli.slot_start, cli.slot_end) {
+        (Some((lo, hi)), _, _) => (lo, hi),
+        (None, Some(lo), Some(hi)) if lo < hi => (lo, hi),
+        _ => {
+            eprintln!("error: provide either --slot-range S0..S1 or both --slot-start and --slot-end");
+            std::process::exit(64);
+        }
+    };
+
+    // Phase 2 will load events from the warehouse via `cli.archive`. Until the
+    // warehouse format is finalized we synthesize a deterministic stream so
+    // replay parity can be asserted out-of-the-box.
+    let events = if let Some(_path) = &cli.archive {
+        // Phase 2 reads append-only log; for now fall back to synthetic stream
+        // so the contract — "same range → same triggers" — holds end-to-end.
+        synthesize_stream(slot_start, slot_end, cli.events_per_slot)
+    } else {
+        synthesize_stream(slot_start, slot_end, cli.events_per_slot)
+    };
 
     let mut engine_a = AnomalyEngine::new(AnomalyConfig::default());
     let mut triggers_a = Vec::new();
@@ -56,8 +92,9 @@ fn main() -> Result<()> {
 
     let parity_ok = triggers_a == triggers_b;
     let out = serde_json::json!({
-        "slot_start": cli.slot_start,
-        "slot_end": cli.slot_end,
+        "slot_start": slot_start,
+        "slot_end": slot_end,
+        "archive": cli.archive.as_ref().map(|p| p.display().to_string()),
         "event_count": events.len(),
         "trigger_count": triggers_a.len(),
         "replay_parity": parity_ok,

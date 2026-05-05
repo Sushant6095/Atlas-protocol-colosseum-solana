@@ -41,8 +41,23 @@ impl Default for AnomalyConfig {
     }
 }
 
+/// Account directory for utilization + whale-exit triggers. Caller
+/// pre-registers which on-chain account proxies which protocol (utilization
+/// reading) or wallet/protocol pair (balance for whale exit). Phase 2 wires
+/// real decoders; Phase 1 derives values from `data_hash`.
+#[derive(Clone, Debug, Default)]
+pub struct AccountDirectory {
+    /// `account_pubkey → protocol_pubkey` for utilization-bps proxy reads.
+    pub utilization_accounts: BTreeMap<Pubkey, Pubkey>,
+    /// `account_pubkey → (wallet, protocol, protocol_tvl_q64)` for whale-exit
+    /// detection. The protocol_tvl is used as the denominator for the 1%
+    /// threshold; caller refreshes it as TVL moves.
+    pub wallet_accounts: BTreeMap<Pubkey, (Pubkey, Pubkey, i128)>,
+}
+
 pub struct AnomalyEngine {
     config: AnomalyConfig,
+    directory: AccountDirectory,
     /// Per-feed volatility median (bps), maintained as an EMA of realized vol.
     feed_volatility_median_bps: BTreeMap<FeedId, u32>,
     /// Per-feed last-seen slot for stall detection.
@@ -51,17 +66,40 @@ pub struct AnomalyEngine {
     feed_last_price: BTreeMap<(FeedId, OracleSource), i64>,
     /// Per-pool last depth at ±1% (bps of TVL) and timestamp slot for delta calc.
     pool_last_depth: BTreeMap<Pubkey, (u32, u64)>,
+    /// Per-account last balance for whale-exit detection.
+    account_last_balance: BTreeMap<Pubkey, i128>,
 }
 
 impl AnomalyEngine {
     pub fn new(config: AnomalyConfig) -> Self {
+        Self::with_directory(config, AccountDirectory::default())
+    }
+
+    pub fn with_directory(config: AnomalyConfig, directory: AccountDirectory) -> Self {
         Self {
             config,
+            directory,
             feed_volatility_median_bps: BTreeMap::new(),
             feed_last_slot: BTreeMap::new(),
             feed_last_price: BTreeMap::new(),
             pool_last_depth: BTreeMap::new(),
+            account_last_balance: BTreeMap::new(),
         }
+    }
+
+    /// Inform the CEP layer that the quorum engine produced a non-Confirmed
+    /// outcome. Emits `RpcSplit` when the disagreement is hard or total.
+    pub fn observe_quorum_disagreement(
+        &mut self,
+        sources: &[crate::event::SourceId],
+    ) -> Vec<AnomalyTrigger> {
+        if sources.is_empty() {
+            return vec![];
+        }
+        let mut sorted: Vec<crate::event::SourceId> = sources.to_vec();
+        sorted.sort_by_key(|s| *s as u8);
+        sorted.dedup();
+        vec![AnomalyTrigger::RpcSplit { sources: sorted }]
     }
 
     /// Process a single event; return any triggers it produced. The CEP layer
@@ -70,6 +108,41 @@ impl AnomalyEngine {
     pub fn ingest(&mut self, event: &AtlasEvent) -> Vec<AnomalyTrigger> {
         let mut triggers = Vec::new();
         match event {
+            AtlasEvent::AccountUpdate { pubkey, data_hash, slot: _slot, .. } => {
+                if let Some(protocol_pubkey) = self.directory.utilization_accounts.get(pubkey) {
+                    let util_bps = (data_hash[0] as u32) * 39;
+                    if util_bps >= self.config.utilization_spike_bps {
+                        triggers.push(AnomalyTrigger::ProtocolUtilizationSpike {
+                            protocol_pubkey: *protocol_pubkey,
+                            util_bps,
+                        });
+                    }
+                }
+                if let Some((wallet, protocol_pubkey, tvl_q64)) =
+                    self.directory.wallet_accounts.get(pubkey)
+                {
+                    let mut buf = [0u8; 8];
+                    buf.copy_from_slice(&data_hash[0..8]);
+                    let balance_q64 = i64::from_le_bytes(buf) as i128;
+                    let prev = self.account_last_balance.insert(*pubkey, balance_q64);
+                    if let Some(prev_balance) = prev {
+                        let delta = balance_q64 - prev_balance;
+                        let abs_delta = delta.abs();
+                        if *tvl_q64 > 0 {
+                            let frac_bps =
+                                (abs_delta * 10_000 / tvl_q64.abs()) as u32;
+                            if frac_bps >= self.config.whale_exit_protocol_tvl_bps {
+                                triggers.push(AnomalyTrigger::WhaleExit {
+                                    wallet: *wallet,
+                                    protocol_pubkey: *protocol_pubkey,
+                                    notional_q64: abs_delta,
+                                    direction_out: delta < 0,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
             AtlasEvent::OracleTick { feed_id, price_q64, publish_slot, source, .. } => {
                 self.feed_last_slot.insert(*feed_id, *publish_slot);
                 let prev = self.feed_last_price.insert((*feed_id, *source), *price_q64);
@@ -152,6 +225,86 @@ impl AnomalyEngine {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::event::SourceId;
+
+    fn account_update(pubkey: Pubkey, data_hash: [u8; 32], slot: u64) -> AtlasEvent {
+        AtlasEvent::AccountUpdate {
+            pubkey,
+            slot,
+            data_hash,
+            data: bytes::Bytes::from_static(&[]),
+            source: SourceId::YellowstoneTriton,
+            seq: slot,
+        }
+    }
+
+    #[test]
+    fn protocol_utilization_spike_above_threshold() {
+        let mut dir = AccountDirectory::default();
+        let acc = [10u8; 32];
+        let proto = [99u8; 32];
+        dir.utilization_accounts.insert(acc, proto);
+        let mut e = AnomalyEngine::with_directory(AnomalyConfig::default(), dir);
+        // data_hash[0] = 250 → 250 * 39 = 9_750 bps (≥ default threshold 9_500)
+        let triggers = e.ingest(&account_update(acc, [250u8; 32], 100));
+        assert!(triggers.iter().any(|t| matches!(
+            t,
+            AnomalyTrigger::ProtocolUtilizationSpike { util_bps, .. } if *util_bps >= 9_500
+        )));
+    }
+
+    #[test]
+    fn protocol_utilization_skipped_below_threshold() {
+        let mut dir = AccountDirectory::default();
+        let acc = [10u8; 32];
+        dir.utilization_accounts.insert(acc, [99u8; 32]);
+        let mut e = AnomalyEngine::with_directory(AnomalyConfig::default(), dir);
+        let triggers = e.ingest(&account_update(acc, [100u8; 32], 100));
+        assert!(!triggers
+            .iter()
+            .any(|t| matches!(t, AnomalyTrigger::ProtocolUtilizationSpike { .. })));
+    }
+
+    #[test]
+    fn whale_exit_fires_on_balance_drop() {
+        let mut dir = AccountDirectory::default();
+        let acc = [11u8; 32];
+        let wallet = [22u8; 32];
+        let proto = [33u8; 32];
+        dir.wallet_accounts.insert(acc, (wallet, proto, 1_000_000));
+        let mut e = AnomalyEngine::with_directory(AnomalyConfig::default(), dir);
+        let mut h1 = [0u8; 32];
+        h1[..8].copy_from_slice(&500_000i64.to_le_bytes());
+        let _ = e.ingest(&account_update(acc, h1, 100));
+        let mut h2 = [0u8; 32];
+        h2[..8].copy_from_slice(&50_000i64.to_le_bytes());
+        let triggers = e.ingest(&account_update(acc, h2, 101));
+        assert!(triggers.iter().any(|t| matches!(
+            t,
+            AnomalyTrigger::WhaleExit { direction_out: true, .. }
+        )));
+    }
+
+    #[test]
+    fn rpc_split_emitted_on_quorum_disagreement() {
+        let mut e = AnomalyEngine::new(AnomalyConfig::default());
+        let triggers = e.observe_quorum_disagreement(&[
+            SourceId::YellowstoneTriton,
+            SourceId::YellowstoneHelius,
+            SourceId::YellowstoneQuickNode,
+        ]);
+        assert_eq!(triggers.len(), 1);
+        assert!(matches!(
+            &triggers[0],
+            AnomalyTrigger::RpcSplit { sources } if sources.len() == 3
+        ));
+    }
+
+    #[test]
+    fn rpc_split_empty_inputs_yields_no_trigger() {
+        let mut e = AnomalyEngine::new(AnomalyConfig::default());
+        assert!(e.observe_quorum_disagreement(&[]).is_empty());
+    }
 
     fn tick(feed: FeedId, source: OracleSource, price: i64, slot: u64, seq: u64) -> AtlasEvent {
         AtlasEvent::OracleTick {

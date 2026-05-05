@@ -22,6 +22,10 @@ pub mod anomaly;
 pub mod webhook;
 pub mod replay;
 pub mod adapters;
+pub mod tier;
+pub mod replay_buffer;
+pub mod backpressure;
+pub mod reorder;
 
 pub use event::{
     canonical_event_bytes, event_id, AtlasEvent, BundleStatus, FeedId, OracleSource, Pubkey,
@@ -30,6 +34,10 @@ pub use event::{
 pub use bus::{AtlasBus, BusConfig, BusError, BusReceiver};
 pub use source::{Health, MarketSource, MarketSourceError};
 pub use quorum::{QuorumEngine, QuorumPolicy, QuorumOutcome, ReliabilityScore};
-pub use anomaly::{AnomalyEngine, AnomalyTrigger};
+pub use anomaly::{AccountDirectory, AnomalyEngine, AnomalyTrigger};
 pub use webhook::{HeliusWebhookReceiver, WebhookError, WebhookEvent};
 pub use replay::{ReplayBus, ReplaySource};
+pub use tier::{FailoverEngine, FailoverPolicy, SourceTier, TierState, TierTransition};
+pub use replay_buffer::{ReplayEntry, SourceReplayBuffer};
+pub use backpressure::{BackpressureMonitor, BackpressurePolicy, BusMode};
+pub use reorder::{ReorderBuffer, ReorderConfig, ReorderError};

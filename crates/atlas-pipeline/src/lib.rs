@@ -20,7 +20,9 @@
 pub mod ctx;
 pub mod stage;
 pub mod hashing;
+pub mod canonical_json;
 pub mod stages;
+pub mod prover_network;
 
 pub use ctx::PipelineCtx;
 pub use stage::{Stage, StageError};

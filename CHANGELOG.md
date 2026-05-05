@@ -100,3 +100,99 @@
 | atlas-pipeline | 33 |
 | atlas-invariants-tests | 6 (incl. 256-case proptest) |
 | **Total** | **44** |
+
+---
+
+## Unreleased — Phase 1.2 (2026-05-06)
+
+### Added
+
+- **canonical_json module** — directive-compliant JSON serializer for hash-committed
+  payloads. Banned use of `serde_json::to_string` on commitment paths
+  (anti-pattern §14). Keys sorted lexicographically by UTF-8 codepoint, no
+  whitespace, integer-only numerics, ASCII-only strings, RFC 8259 escapes for
+  control chars.
+- **Stage 09 ExplainDecision** — `StructuredExplanation` with stable enums
+  (`Regime`, `Signal`, `Constraint`), `canonical_bytes()` reproducing the
+  directive §7 example byte-for-byte, `explanation_hash()` =
+  `hash_with_tag(b"atlas.expl.v2", canonical_bytes)`. Constraints dedup +
+  sort lexicographically inside the canonical form. Drivers preserve insertion
+  order — caller responsibility for stability.
+- **Stage 04 PreprocessRisk** — full live topology:
+  - `ContagionGraph` with `(from, to, kind)` deterministic ordering and
+    domain-tagged Merkle root.
+  - `OracleDependencyMap` keyed by `OracleId` → sorted/dedup `Vec<ProtocolId>`.
+  - `correlated_liquidation_loss` integer-only simulator running shock
+    scenarios over `ProtocolExposure { notional_bps, leverage_bps }`.
+  - `LiquidityForecast` per scenario (Calm/Stressed/Crisis) with coverage
+    helper that handles zero-queue.
+  - `RiskTopology::build` outputs the `risk_state_hash` committed to
+    `public_input.risk_state_hash`.
+  - **Emergency triggers** — pure `evaluate_emergency_triggers` returns the
+    first hit in deterministic order across all five rules: volatility spike,
+    oracle deviation, projected proof age, TVL crash, consensus disagreement.
+- **Stage 12 PlanExecution + 9.1 ALT engine + 9.2 CU intelligence**:
+  - `CpiPlan { legs, predicted_cu, plan_root }`. `predict_cu` = Σ p99 + 15%.
+  - `CuHistogram` ring buffer (cap 1000), `p99()` from sorted copy.
+  - `AltDescriptor` content-addressed by account set; `compact_alts` collapses
+    pairs with ≥80% intersection.
+- **Stage 13 SynthesizeTx** — `segment_plan` splits over-budget plans into the
+  minimal number of transactions; never silently drops legs (asserted via
+  `segment_over_budget_splits_no_drops`).
+- **Stage 14 SimulateExecution** — `evaluate_simulation` rejects on non-zero
+  `err`, recognized failure-string log matches (insufficient funds / slippage
+  / stale oracle, both lower-cased and CamelCase), CU usage exceeding budget,
+  and CU drift > 25% above prediction.
+- **Prover network** (directive §10) — `ProverRegistry`,
+  `ProverRecord`, weighted dispatch with deterministic randomness beacon
+  (sha256(slot ‖ vault ‖ beacon)), full slashing logic
+  (`InvalidProof` → 100% burn, `MissedDeadline` → linear, `DuplicateSubmission`
+  → reputation-only), reputation EMA over correctness + latency.
+
+### Tests added
+
+- `canonical_json`: 6 tests (empty object, key order, array order, no
+  whitespace, non-ASCII rejection, deterministic encoding).
+- `explanation`: 4 tests (directive byte-for-byte match, deterministic hash,
+  driver-order sensitivity, constraint dedup).
+- `risk`: 11 tests (linear scaling, zero-empty, contagion order invariance,
+  oracle map protocols, hash sensitivity, liquidity coverage, all five
+  emergency trigger rules + no-trigger normal case).
+- `planning`: 9 tests (15% buffer, p99, ring eviction, ALT content-address,
+  ALT compaction, plan root determinism, segmentation no-drop).
+- `simulate`: 8 tests (accept clean, reject error, slippage / insufficient
+  funds / stale oracle log matches, CU drift above + accept under threshold,
+  budget overrun).
+- `prover_network`: 9 tests (upsert/active filter, all three slash reasons,
+  dispatch picks active, dispatch determinism, none when empty, reputation
+  ema rises on success / falls on failure, weighted dispatch favors high
+  reputation in ≥5:1 ratio over 1000 trials).
+
+### Test counts
+
+| Crate | Tests |
+|---|---|
+| atlas-public-input | 5 |
+| atlas-pipeline | 82 (was 33) |
+| atlas-invariants-tests | 6 |
+| **Total** | **93** (up from 44) |
+
+### Directive coverage
+
+| § | Item | Status |
+|---|---|---|
+| §7 | Canonical JSON, lex-sorted keys, no whitespace, integer-only, hash-committed | ✓ |
+| §7 | `explanation_hash` byte-equal to directive example | ✓ proven via test |
+| §8 | Contagion graph (collateral / oracle / liquidator edges) | ✓ |
+| §8 | Oracle dependency map | ✓ |
+| §8 | Correlated-liquidation model | ✓ integer-only |
+| §8 | Liquidity-collapse forecast (Calm/Stressed/Crisis) | ✓ |
+| §8 | All 5 emergency triggers | ✓ pure fn, tested |
+| §9.1 | Per-protocol ALT, content-addressed | ✓ |
+| §9.1 | ALT compaction at ≥80% intersection | ✓ |
+| §9.2 | p99 CU histogram, ring of last 1000 | ✓ |
+| §9.2 | CU prediction = Σ p99 + 15% | ✓ |
+| §9.2 | Segment when > 1.4M, no leg dropped | ✓ proven via test |
+| §9.4 | Simulation gate — error / log / CU drift | ✓ |
+| §10 | Prover registry, dispatch, slashing | ✓ |
+| §10 | Reputation EMA over correctness + latency | ✓ |

@@ -1,0 +1,13 @@
+[package]
+name = "atlas-invariants-tests"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+atlas-public-input = { path = "../../crates/atlas-public-input" }
+atlas-pipeline = { path = "../../crates/atlas-pipeline" }
+
+[dev-dependencies]
+proptest = "1.5"

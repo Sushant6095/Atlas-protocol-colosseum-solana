@@ -1,0 +1,21 @@
+# Atlas clippy configuration.
+#
+# Banned in commitment paths (I-6, I-7, I-12).
+# `tests/` are exempt via crate-level `#![cfg_attr(test, allow(clippy::unwrap_used))]`.
+
+disallowed-methods = [
+    { path = "std::collections::HashMap::new",          reason = "I-6: use BTreeMap when iteration order touches a hash" },
+    { path = "std::collections::HashSet::new",          reason = "I-6: use BTreeSet when iteration order touches a hash" },
+    { path = "chrono::Utc::now",                        reason = "I-6: wall-clock time is non-deterministic in commitment paths" },
+    { path = "std::time::SystemTime::now",              reason = "I-6: wall-clock time is non-deterministic in commitment paths" },
+    { path = "core::result::Result::unwrap",            reason = "I-12: no unwrap on a path reachable in production" },
+    { path = "core::option::Option::unwrap",            reason = "I-12: no unwrap on a path reachable in production" },
+    { path = "core::result::Result::expect",            reason = "I-12: no expect on a path reachable in production" },
+    { path = "core::option::Option::expect",            reason = "I-12: no expect on a path reachable in production" },
+]
+
+disallowed-macros = [
+    { path = "std::panic",   reason = "I-12: panics in BPF programs cost compute and break atomicity" },
+    { path = "std::todo",    reason = "I-12: incomplete code may not enter a commitment path" },
+    { path = "std::unimplemented", reason = "I-12: incomplete code may not enter a commitment path" },
+]

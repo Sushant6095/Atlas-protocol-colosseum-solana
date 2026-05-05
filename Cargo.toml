@@ -1,6 +1,16 @@
 [workspace]
 resolver = "2"
+# Phase 1 pipeline crates compile in this workspace.
+# Anchor programs + SP1 prover live in `solana_workspace/Cargo.toml` (separate
+# resolver scope) — their dependency tree (sp1-solana, spl-account-compression,
+# anchor-lang) currently conflicts with sp1-sdk 4.x. Phase 2 unifies these once
+# the audited sp1-solana mainnet pin is locked in.
 members = [
+    "crates/atlas-public-input",
+    "crates/atlas-pipeline",
+    "tests/invariants",
+]
+exclude = [
     "programs/atlas-verifier",
     "programs/atlas-registry",
     "programs/atlas-vault",
@@ -9,7 +19,6 @@ members = [
     "prover/orchestrator",
     "sdk/rust",
 ]
-exclude = []
 
 [workspace.package]
 version = "0.1.0"
@@ -25,10 +34,11 @@ solana-program = "2.1.0"
 spl-token-2022 = { version = "5.0", features = ["no-entrypoint"] }
 spl-account-compression = { version = "0.4", features = ["cpi"] }
 
-# zk
-sp1-solana = "1.2.0"
-sp1-sdk = "4.0.0"
-sp1-zkvm = "4.0.0"
+# zk — pinned to published versions; APIs may diverge from current code stubs.
+# Phase 2 pins these once we verify against the audited mainnet release.
+sp1-solana = "0.1.0"
+sp1-sdk = "4"
+sp1-zkvm = "4"
 
 # off-chain
 tokio = { version = "1.40", features = ["full"] }

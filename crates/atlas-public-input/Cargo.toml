@@ -1,0 +1,18 @@
+[package]
+name = "atlas-public-input"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Single source of truth for the 268-byte Atlas public-input v2 layout. Used by atlas_verifier (on-chain), the SP1 guest, and the off-chain pipeline. Duplication of layout is a CI failure (I-4, I-9)."
+
+[features]
+default = ["std"]
+# `std` enables the off-chain orchestrator path (anyhow, thiserror).
+# Disable for `sp1-zkvm` and on-chain Solana program builds.
+std = ["dep:thiserror"]
+
+[dependencies]
+thiserror = { version = "2.0", optional = true }
+
+[dev-dependencies]
+proptest = "1.5"

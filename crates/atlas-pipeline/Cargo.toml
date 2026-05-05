@@ -1,0 +1,25 @@
+[package]
+name = "atlas-pipeline"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "16-stage pipeline framework for Atlas — typed Stage trait, PipelineCtx, replay mode, OpenTelemetry spans, content-addressed snapshot. Each stage is a pure function modulo telemetry."
+
+[lib]
+
+[dependencies]
+atlas-public-input = { path = "../atlas-public-input" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tracing.workspace = true
+async-trait = "0.1"
+solana-client.workspace = true
+solana-sdk.workspace = true
+sha2 = "0.10"
+
+[dev-dependencies]
+proptest = "1.5"
+tokio = { workspace = true, features = ["full", "test-util"] }

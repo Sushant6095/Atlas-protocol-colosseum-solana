@@ -1,0 +1,39 @@
+crates/atlas-pipeline/src/canonical_json.rs
+  c3576656714da0ca 1-173
+crates/atlas-pipeline/src/prover_network.rs
+  c3576656714da0ca 1-355
+crates/atlas-pipeline/src/lib.rs
+  c3576656714da0ca 23,25
+crates/atlas-pipeline/src/stages/mod.rs
+  c3576656714da0ca 6-7,12,15-17,26,28-30
+CHANGELOG.md
+  c3576656714da0ca 103-198
+crates/atlas-pipeline/src/stages/simulate.rs
+  c3576656714da0ca 1-168
+crates/atlas-pipeline/src/stages/explanation.rs
+  c3576656714da0ca 1-222
+crates/atlas-pipeline/src/stages/risk.rs
+  c3576656714da0ca 1-474
+crates/atlas-pipeline/src/stages/planning.rs
+  c3576656714da0ca 1-341
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "0ccf742c9fead82b0721cf4d9e727762aa60bbf1",
+  "prompts": {
+    "c3576656714da0ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 1841,
+      "total_deletions": 6,
+      "accepted_lines": 1841,
+      "overriden_lines": 0
+    }
+  }
+}

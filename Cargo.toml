@@ -8,7 +8,10 @@ resolver = "2"
 members = [
     "crates/atlas-public-input",
     "crates/atlas-pipeline",
+    "crates/atlas-telemetry",
+    "crates/atlas-replay",
     "tests/invariants",
+    "tests/adversarial",
 ]
 exclude = [
     "programs/atlas-verifier",
@@ -47,7 +50,7 @@ serde_json = "1.0"
 anyhow = "1.0"
 thiserror = "2.0"
 tracing = "0.1"
-tracing-subscriber = "0.3"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Solana RPC
 solana-client = "2.1.0"
@@ -55,6 +58,10 @@ solana-sdk = "2.1.0"
 
 # ML
 ndarray = "0.16"
+
+# observability + cli
+prometheus = "0.13"
+clap = { version = "4.5", features = ["derive"] }
 
 [profile.release]
 overflow-checks = true

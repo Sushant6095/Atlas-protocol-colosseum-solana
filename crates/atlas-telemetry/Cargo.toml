@@ -1,0 +1,17 @@
+[package]
+name = "atlas-telemetry"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Prometheus metrics + tracing spans for the Atlas pipeline. Implements directive §13 SLO surface — metric names, types, and label sets are part of the observability contract."
+
+[lib]
+
+[dependencies]
+prometheus.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+once_cell = "1.20"
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full", "macros"] }

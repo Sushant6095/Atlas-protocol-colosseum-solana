@@ -1,0 +1,183 @@
+{
+  "title": "Atlas — Pipeline SLOs",
+  "uid": "atlas-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "timezone": "",
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "vault_id",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(atlas_rebalance_e2e_seconds_count, vault_id)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Rebalance E2E p99 (s)",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(atlas_rebalance_e2e_seconds_bucket{vault_id=~\"$vault_id\",replay=\"false\"}[5m])) by (le))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 60 },
+              { "color": "red", "value": 90 }
+            ]
+          },
+          "unit": "s"
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Proof gen p99 (s)",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(atlas_proof_gen_seconds_bucket{vault_id=~\"$vault_id\",replay=\"false\"}[5m])) by (le))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 75 }
+            ]
+          },
+          "unit": "s"
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Inference p99 (ms)",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(atlas_inference_ms_bucket{vault_id=~\"$vault_id\",replay=\"false\"}[5m])) by (le))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 200 },
+              { "color": "red", "value": 250 }
+            ]
+          },
+          "unit": "ms"
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Verifier CU p99",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(atlas_verifier_cu_bucket{vault_id=~\"$vault_id\",replay=\"false\"}[5m])) by (le))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 250000 },
+              { "color": "red", "value": 280000 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "CU per rebalance (histogram p50/p99)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "legendFormat": "p50",
+          "expr": "histogram_quantile(0.50, sum(rate(atlas_rebalance_cu_total_bucket{vault_id=~\"$vault_id\",replay=\"false\"}[5m])) by (le))"
+        },
+        {
+          "legendFormat": "p99",
+          "expr": "histogram_quantile(0.99, sum(rate(atlas_rebalance_cu_total_bucket{vault_id=~\"$vault_id\",replay=\"false\"}[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Consensus disagreement (bps)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "legendFormat": "{{vault_id}}",
+          "expr": "atlas_consensus_disagreement_bps{vault_id=~\"$vault_id\",replay=\"false\"}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1000 },
+              { "color": "red", "value": 1500 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Rejection counters",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "legendFormat": "stale_proof_rejections",
+          "expr": "sum(rate(atlas_stale_proof_rejections_total{replay=\"false\"}[5m]))"
+        },
+        {
+          "legendFormat": "archival_failures",
+          "expr": "sum(rate(atlas_archival_failures_total{replay=\"false\"}[5m]))"
+        },
+        {
+          "legendFormat": "quorum_disagreements",
+          "expr": "sum(rate(atlas_quorum_disagreement_total{replay=\"false\"}[5m]))"
+        },
+        {
+          "legendFormat": "cpi_failures",
+          "expr": "sum(rate(atlas_cpi_failure_total{replay=\"false\"}[5m]))"
+        }
+      ]
+    }
+  ]
+}

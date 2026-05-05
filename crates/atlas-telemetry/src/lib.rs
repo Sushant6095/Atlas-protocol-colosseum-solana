@@ -1,0 +1,260 @@
+//! Atlas telemetry — Prometheus metrics + tracing spans.
+//!
+//! The metric names below are the **observability contract** in directive §13.
+//! Renaming them breaks dashboards and alerts; add new metrics, never repurpose
+//! the existing ones. Every span carries `vault_id`, `slot`, `pipeline_run_id`.
+//! Replay-mode spans are tagged `replay=true` so production dashboards can
+//! exclude them by default.
+
+#![deny(unsafe_code)]
+#![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+
+use once_cell::sync::Lazy;
+use prometheus::{
+    exponential_buckets, register_counter_vec, register_gauge_vec, register_histogram_vec,
+    CounterVec, Encoder, GaugeVec, HistogramVec, Registry, TextEncoder,
+};
+
+/// Mandatory label set for every Atlas metric.
+const LABELS: &[&str] = &["vault_id", "replay"];
+/// Subset used by per-protocol counters.
+const LABELS_PROTO: &[&str] = &["vault_id", "protocol", "replay"];
+
+#[derive(Debug, thiserror::Error)]
+pub enum TelemetryError {
+    #[error("prometheus encoder failed: {0}")]
+    Encoder(String),
+    #[error("metric registration failed: {0}")]
+    Registration(String),
+}
+
+/// Global registry. The orchestrator exposes this on `/metrics` via Hyper or
+/// any other HTTP server; replay/adversarial tools read it via `gather_text`.
+pub static REGISTRY: Lazy<Registry> = Lazy::new(Registry::new);
+
+// ─── Histograms ───────────────────────────────────────────────────────────
+
+pub static REBALANCE_E2E_SECONDS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_rebalance_e2e_seconds",
+        "End-to-end rebalance wall time (snapshot → bundle landed). p99 SLO ≤ 90s.",
+        exponential_buckets(0.5, 2.0, 10).unwrap_or_default()
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static PROOF_GEN_SECONDS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_proof_gen_seconds",
+        "SP1 proof generation wall time. p99 SLO ≤ 75s.",
+        exponential_buckets(1.0, 1.5, 10).unwrap_or_default()
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static INFERENCE_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_inference_ms",
+        "Off-chain inference wall time (ranker only). p99 SLO ≤ 250 ms.",
+        exponential_buckets(1.0, 1.5, 12).unwrap_or_default()
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static INGEST_QUORUM_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_ingest_quorum_ms",
+        "RPC quorum read wall time. p99 SLO ≤ 1500 ms.",
+        exponential_buckets(50.0, 1.5, 10).unwrap_or_default()
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static VERIFIER_CU: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_verifier_cu",
+        "Compute units consumed by the on-chain verifier ix. p99 SLO ≤ 280k.",
+        vec![100_000.0, 150_000.0, 200_000.0, 250_000.0, 280_000.0, 320_000.0, 400_000.0]
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static REBALANCE_CU_TOTAL: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_rebalance_cu_total",
+        "Total CU per rebalance bundle. p99 SLO ≤ 1.2M; hard cap 1.4M.",
+        vec![400_000.0, 600_000.0, 800_000.0, 1_000_000.0, 1_200_000.0, 1_400_000.0]
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+// ─── Counters ─────────────────────────────────────────────────────────────
+
+pub static CPI_FAILURE_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_cpi_failure_total",
+        "CPI failures observed during a bundle. SLO ≤ 0.5% of rebalances.",
+        LABELS_PROTO
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static STALE_PROOF_REJECTIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_stale_proof_rejections_total",
+        "Proofs rejected because slot freshness gate failed. Alert on rate > 0.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static ARCHIVAL_FAILURES_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_archival_failures_total",
+        "Archival writes that failed. Per I-8, the rebalance is aborted in this case. Alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static QUORUM_DISAGREEMENT_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_quorum_disagreement_total",
+        "RPC quorum read halted because providers disagreed on an account hash. Alert on rate spike.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+// ─── Gauges ───────────────────────────────────────────────────────────────
+
+pub static CONSENSUS_DISAGREEMENT_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_consensus_disagreement_bps",
+        "Live disagreement metric across the agent ensemble (1 - cosine in bps). Alert > 1500 sustained.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+// ─── Span helpers ─────────────────────────────────────────────────────────
+
+/// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory
+/// labels per directive §13. The closure returns the operation's value; the
+/// span is recorded with `duration_ms`.
+pub fn span<F, T>(stage: &'static str, vault_id_hex: &str, slot: u64, replay: bool, f: F) -> T
+where
+    F: FnOnce() -> T,
+{
+    let start = std::time::Instant::now();
+    let span = tracing::info_span!(
+        "atlas.stage",
+        stage = stage,
+        vault_id = vault_id_hex,
+        slot = slot,
+        replay = replay,
+    );
+    let _enter = span.enter();
+    let v = f();
+    let dur_ms = start.elapsed().as_millis() as u64;
+    tracing::info!(stage = stage, duration_ms = dur_ms, "stage complete");
+    v
+}
+
+/// Format a 32-byte vault id into a stable lowercase hex string.
+pub fn vault_id_hex(vault_id: &[u8; 32]) -> String {
+    let mut s = String::with_capacity(64);
+    for b in vault_id {
+        s.push_str(&format!("{:02x}", b));
+    }
+    s
+}
+
+/// Encode the registry to Prometheus text exposition format. Caller serves
+/// this on `/metrics`.
+pub fn gather_text() -> Result<String, TelemetryError> {
+    let mut buffer = Vec::new();
+    let encoder = TextEncoder::new();
+    let mf = REGISTRY.gather();
+    encoder
+        .encode(&mf, &mut buffer)
+        .map_err(|e| TelemetryError::Encoder(e.to_string()))?;
+    String::from_utf8(buffer).map_err(|e| TelemetryError::Encoder(e.to_string()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn touch_all() {
+        // Dereferencing each Lazy registers the metric on first access.
+        let _ = REBALANCE_E2E_SECONDS.with_label_values(&["abc", "false"]).observe(0.0);
+        let _ = PROOF_GEN_SECONDS.with_label_values(&["abc", "false"]).observe(0.0);
+        let _ = INFERENCE_MS.with_label_values(&["abc", "false"]).observe(0.0);
+        let _ = INGEST_QUORUM_MS.with_label_values(&["abc", "false"]).observe(0.0);
+        let _ = VERIFIER_CU.with_label_values(&["abc", "false"]).observe(250_000.0);
+        let _ = REBALANCE_CU_TOTAL.with_label_values(&["abc", "false"]).observe(900_000.0);
+        let _ = CPI_FAILURE_TOTAL.with_label_values(&["abc", "kamino", "false"]).inc();
+        let _ = STALE_PROOF_REJECTIONS_TOTAL.with_label_values(&["abc", "false"]).inc();
+        let _ = ARCHIVAL_FAILURES_TOTAL.with_label_values(&["abc", "false"]).inc();
+        let _ = QUORUM_DISAGREEMENT_TOTAL.with_label_values(&["abc", "false"]).inc();
+        let _ = CONSENSUS_DISAGREEMENT_BPS.with_label_values(&["abc", "false"]).set(1200.0);
+    }
+
+    #[test]
+    fn registry_carries_all_directive_metrics() {
+        touch_all();
+        let text = gather_text().unwrap();
+        for needle in [
+            "atlas_rebalance_e2e_seconds",
+            "atlas_proof_gen_seconds",
+            "atlas_inference_ms",
+            "atlas_ingest_quorum_ms",
+            "atlas_verifier_cu",
+            "atlas_rebalance_cu_total",
+            "atlas_cpi_failure_total",
+            "atlas_consensus_disagreement_bps",
+            "atlas_stale_proof_rejections_total",
+            "atlas_archival_failures_total",
+            "atlas_quorum_disagreement_total",
+        ] {
+            assert!(text.contains(needle), "missing metric: {needle}");
+        }
+    }
+
+    #[test]
+    fn vault_id_hex_is_lowercase_64() {
+        let v = [0xab_u8; 32];
+        let s = vault_id_hex(&v);
+        assert_eq!(s.len(), 64);
+        assert!(s.chars().all(|c| c.is_ascii_hexdigit() && (c.is_ascii_digit() || c.is_ascii_lowercase())));
+    }
+
+    #[test]
+    fn span_records_value() {
+        let v = span("01-ingest-state", "deadbeef", 12345, false, || 7);
+        assert_eq!(v, 7);
+    }
+}

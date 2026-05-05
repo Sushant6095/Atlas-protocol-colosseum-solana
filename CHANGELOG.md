@@ -177,6 +177,96 @@
 | atlas-invariants-tests | 6 |
 | **Total** | **93** (up from 44) |
 
+---
+
+## Unreleased — Phase 1.3 (2026-05-06)
+
+### Added
+
+- **crates/atlas-telemetry** — Prometheus metrics + tracing-span helpers. Implements
+  the §13 SLO surface as a non-negotiable observability contract:
+  histograms (`atlas_rebalance_e2e_seconds`, `atlas_proof_gen_seconds`,
+  `atlas_inference_ms`, `atlas_ingest_quorum_ms`, `atlas_verifier_cu`,
+  `atlas_rebalance_cu_total`), counters (`atlas_cpi_failure_total`,
+  `atlas_stale_proof_rejections_total`, `atlas_archival_failures_total`,
+  `atlas_quorum_disagreement_total`), gauge
+  (`atlas_consensus_disagreement_bps`). Mandatory labels `vault_id` + `replay`
+  on every metric; `protocol` added on `cpi_failure_total`.
+  Spans created via `span()` carry `stage`, `vault_id`, `slot`, `replay`,
+  `duration_ms` per directive. `gather_text()` produces Prometheus text
+  exposition for any HTTP exposition endpoint.
+- **crates/atlas-replay** binary (§11). Three subcommands:
+  - `atlas-replay run --vault <hex> --slot <u64>` — reconstructs a historical
+    rebalance from the archival store and asserts byte-identity vs. the
+    archived public input + proof. Returns structured JSON outcome.
+  - `atlas-replay what-if --vault --slot --override agent.<Name>.weight=<bps>`
+    — counterfactual replay. Override parser rejects unknown agents,
+    unknown fields, out-of-range weights, unsupported namespaces.
+  - `atlas-replay fuzz --scenario <kind> --slots N --magnitude <bps>` — runs
+    one of the 7 directive §11 adversarial scenarios:
+    `OracleDrift{Linear,Sudden,Oscillating}`, `LiquidityVanish`,
+    `VolatilityShock`, `ProtocolInsolvency`, `RpcQuorumSplit`,
+    `StaleProofReplay`, `ForgedVaultTarget`, `CuExhaustion`. Each scenario
+    is a pure function returning `ScenarioOutcome::{DefensiveTriggered |
+    Halted | RejectedAtVerifier | SegmentedPlan | NoOp | RebalancedSafely}`
+    where the first five are "safe" outcomes; the last is rejected for
+    corruption-bearing scenarios. Exit code 0 for safe, 1 for unsafe — CI
+    can fail on regressions.
+- **tests/adversarial** — directive §12 corpus, all ten cases. Each test
+  exercises the verifier-side gate, ingest quorum, segmentation, consensus
+  arbitration, simulation gate, or archival contract:
+  1. `replay_old_proof_rejected` — proof beyond `MAX_STALE_SLOTS` window
+  2. `wrong_vault_id_rejected` — vault A proof submitted to vault B
+  3. `wrong_model_hash_rejected` — proof model_hash ≠ vault.approved
+  4. `forged_state_root_rejected` — public input state_root ≠ snapshot
+  5. `proof_substitution_rejected` — proof from unrelated public input
+  6. `quorum_split_halts` — 1-1-1 RPC split → ingest halts
+  7. `cpi_failure_atomic` — failing simulation log → reject before submit
+  8. `cu_exhaustion_segments` — 6×600k legs → segmented, no leg dropped
+  9. `defensive_mode_on_hard_veto` — TailRisk Hard veto → final == defensive
+  10. `archival_failure_aborts` — archive write Err → bundle never submits
+- **ops/grafana/atlas-overview.json** — committed dashboard wired to all §13
+  metrics with directive thresholds (rebalance e2e p99 90s, verifier CU 280k,
+  consensus disagreement alert > 1500 bps, rejection counters per-rate).
+
+### Tests
+
+- `atlas-telemetry`: 3 (registry contract, vault_id_hex format, span value).
+- `atlas-replay` lib: 18 (10 scenario tests covering all 7 directive §11
+  scenarios + 8 whatif/replay parser tests).
+- `atlas-replay` bin: 2 (pubkey parser).
+- `tests/adversarial`: 10 (one per directive §12 case).
+
+### Test counts
+
+| Crate | Tests |
+|---|---|
+| atlas-public-input | 5 |
+| atlas-pipeline | 82 |
+| atlas-telemetry | 3 |
+| atlas-replay | 20 (18 lib + 2 bin) |
+| atlas-invariants-tests | 6 |
+| atlas-adversarial-tests | 10 |
+| **Total** | **126** (up from 93) |
+
+### Directive coverage
+
+| § | Item | Status |
+|---|---|---|
+| §11 | atlas-replay binary | ✓ run / what-if / fuzz |
+| §11 | 7 fuzz scenarios | ✓ all 7 implemented + tested |
+| §11 | "Pass only if rebalance halts or stays safe" contract | ✓ via `ScenarioOutcome::is_safe` |
+| §12 | All 10 adversarial cases | ✓ |
+| §13 | All 11 directive metrics registered | ✓ |
+| §13 | Mandatory labels (vault_id, slot, replay) | ✓ |
+| §13 | `replay=true` tag for replay-mode spans | ✓ |
+| §13 | Grafana dashboard committed | ✓ `ops/grafana/atlas-overview.json` |
+| §14 | `serde_json::to_string` ban for commitment paths | ✓ via `canonical_json` module |
+| §14 | `chrono::Utc::now` ban | ✓ via `clippy.toml` |
+| §14 | `HashMap` for hash-touching collections ban | ✓ via `clippy.toml` |
+| §14 | `unsafe` block ban | ✓ via `#![deny(unsafe_code)]` on every crate |
+| §14 | `unwrap`/`expect`/`panic!` on prod paths | ✓ via clippy + crate-level deny |
+
 ### Directive coverage
 
 | § | Item | Status |

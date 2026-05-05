@@ -11,6 +11,10 @@ description = "Atlas real-time data ingestion fabric — typed event bus, conten
 name = "atlas-bus-replay"
 path = "src/bin/replay.rs"
 
+[[bin]]
+name = "atlas-webhook-rx"
+path = "src/bin/webhook_rx.rs"
+
 [dependencies]
 atlas-public-input = { path = "../atlas-public-input" }
 atlas-telemetry = { path = "../atlas-telemetry" }
@@ -27,6 +31,7 @@ bytes.workspace = true
 hmac.workspace = true
 sha2.workspace = true
 clap.workspace = true
+axum.workspace = true
 
 [dev-dependencies]
 proptest = "1.5"

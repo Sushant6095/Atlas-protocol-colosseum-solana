@@ -163,6 +163,23 @@ impl AtlasEvent {
         }
     }
 
+    /// Stable source label for telemetry — `"n/a"` for variants that do not
+    /// carry a `SourceId` (e.g. `SlotAdvance`, `BundleStatusEvent`).
+    pub fn source_label(&self) -> &'static str {
+        match self {
+            AtlasEvent::AccountUpdate { source, .. } => source.name(),
+            AtlasEvent::TransactionLanded { source, .. } => source.name(),
+            AtlasEvent::OracleTick { source, .. } => match source {
+                OracleSource::PythHermes => "pyth_hermes",
+                OracleSource::SwitchboardOnDemand => "switchboard_on_demand",
+                OracleSource::DexTwap => "dex_twap",
+            },
+            AtlasEvent::PoolStateChange { source, .. } => source.name(),
+            AtlasEvent::HealthSignal { source, .. } => source.name(),
+            AtlasEvent::SlotAdvance { .. } | AtlasEvent::BundleStatusEvent { .. } => "n/a",
+        }
+    }
+
     /// Variant tag used in canonical encoding.
     pub fn tag(&self) -> u8 {
         match self {

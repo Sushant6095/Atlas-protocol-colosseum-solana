@@ -1,0 +1,170 @@
+# Atlas Prometheus alert rules — directive §8 SLOs.
+#
+# Reload on the AlertManager / Prometheus side:
+#   prometheus --config.file=prometheus.yml \
+#              --rule-files=ops/prometheus/atlas-alerts.yaml
+#
+# Severity convention:
+#   page    — wakes oncall; SLO breach with funds-at-risk implications
+#   warn    — degrades dashboards; investigate within business hours
+#   info    — informational; reported on the daily digest
+
+groups:
+  # ─── Pipeline (Phase 01 — directive §13) ─────────────────────────────────
+  - name: atlas-pipeline-slos
+    interval: 30s
+    rules:
+      - alert: AtlasRebalanceE2ELatencyHigh
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum(rate(atlas_rebalance_e2e_seconds_bucket{replay="false"}[5m])) by (le, vault_id)
+          ) > 90
+        for: 10m
+        labels: { severity: warn, surface: pipeline }
+        annotations:
+          summary: "Atlas rebalance e2e p99 above 90s for vault {{ $labels.vault_id }}"
+
+      - alert: AtlasProofGenLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum(rate(atlas_proof_gen_seconds_bucket{replay="false"}[5m])) by (le, vault_id)
+          ) > 75
+        for: 10m
+        labels: { severity: warn, surface: prover }
+        annotations:
+          summary: "SP1 proof gen p99 above 75s for {{ $labels.vault_id }}"
+
+      - alert: AtlasInferenceLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum(rate(atlas_inference_ms_bucket{replay="false"}[5m])) by (le, vault_id)
+          ) > 250
+        for: 10m
+        labels: { severity: warn, surface: ranker }
+        annotations:
+          summary: "Off-chain inference p99 above 250ms for {{ $labels.vault_id }}"
+
+      - alert: AtlasVerifierCuHigh
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum(rate(atlas_verifier_cu_bucket{replay="false"}[5m])) by (le, vault_id)
+          ) > 280000
+        for: 10m
+        labels: { severity: warn, surface: verifier }
+        annotations:
+          summary: "Verifier ix CU p99 above 280k for {{ $labels.vault_id }}"
+
+      - alert: AtlasRebalanceCuOverBudget
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum(rate(atlas_rebalance_cu_total_bucket{replay="false"}[5m])) by (le, vault_id)
+          ) > 1200000
+        for: 10m
+        labels: { severity: page, surface: rebalancer }
+        annotations:
+          summary: "Bundle CU p99 above 1.2M for {{ $labels.vault_id }} — segmentation likely"
+
+      - alert: AtlasCpiFailureRateHigh
+        expr: |
+          sum(rate(atlas_cpi_failure_total[15m])) by (vault_id)
+            /
+          sum(rate(atlas_rebalance_cu_total_count[15m])) by (vault_id)
+            > 0.005
+        for: 15m
+        labels: { severity: page, surface: rebalancer }
+        annotations:
+          summary: "CPI failure rate >0.5% on {{ $labels.vault_id }}"
+
+      - alert: AtlasConsensusDisagreementSustained
+        expr: atlas_consensus_disagreement_bps{replay="false"} > 1500
+        for: 10m
+        labels: { severity: warn, surface: consensus }
+        annotations:
+          summary: "Consensus disagreement >1500 bps sustained on {{ $labels.vault_id }}"
+
+      - alert: AtlasStaleProofRejection
+        expr: rate(atlas_stale_proof_rejections_total[5m]) > 0
+        labels: { severity: page, surface: verifier }
+        annotations:
+          summary: "Stale proof rejections detected — proof_age gate firing"
+
+      - alert: AtlasArchivalFailureAny
+        expr: increase(atlas_archival_failures_total[1m]) > 0
+        labels: { severity: page, surface: archival }
+        annotations:
+          summary: "Archival write failed (I-8) — bundles must be aborted on this code path"
+
+      - alert: AtlasQuorumDisagreementSpike
+        expr: |
+          rate(atlas_quorum_disagreement_total[5m])
+            >
+          5 * avg_over_time(rate(atlas_quorum_disagreement_total[5m])[7d:1h])
+        labels: { severity: warn, surface: ingest }
+        annotations:
+          summary: "Quorum disagreement rate is 5× the 7-day median"
+
+  # ─── Ingestion (Phase 02 — directive §8) ─────────────────────────────────
+  - name: atlas-ingest-slos
+    interval: 30s
+    rules:
+      - alert: AtlasIngestLagSlots
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum(rate(atlas_ingest_event_lag_slots_bucket[5m])) by (le, source)
+          ) > 2
+        for: 10m
+        labels: { severity: warn, surface: ingest }
+        annotations:
+          summary: "Source {{ $labels.source }} event lag p99 > 2 slots"
+
+      - alert: AtlasIngestLagMillis
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum(rate(atlas_ingest_event_lag_ms_bucket[5m])) by (le, source)
+          ) > 600
+        for: 10m
+        labels: { severity: warn, surface: ingest }
+        annotations:
+          summary: "gRPC source {{ $labels.source }} event lag p99 > 600 ms"
+
+      - alert: AtlasQuorumMatchRateLow
+        expr: atlas_ingest_quorum_match_rate_bps < 9950
+        for: 1h
+        labels: { severity: warn, surface: ingest }
+        annotations:
+          summary: "Quorum match rate <99.5% sustained for 1h on {{ $labels.vault_id }}"
+
+      - alert: AtlasDedupDroppedSpike
+        expr: |
+          rate(atlas_ingest_dedup_dropped_total[5m])
+            >
+          5 * avg_over_time(rate(atlas_ingest_dedup_dropped_total[5m])[7d:1h])
+        labels: { severity: warn, surface: ingest }
+        annotations:
+          summary: "Dedup drop rate is 5× the 7-day median on source {{ $labels.source }}"
+
+      - alert: AtlasBusOverflowCommitment
+        expr: increase(atlas_ingest_bus_overflow_commitment_total[1m]) > 0
+        labels: { severity: page, surface: ingest }
+        annotations:
+          summary: "Commitment-channel overflow — fatal per directive §2"
+
+      - alert: AtlasSourceQuarantinedSpike
+        expr: |
+          increase(atlas_ingest_source_quarantined_total[15m]) > 0
+        labels: { severity: warn, surface: ingest }
+        annotations:
+          summary: "Source {{ $labels.source }} quarantined by reliability EMA"
+
+      - alert: AtlasReplayDriftAny
+        expr: increase(atlas_ingest_replay_drift_events_total[1m]) > 0
+        labels: { severity: page, surface: ingest }
+        annotations:
+          summary: "Replay drift detected — derived triggers diverged from recorded set"

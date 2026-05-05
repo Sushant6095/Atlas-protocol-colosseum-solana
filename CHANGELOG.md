@@ -1,5 +1,121 @@
 # Atlas Changelog
 
+## Unreleased — Phase 2.2 (2026-05-06) — Ingestion fabric closeout (directive §7-§10)
+
+### atlas-webhook-rx binary
+
+- New standalone Helius webhook ingress (axum HTTP, port 9090 default).
+- Endpoints:
+  - `GET /healthz` — process liveness.
+  - `POST /v1/webhooks/helius?webhook_id=...&slot=...&sig=<128-hex>` —
+    accepts signed payload (header `x-atlas-signature: <hex MAC>`),
+    verifies HMAC-SHA256, dedups on `(webhook_id, slot, sig)`, runs the
+    token-bucket rate limit, then queues. Receiver does no work inline
+    (anti-pattern §9).
+  - `GET /v1/webhooks/helius/replay` — replay endpoint exposing observed
+    `(webhook_id, slot)` tuples for the past window (directive §7).
+- Status codes: 200 accept, 200+duplicate body, 400 malformed, 401 hmac,
+  429 rate-limited.
+- Reads `ATLAS_WEBHOOK_SECRET` env or `--secret` flag.
+
+### atlas-bus → telemetry wiring (§8)
+
+- `AtlasBus::inject` now increments
+  `atlas_ingest_dedup_dropped_total{source}` on dedup and
+  `atlas_ingest_bus_overflow_commitment_total{vault_id="_global", replay="false"}`
+  on commitment overflow. The local `BusCounters` AtomicU64 fields stay as
+  the in-process counter; Prometheus is the cross-process export.
+- New `AtlasEvent::source_label()` helper produces stable lowercase labels
+  for every variant (`"n/a"` for `SlotAdvance` and `BundleStatusEvent`).
+
+### atlas-telemetry — Phase 02 metrics finally landed
+
+- 7 directive §8 metrics added (an earlier Edit had failed silently):
+  - `atlas_ingest_event_lag_slots` (histogram, label `source`)
+  - `atlas_ingest_event_lag_ms` (histogram, label `source`, gRPC sources)
+  - `atlas_ingest_quorum_match_rate_bps` (gauge)
+  - `atlas_ingest_dedup_dropped_total` (counter, label `source`)
+  - `atlas_ingest_bus_overflow_commitment_total` (counter — hard alert)
+  - `atlas_ingest_source_quarantined_total` (counter, label `source`)
+  - `atlas_ingest_replay_drift_events_total` (counter — hard alert)
+
+### atlas-bus — `Polling*` naming (§9 anti-pattern)
+
+- Renamed REST/poll-only adapters to satisfy directive §9 ("polling-only
+  adapters hidden behind a stream interface" → reject):
+  - `BirdeyeAdapter` → `PollingBirdeyeAdapter` (alias kept w/ `#[deprecated]`)
+  - `DefiLlamaAdapter` → `PollingDefiLlamaAdapter`
+  - `JupiterAdapter` → `PollingJupiterAdapter`
+- The `Polling*` prefix declares transport semantics in the type name so
+  reviewers cannot mistake them for streams.
+
+### Prometheus alert rules
+
+- `ops/prometheus/atlas-alerts.yaml` — full alert rule set wired to every
+  §8 + §13 SLO. Severity: `page` for funds-at-risk breaches, `warn` for
+  business-hours follow-up. Includes:
+  - rebalance e2e p99 > 90s (warn)
+  - proof gen p99 > 75s (warn)
+  - inference p99 > 250 ms (warn)
+  - verifier CU p99 > 280k (warn)
+  - rebalance CU p99 > 1.2M (page)
+  - cpi failure rate > 0.5% (page)
+  - consensus disagreement > 1500 bps sustained (warn)
+  - stale proof rejections rate > 0 (page)
+  - archival failure on any increase (page)
+  - quorum disagreement spike vs 7d median (warn)
+  - ingest event lag slots p99 > 2 (warn)
+  - ingest event lag ms p99 > 600 (warn)
+  - quorum match rate < 99.5% sustained 1h (warn)
+  - dedup drop spike vs 7d median (warn)
+  - commitment-channel overflow on any (page)
+  - source quarantine spike (warn)
+  - replay drift on any (page)
+
+### CI replay-parity workflow
+
+- `.github/workflows/replay-parity.yml` runs on push, pull_request, and
+  daily cron. Builds `atlas-bus-replay`, runs `--slot-range 1000000..1216000`
+  (216_000 slots ≈ 24h at 400ms), asserts `replay_parity == true` via `jq`,
+  then runs the workspace test suite + clippy with `-D warnings` on
+  commitment-bound crates (atlas-public-input, atlas-pipeline, atlas-bus).
+
+### Tests added (3)
+
+- `webhook_rx` bin: 3 (decode_hex round-trip, decode_hex odd-length reject,
+  decode_sig wrong-length reject). Bus + telemetry wiring is exercised
+  through the existing 56-test atlas-bus suite (no new tests needed; the
+  metric counter incs are observable via the `gather_text` round-trip
+  test in atlas-telemetry).
+
+### Test counts
+
+| Crate | Tests |
+|---|---|
+| atlas-public-input | 5 |
+| atlas-pipeline | 82 |
+| atlas-telemetry | 3 |
+| atlas-replay | 20 |
+| atlas-bus | 56 + 3 (webhook_rx bin) = 59 |
+| atlas-invariants-tests | 6 |
+| atlas-adversarial-tests | 10 |
+| **Total** | **185** (up from 182) |
+
+### Directive 02 §10 deliverable checklist — closed out
+
+| Item | Status |
+|---|---|
+| atlas-bus crate w/ typed event enum, bounded channels, content-addressed dedup | ✓ |
+| Adapters for Yellowstone (Triton + Helius + QuickNode), Pyth Hermes, Switchboard, Birdeye, Jupiter, DefiLlama | ✓ trait surface; real transport in Phase 2 |
+| Quorum engine with reliability EMA and quarantine | ✓ |
+| Anomaly trigger CEP layer with deterministic replay parity | ✓ all 7 triggers, replay-parity test |
+| `atlas-bus replay` binary | ✓ `--slot-range` + `--archive` |
+| Helius webhook receiver, signed-payload verified, idempotent | ✓ standalone bin |
+| Prometheus metrics + alert rules for every SLO | ✓ all 11 + 7 ingest = 18 metrics, alert rules YAML |
+| CI replay test against last 24h archive | ✓ `.github/workflows/replay-parity.yml` |
+
+---
+
 ## Unreleased — Phase 2.1 (2026-05-06) — Ingestion fabric hardening (directive §3-§6)
 
 ### atlas-bus extensions

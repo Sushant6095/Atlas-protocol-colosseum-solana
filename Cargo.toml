@@ -62,13 +62,14 @@ ndarray = "0.16"
 
 # observability + cli
 prometheus = "0.13"
-clap = { version = "4.5", features = ["derive"] }
+clap = { version = "4.5", features = ["derive", "env"] }
 
 # event bus
 blake3 = "1.5"
 bytes = "1.7"
 hmac = "0.12"
 sha2 = "0.10"
+axum = "0.7"
 
 [profile.release]
 overflow-checks = true

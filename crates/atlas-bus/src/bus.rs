@@ -167,9 +167,13 @@ impl AtlasBus {
     /// based on `is_commitment_bound`. Performs dedup and reorder checks.
     pub async fn inject(&self, event: AtlasEvent) -> Result<(), BusError> {
         let id = event_id(&event);
+        let source_label = event.source_label();
         let mut seen = self.seen.lock().await;
         if !seen.insert(id) {
             self.counters.dedup_dropped.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            atlas_telemetry::INGEST_DEDUP_DROPPED_TOTAL
+                .with_label_values(&[source_label])
+                .inc();
             return Err(BusError::Dedup(id));
         }
         drop(seen);
@@ -190,9 +194,12 @@ impl AtlasBus {
             }
             drop(state);
 
-            self.commitment_tx
-                .try_send(event)
-                .map_err(|_| BusError::CommitmentOverflow)?;
+            if let Err(_) = self.commitment_tx.try_send(event) {
+                atlas_telemetry::INGEST_BUS_OVERFLOW_COMMITMENT_TOTAL
+                    .with_label_values(&["_global", "false"])
+                    .inc();
+                return Err(BusError::CommitmentOverflow);
+            }
         } else {
             if let Err(_) = self.monitoring_tx.try_send(event) {
                 self.counters

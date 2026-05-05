@@ -138,22 +138,34 @@ adapter_stub!(
 );
 
 adapter_stub!(
-    BirdeyeAdapter,
+    PollingBirdeyeAdapter,
     SourceId::Birdeye,
-    "Birdeye — token liquidity + holder distribution + smart-money tags."
+    "Birdeye REST polling — token liquidity, holder distribution, smart-money \
+tags. **Polling** by default; live WS available where supported. Naming \
+follows directive §9: any polling adapter is `Polling*`."
 );
 
+#[deprecated(note = "Use `PollingBirdeyeAdapter` per directive §9 (polling-only naming)")]
+pub type BirdeyeAdapter = PollingBirdeyeAdapter;
+
 adapter_stub!(
-    DefiLlamaAdapter,
+    PollingDefiLlamaAdapter,
     SourceId::DefiLlama,
-    "DefiLlama — cross-protocol APY/TVL reference (replay-tagged, NOT commitment-bound)."
+    "DefiLlama REST — cross-protocol APY/TVL reference. **Polling**. \
+Replay-tagged, NOT commitment-bound."
 );
 
+#[deprecated(note = "Use `PollingDefiLlamaAdapter` per directive §9 (polling-only naming)")]
+pub type DefiLlamaAdapter = PollingDefiLlamaAdapter;
+
 adapter_stub!(
-    JupiterAdapter,
+    PollingJupiterAdapter,
     SourceId::Jupiter,
-    "Jupiter Price + Quote — routed-price reference + slippage curves."
+    "Jupiter Price + Quote REST — routed-price + slippage curves. **Polling**."
 );
+
+#[deprecated(note = "Use `PollingJupiterAdapter` per directive §9 (polling-only naming)")]
+pub type JupiterAdapter = PollingJupiterAdapter;
 
 adapter_stub!(
     MeteoraAdapter,
@@ -187,9 +199,9 @@ mod tests {
             JitoBlockEngineAdapter::default().id(),
             PythHermesAdapter::default().id(),
             SwitchboardOnDemandAdapter::default().id(),
-            BirdeyeAdapter::default().id(),
-            DefiLlamaAdapter::default().id(),
-            JupiterAdapter::default().id(),
+            PollingBirdeyeAdapter::default().id(),
+            PollingDefiLlamaAdapter::default().id(),
+            PollingJupiterAdapter::default().id(),
             MeteoraAdapter::default().id(),
             OrcaAdapter::default().id(),
             RaydiumAdapter::default().id(),

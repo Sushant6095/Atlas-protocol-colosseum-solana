@@ -159,6 +159,85 @@ pub static CONSENSUS_DISAGREEMENT_BPS: Lazy<GaugeVec> = Lazy::new(|| {
     v
 });
 
+// ─── Phase 02 — Data Ingestion Fabric SLOs (directive §8) ────────────────
+
+pub static INGEST_EVENT_LAG_SLOTS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_ingest_event_lag_slots",
+        "Slots between leader inclusion and event arrival. p99 SLO ≤ 2.",
+        vec![0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0]
+    );
+    let h = HistogramVec::new(opts, &["source"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static INGEST_EVENT_LAG_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_ingest_event_lag_ms",
+        "Wall time between leader inclusion and event arrival on gRPC sources. p99 SLO ≤ 600 ms.",
+        exponential_buckets(50.0, 1.5, 10).unwrap_or_default()
+    );
+    let h = HistogramVec::new(opts, &["source"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static INGEST_QUORUM_MATCH_RATE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_ingest_quorum_match_rate_bps",
+        "Rolling 1h quorum match rate in bps (10_000 = 100%). SLO ≥ 9_950.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static INGEST_DEDUP_DROPPED_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_ingest_dedup_dropped_total",
+        "Events dropped by content-addressed dedup. Alert on rate > 5× 7d median.",
+        &["source"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static INGEST_BUS_OVERFLOW_COMMITMENT_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_ingest_bus_overflow_commitment_total",
+        "Commitment-channel overflow — fatal per directive §2. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static INGEST_SOURCE_QUARANTINED_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_ingest_source_quarantined_total",
+        "Sources quarantined by the quorum reliability EMA falling below threshold.",
+        &["source"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static INGEST_REPLAY_DRIFT_EVENTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_ingest_replay_drift_events_total",
+        "Events whose replay output diverged from the recorded production stream. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

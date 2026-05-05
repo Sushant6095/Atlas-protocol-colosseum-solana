@@ -1,0 +1,58 @@
+name: Replay Parity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'atlas/crates/atlas-bus/**'
+      - 'atlas/crates/atlas-pipeline/**'
+      - 'atlas/crates/atlas-public-input/**'
+      - '.github/workflows/replay-parity.yml'
+  pull_request:
+    paths:
+      - 'atlas/crates/atlas-bus/**'
+      - 'atlas/crates/atlas-pipeline/**'
+      - 'atlas/crates/atlas-public-input/**'
+      - '.github/workflows/replay-parity.yml'
+  schedule:
+    # Daily replay against synthetic 24h slot range — directive §6 contract.
+    - cron: '0 7 * * *'
+
+jobs:
+  replay-24h:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: atlas
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Cargo build (release, atlas-bus-replay)
+        run: cargo build --release --bin atlas-bus-replay
+
+      - name: Replay synthetic 24h (216_000 slots @ 400ms each)
+        # Atlas slot ≈ 400ms → 24h ≈ 216_000 slots. We synthesize a
+        # deterministic stream and assert replay parity across two runs.
+        run: |
+          ./target/release/atlas-bus-replay \
+            --slot-range 1000000..1216000 \
+            --events-per-slot 4 \
+            > replay-output.json
+          cat replay-output.json
+          jq -e '.replay_parity == true' replay-output.json
+
+      - name: Cargo test (full suite)
+        run: cargo test --workspace --no-fail-fast
+
+      - name: Clippy (deny warnings on commitment crates)
+        run: |
+          cargo clippy -p atlas-public-input -p atlas-pipeline -p atlas-bus \
+            -- -D warnings

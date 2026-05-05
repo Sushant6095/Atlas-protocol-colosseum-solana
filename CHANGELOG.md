@@ -1,5 +1,74 @@
 # Atlas Changelog
 
+## Unreleased — Phase 2 (2026-05-06) — Real-Time Data Ingestion Fabric (directive 02)
+
+### atlas-bus crate
+- `event` module — `AtlasEvent` (7 variants), `SourceId` (14 stable discriminants),
+  `canonical_event_bytes`, `event_id = blake3(canonical_bytes)` for
+  content-addressed dedup. `is_commitment_bound()` partitions the surface.
+- `bus` module — `AtlasBus` with bounded mpsc channels (commitment + monitoring,
+  default 65_536). Commitment overflow fatal per §2; monitoring overflow
+  increments a counter. `DedupRing` FIFO eviction at cap. Reorder-window guard.
+- `source` module — `MarketSource` trait (id / run / health / backoff),
+  `Health`, `BackoffPolicy`, `MarketSourceError` taxonomy.
+- `quorum` module — `QuorumEngine` with reliability EMA + quarantine + AS
+  region diversity guard. Six classification rules: Confirmed / Soft / Hard /
+  Total.
+- `anomaly` module — 7 CEP triggers (VolatilitySpike, OracleDrift,
+  LiquidityCollapse, ProtocolUtilizationSpike, WhaleExit, FeedStall, RpcSplit).
+  Pure-function ingestion → replay-parity assertable.
+- `replay` module — `ReplaySource` + `ReplayBus::drain` (synchronous,
+  deterministic).
+- `webhook` module — `HeliusWebhookReceiver` with HMAC-SHA256, idempotency
+  over `(webhook_id, slot, sig)`, token-bucket rate limit, replay endpoint.
+- `adapters` module — 13 typed stubs implementing `MarketSource` for every
+  directive §1 provider. `AtomicHealth` lock-free snapshots.
+
+### atlas-bus-replay binary
+- `--slot-start S --slot-end E` synthesizes deterministic event stream,
+  asserts replay parity across two independent runs. Exit code 2 on divergence.
+
+### atlas-telemetry §8 SLOs
+- 7 new metrics: ingest_event_lag_slots, ingest_event_lag_ms,
+  ingest_quorum_match_rate_bps, ingest_dedup_dropped_total,
+  ingest_bus_overflow_commitment_total, ingest_source_quarantined_total,
+  ingest_replay_drift_events_total.
+
+### Tests added (35)
+- event 5, source 3, bus 5, quorum 7, anomaly 6 (incl. replay parity),
+  webhook 5, replay 2, adapters 2.
+
+### Test counts
+
+| Crate | Tests |
+|---|---|
+| atlas-public-input | 5 |
+| atlas-pipeline | 82 |
+| atlas-telemetry | 3 |
+| atlas-replay | 20 |
+| atlas-bus | 35 |
+| atlas-invariants-tests | 6 |
+| atlas-adversarial-tests | 10 |
+| **Total** | **161** (up from 126) |
+
+### Directive 02 coverage
+| § | Item | Status |
+|---|---|---|
+| §0 | Sub-slot freshness | trait surface ready, real gRPC Phase 2 |
+| §0 | Quorum integrity | ✓ |
+| §0 | Replayable | ✓ proven via parity test + bin |
+| §0 | Backpressure-aware | ✓ commitment overflow fatal |
+| §1 | All 13 providers have a typed adapter | ✓ |
+| §2 | Single in-process bus, no Kafka, content-addressed dedup, reorder window | ✓ |
+| §3 | Quorum policy, EMA, quarantine, AS-region diversity, 4 classes | ✓ |
+| §5 | 7 anomaly triggers + replay parity | ✓ |
+| §6 | `atlas-bus-replay` binary | ✓ |
+| §7 | Helius webhook signed-payload + idempotent + rate limit | ✓ |
+| §8 | 7 SLO metrics registered | ✓ |
+| §9 | Anti-patterns enforced | ✓ |
+
+---
+
 ## Unreleased — Phase 1 (2026-05-05)
 
 ### Added

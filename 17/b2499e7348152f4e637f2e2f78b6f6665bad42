@@ -1,0 +1,88 @@
+crates/atlas-runtime/src/zero_copy.rs
+  s_c3576656714da0::t_88fbe789dec72a 1-146
+crates/atlas-alt/src/compaction.rs
+  s_c3576656714da0::t_816ca6e474e1fa 1-99,103-105,107-127,130-135
+  s_c3576656714da0::t_bdc5993a0d1213 100-102,106
+  s_c3576656714da0::t_e0dfed2fb2db9d 128-129
+crates/atlas-bundle/src/lib.rs
+  s_c3576656714da0::t_3d993c47efa8ac 1-29
+crates/atlas-alt/src/lifecycle.rs
+  s_c3576656714da0::t_2c280c679fa596 1-178
+Cargo.toml
+  s_c3576656714da0::t_51bad8dafeb3c7 27-31
+crates/atlas-runtime/src/tx_size.rs
+  s_c3576656714da0::t_35dce25c8b06eb 1-96
+crates/atlas-bundle/src/region.rs
+  s_c3576656714da0::t_eb0583444a51c8 1-136
+crates/atlas-runtime/src/lib.rs
+  s_c3576656714da0::t_c1b8b0090f4ee6 1-36
+crates/atlas-mev/src/anomaly.rs
+  s_c3576656714da0::t_17d210d8b0fd01 1-56
+CHANGELOG.md
+  s_c3576656714da0::t_7a17891d70099c 3-125
+crates/atlas-cpi-guard/src/allowlist.rs
+  s_c3576656714da0::t_1f9945815c2c05 1-94
+crates/atlas-mev/src/lib.rs
+  s_c3576656714da0::t_ee25f01c0170ac 1-21
+crates/atlas-bundle/src/tip.rs
+  s_c3576656714da0::t_9969a060ba8ff1 1-151
+ops/runbooks/runtime.md
+  s_c3576656714da0::t_8d841d133404bb 1-97
+crates/atlas-cpi-guard/src/lib.rs
+  s_c3576656714da0::t_afe3781f8bb745 1-27
+crates/atlas-runtime/Cargo.toml
+  s_c3576656714da0::t_0bbf86a05a8f04 1-17
+crates/atlas-bundle/Cargo.toml
+  s_c3576656714da0::t_48a273bcd396ec 1-18
+crates/atlas-cpi-guard/Cargo.toml
+  s_c3576656714da0::t_9fc8b7fd488dce 1-18
+crates/atlas-bundle/src/idempotency.rs
+  s_c3576656714da0::t_9e206c91a1219c 1-86
+crates/atlas-telemetry/src/lib.rs
+  s_c3576656714da0::t_8260d98d1aaf82 491-580
+crates/atlas-runtime/src/lints.rs
+  s_c3576656714da0::t_6514cb4adcf51f 1-165
+crates/atlas-mev/Cargo.toml
+  s_c3576656714da0::t_7148ea8945ce7a 1-19
+crates/atlas-runtime/src/compute_budget.rs
+  s_c3576656714da0::t_34914c48f674c0 1-102,104-167,170-176,178-208
+  s_c3576656714da0::t_c493f15939f0e8 177
+  s_c3576656714da0::t_3d03300ea9d05e 103
+  s_c3576656714da0::t_80a83eba6235ab 168-169
+crates/atlas-cpi-guard/src/snapshot.rs
+  s_c3576656714da0::t_902c2b10e62119 1-171
+crates/atlas-alt/Cargo.toml
+  s_c3576656714da0::t_99896b0597d65c 1-18
+crates/atlas-mev/src/exposure.rs
+  s_c3576656714da0::t_ad470359a88d33 78
+  s_c3576656714da0::t_6b0f3de2d95402 105
+  s_c3576656714da0::t_c23d90112455a0 1-28,32-77,79-104,106-163
+  s_c3576656714da0::t_c852813fe9741a 29-31
+crates/atlas-runtime/src/determinism.rs
+  s_c3576656714da0::t_1c9685c27be1ea 1-83
+crates/atlas-cpi-guard/src/ownership.rs
+  s_c3576656714da0::t_3f85b510807a7e 1-42
+crates/atlas-runtime/src/locks.rs
+  s_c3576656714da0::t_0b1d8a4ec3ef88 1-145
+crates/atlas-bundle/src/route.rs
+  s_c3576656714da0::t_895fc660ec1e10 1-4,6-50
+  s_c3576656714da0::t_4e7ee33e892fe7 5
+crates/atlas-alt/src/lib.rs
+  s_c3576656714da0::t_a5bafd5942bbe7 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "17b2499e7348152f4e637f2e2f78b6f6665bad42",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

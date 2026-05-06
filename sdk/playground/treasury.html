@@ -58,6 +58,20 @@
     </section>
 
     <section>
+      <h2>Cross-chain mirror (combined NAV)</h2>
+      <p style="font-size:12px;color:#8893a8">
+        Solana legs are warehouse-anchored (proof-replayable). EVM legs are
+        Dune snapshots — provenance rendered inline so the operator never
+        has to ask "where did this number come from".
+      </p>
+      <table style="width:100%;border-collapse:collapse;font:12px ui-monospace, Menlo, monospace">
+        <thead><tr style="border-bottom:1px solid #1d2230"><th style="text-align:left;padding:6px 10px;color:#8893a8;font-size:11px;text-transform:uppercase">chain</th><th style="text-align:left;padding:6px 10px;color:#8893a8;font-size:11px;text-transform:uppercase">NAV (Q64)</th><th style="text-align:left;padding:6px 10px;color:#8893a8;font-size:11px;text-transform:uppercase">provenance</th></tr></thead>
+        <tbody id="legs"></tbody>
+      </table>
+      <p style="margin-top:10px"><b id="combined-nav">Combined NAV: —</b></p>
+    </section>
+
+    <section>
       <h2>30-day rebalance timeline</h2>
       <p style="font-size:12px;color:#8893a8">Each row links to the Phase 05 black box record. The on-chain anchor slot is the warehouse archive root.</p>
       <pre id="timeline"><code>// timeline appears after load.</code></pre>
@@ -113,11 +127,42 @@
         // Render last 30d timeline if returned.
         const tl = document.getElementById("timeline");
         tl.innerHTML = `<code>${escapeHtml(JSON.stringify(t.recent_rebalances ?? [], null, 2))}</code>`;
+        // Render cross-chain legs with per-leg provenance.
+        renderLegs(t.combined_nav);
       } catch (err) {
         out.classList.add("err");
         out.innerHTML = `<code>${escapeHtml(String(err))}</code>`;
       }
     };
+
+    function renderLegs(combined) {
+      const tbody = document.getElementById("legs");
+      tbody.innerHTML = "";
+      if (!combined || !combined.legs) {
+        tbody.innerHTML = `<tr><td colspan="3" style="padding:8px;color:#8893a8">no cross-chain legs reported</td></tr>`;
+        document.getElementById("combined-nav").textContent = "Combined NAV: —";
+        return;
+      }
+      for (const leg of combined.legs) {
+        const tr = document.createElement("tr");
+        tr.style.borderBottom = "1px solid #1d2230";
+        const provenanceText = leg.provenance?.AtlasProofAnchored
+          ? `proof-anchored at slot ${leg.provenance.AtlasProofAnchored.slot}`
+          : leg.provenance?.DuneSnapshot
+            ? `Dune exec_id ${leg.provenance.DuneSnapshot.execution_id} @ block ${leg.provenance.DuneSnapshot.block_height} (fetched slot ${leg.provenance.DuneSnapshot.fetched_at_slot})`
+            : "unknown";
+        const tag = leg.provenance?.AtlasProofAnchored ? "warehouse" : "dune";
+        tr.innerHTML = `
+          <td style="padding:6px 10px">${escapeHtml(leg.chain ?? "")}</td>
+          <td style="padding:6px 10px">${escapeHtml(String(leg.nav_q64 ?? ""))}</td>
+          <td style="padding:6px 10px">
+            <span style="display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;background:${tag==='warehouse'?'#1f3d2e':'#1f2d4d'};color:${tag==='warehouse'?'#5be1a0':'#6aa6ff'};margin-right:6px">${tag}</span>
+            ${escapeHtml(provenanceText)}
+          </td>`;
+        tbody.appendChild(tr);
+      }
+      document.getElementById("combined-nav").textContent = `Combined NAV: ${combined.combined_nav_q64} (Q64)`;
+    }
 
     document.getElementById("verify-latest").onclick = async () => {
       const base = document.getElementById("base").value;

@@ -1,5 +1,35 @@
 # Atlas Changelog
 
+## Unreleased — Phase 11.1 (2026-05-06) — Directive 11 closeout (rationale + /intelligence + cross-chain mirror + published queries)
+
+Final §14 items. The eligibility demo video remains an operator artifact.
+
+- `atlas-birdeye-overlay::opportunity::RationaleClause` — 3 Dune-evidence
+  variants added (`DuneProtocolInflowVelocity`,
+  `DuneCrossChainMigrationLeading`, `DuneHistoricalDrawdownDeep`) +
+  `is_dune_sourced()` predicate. Schema unchanged — round-trip serde test
+  pins it. Vault-creation only; never an existing-vault rebalance input
+  (directive §6).
+- `sdk/playground/intelligence.html` — `/intelligence` dashboard with the
+  capital-flow heatmap (per-cell source tag: warehouse vs dune) and a
+  force-directed wallet → protocol → asset SVG exposure graph rendered
+  client-side. Per-node hover tooltip shows kind + size; the provenance
+  footer summarises slot range, cell count, node/edge count.
+- `sdk/playground/treasury.html` — cross-chain mirror panel added.
+  Renders one row per leg with chain, NAV (Q64), and inline provenance
+  (warehouse vs Dune snapshot, with execution id + block height). The
+  combined NAV figure surfaces below the table.
+- `DUNE-QUERIES.md` — published-queries doc at the repo root listing
+  the 4 cohort query ids (8100001..8100004) backed by
+  `cohort_registry()`, the publish workflow, and the bidirectional
+  Atlas-published dashboard reference. Also re-states the §0 hard rule
+  + Phase 06 §3.1 promotion gate.
+
+§14 deliverable checklist (off-chain): all closed except the
+≤90-second demo video (operator artifact).
+
+Workspace: **724 tests** green (+2 vs Phase 11.0).
+
 ## Unreleased — Phase 11.0 (2026-05-06) — Directive 11 (Dune onchain intelligence)
 
 Onchain intelligence engine. Dune SIM extends Atlas outward (wallets and chains

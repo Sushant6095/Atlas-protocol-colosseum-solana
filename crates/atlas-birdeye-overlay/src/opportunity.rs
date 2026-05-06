@@ -19,6 +19,25 @@ pub enum RationaleClause {
     HighVolatility,
     Concentration,
     BirdeyeRiskFlag,
+    // Phase 11 §6 — Dune-derived evidence rows. Vault-creation only;
+    // never an existing-vault rebalance input.
+    DuneProtocolInflowVelocity,
+    DuneCrossChainMigrationLeading,
+    DuneHistoricalDrawdownDeep,
+}
+
+impl RationaleClause {
+    /// True iff the clause comes from a Dune snapshot. Used by the
+    /// scanner to inject the snapshot id into the opportunity row's
+    /// provenance footer.
+    pub const fn is_dune_sourced(self) -> bool {
+        matches!(
+            self,
+            RationaleClause::DuneProtocolInflowVelocity
+                | RationaleClause::DuneCrossChainMigrationLeading
+                | RationaleClause::DuneHistoricalDrawdownDeep
+        )
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -120,5 +139,41 @@ mod tests {
         ];
         let ranked = rank_opportunities(r);
         assert!(!ranked.iter().any(|x| x.eligible_for_universe && x.risk_score_bps >= 5_000));
+    }
+
+    #[test]
+    fn dune_sourced_predicate_partitions_clauses() {
+        for c in [
+            RationaleClause::StableApy,
+            RationaleClause::DeepLiquidity,
+            RationaleClause::LowToxicity,
+            RationaleClause::HolderDispersion,
+            RationaleClause::BirdeyeFlagClean,
+            RationaleClause::SmartMoneyInflow,
+            RationaleClause::HighVolatility,
+            RationaleClause::Concentration,
+            RationaleClause::BirdeyeRiskFlag,
+        ] {
+            assert!(!c.is_dune_sourced(), "{c:?} should not be Dune-sourced");
+        }
+        for c in [
+            RationaleClause::DuneProtocolInflowVelocity,
+            RationaleClause::DuneCrossChainMigrationLeading,
+            RationaleClause::DuneHistoricalDrawdownDeep,
+        ] {
+            assert!(c.is_dune_sourced(), "{c:?} should be Dune-sourced");
+        }
+    }
+
+    #[test]
+    fn dune_evidence_lands_in_rationale_without_changing_schema() {
+        let mut o = opp(500, 100, 8_000, 1_000);
+        o.rationale.positives.push(RationaleClause::DuneProtocolInflowVelocity);
+        o.rationale.positives.push(RationaleClause::DuneCrossChainMigrationLeading);
+        o.rationale.negatives.push(RationaleClause::DuneHistoricalDrawdownDeep);
+        // Round-trip serde: the schema accepts the new variants verbatim.
+        let s = serde_json::to_string(&o).unwrap();
+        let back: YieldOpportunity = serde_json::from_str(&s).unwrap();
+        assert_eq!(o, back);
     }
 }

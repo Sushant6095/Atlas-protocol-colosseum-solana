@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas — /intelligence dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; }
+    header small { color: #8893a8; }
+    main { padding: 24px; display: grid; gap: 18px; max-width: 1300px; margin: 0 auto; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 18px; }
+    h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    label { font-size: 12px; color: #8893a8; display: block; margin: 4px 0 2px; }
+    input { padding: 8px 10px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 280px; }
+    button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font: inherit; }
+    button:hover { background: #1f57d6; }
+    table { border-collapse: collapse; width: 100%; font: 12px ui-monospace, Menlo, monospace; }
+    th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #1d2230; }
+    th { font-size: 11px; text-transform: uppercase; color: #8893a8; letter-spacing: 0.06em; }
+    tr.warehouse { color: #b8eecf; }
+    tr.dune { color: #b9d3ff; }
+    .source-tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; margin-left: 6px; }
+    .source-tag.warehouse { background: #1f3d2e; color: #5be1a0; }
+    .source-tag.dune { background: #1f2d4d; color: #6aa6ff; }
+    .net.pos { color: #5be1a0; }
+    .net.neg { color: #ff8b8b; }
+    pre { margin: 0; padding: 12px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; overflow: auto; font: 12px/1.5 ui-monospace, Menlo, monospace; color: #c5cad6; }
+    .legend { font-size: 11px; color: #8893a8; margin-top: 8px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    svg { width: 100%; height: 360px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; }
+    .node { cursor: pointer; }
+    .node-label { font: 10px ui-monospace, Menlo, monospace; fill: #c5cad6; pointer-events: none; }
+    .edge { stroke: #2a3142; stroke-width: 1.5; }
+    .tooltip { position: fixed; pointer-events: none; background: #0b0d11; border: 1px solid #2a3142; border-radius: 4px; padding: 8px 10px; font: 11px ui-monospace, Menlo, monospace; color: #e7eaf0; max-width: 280px; display: none; z-index: 10; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas Intelligence <small>· /intelligence — heatmap + exposure graph</small></h1>
+  </header>
+  <main>
+    <section>
+      <h2>Inputs</h2>
+      <label>API base URL</label>
+      <input id="base" value="https://atlas.example" autocomplete="off">
+      <label>Wallet (for exposure graph)</label>
+      <input id="wallet" placeholder="ab12...cd34" autocomplete="off">
+      <label>From slot &nbsp;&middot;&nbsp; To slot</label>
+      <input id="from" value="0" style="min-width:120px">
+      <input id="to" value="1000000000" style="min-width:160px">
+      <p style="margin-top:12px"><button id="load">Refresh</button></p>
+      <p class="legend">Per-cell source provenance is shown inline. Hover any node in the exposure graph for the contributing positions.</p>
+    </section>
+
+    <section>
+      <h2>Capital flow heatmap (24h rolling)</h2>
+      <table>
+        <thead><tr><th>asset</th><th>protocol</th><th>direction</th><th>notional Q64</th><th>source</th><th>snapshot</th></tr></thead>
+        <tbody id="heatmap"></tbody>
+      </table>
+      <p class="legend">
+        <span class="source-tag warehouse">warehouse</span> proof-anchored, replayable from the Atlas archive.
+        <span class="source-tag dune">dune</span> snapshot-tagged Dune query result; click-through to the underlying tx set.
+      </p>
+    </section>
+
+    <section>
+      <h2>Wallet → Protocol → Asset exposure graph</h2>
+      <div class="grid">
+        <div>
+          <svg id="graph"></svg>
+          <p class="legend">Edges weighted by path-decayed effective exposure. Nodes sized by notional.</p>
+        </div>
+        <div>
+          <h2 style="margin-top:0">Raw graph</h2>
+          <pre id="graph-raw"><code>// Pick a wallet, click Refresh.</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Provenance footer</h2>
+      <p class="legend" id="provenance">No data loaded.</p>
+    </section>
+  </main>
+  <div class="tooltip" id="tt"></div>
+
+  <script type="module">
+    const tt = document.getElementById("tt");
+
+    document.getElementById("load").onclick = async () => {
+      const base = document.getElementById("base").value.replace(/\/$/, "");
+      const wallet = document.getElementById("wallet").value.trim();
+      const from = document.getElementById("from").value || "0";
+      const to = document.getElementById("to").value || "1000000000";
+      const provenance = [];
+      try {
+        const heat = await getJson(`${base}/api/v1/intelligence/heatmap?from=${from}&to=${to}`);
+        renderHeatmap(heat);
+        provenance.push(`heatmap: ${heat.cells?.length ?? 0} cells, slots ${heat.started_at_slot}..${heat.ended_at_slot}`);
+      } catch (err) {
+        document.getElementById("heatmap").innerHTML = `<tr><td colspan="6" style="color:#ff8b8b">heatmap: ${escapeHtml(String(err))}</td></tr>`;
+      }
+      if (wallet) {
+        try {
+          const g = await getJson(`${base}/api/v1/intelligence/exposure-graph/${encodeURIComponent(wallet)}`);
+          renderGraph(g);
+          document.getElementById("graph-raw").innerHTML = `<code>${escapeHtml(JSON.stringify(g, null, 2))}</code>`;
+          provenance.push(`exposure: ${g.nodes?.length ?? 0} nodes, ${g.edges?.length ?? 0} edges, slot ${g.generated_at_slot}`);
+        } catch (err) {
+          document.getElementById("graph-raw").innerHTML = `<code style="color:#ff8b8b">${escapeHtml(String(err))}</code>`;
+        }
+      }
+      document.getElementById("provenance").textContent = provenance.join(" · ") || "No data loaded.";
+    };
+
+    async function getJson(url) {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(`GET ${url} → ${r.status}`);
+      return r.json();
+    }
+
+    function renderHeatmap(h) {
+      const tbody = document.getElementById("heatmap");
+      tbody.innerHTML = "";
+      const cells = (h.cells ?? []).slice().sort((a, b) => Number(b.notional_q64 || 0) - Number(a.notional_q64 || 0));
+      for (const c of cells.slice(0, 50)) {
+        const tr = document.createElement("tr");
+        const src = c.source === "atlas_warehouse" ? "warehouse" : "dune";
+        tr.className = src;
+        tr.innerHTML = `
+          <td>${escapeHtml(String(c.asset?.[0] ?? c.asset ?? ""))}</td>
+          <td>${escapeHtml(String(c.protocol?.[0] ?? c.protocol ?? ""))}</td>
+          <td>${escapeHtml(c.direction ?? "")}</td>
+          <td>${escapeHtml(String(c.notional_q64 ?? ""))}</td>
+          <td><span class="source-tag ${src}">${src}</span></td>
+          <td>${escapeHtml(c.snapshot_id_hex ?? "")}</td>`;
+        tbody.appendChild(tr);
+      }
+      if (cells.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="color:#8893a8">no cells in window</td></tr>`;
+      }
+    }
+
+    function renderGraph(g) {
+      const svg = document.getElementById("graph");
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      const w = svg.clientWidth || 500;
+      const h = 360;
+      const nodes = g.nodes ?? [];
+      if (nodes.length === 0) return;
+      // Three columns: wallet, protocol, asset.
+      const cols = { wallet: 0, protocol: 1, asset: 2 };
+      const colWidth = w / 3;
+      const groups = { wallet: [], protocol: [], asset: [] };
+      for (const n of nodes) {
+        const k = n.kind || "wallet";
+        (groups[k] || groups.wallet).push(n);
+      }
+      const positions = new Map();
+      for (const [kind, list] of Object.entries(groups)) {
+        list.forEach((n, i) => {
+          const x = colWidth * cols[kind] + colWidth / 2;
+          const y = ((h - 40) * (i + 1)) / (list.length + 1) + 20;
+          positions.set(n.id, { x, y, n });
+        });
+      }
+      const ns = "http://www.w3.org/2000/svg";
+      // Edges first.
+      for (const e of g.edges ?? []) {
+        const a = positions.get(e.from);
+        const b = positions.get(e.to);
+        if (!a || !b) continue;
+        const line = document.createElementNS(ns, "line");
+        line.setAttribute("x1", a.x);
+        line.setAttribute("y1", a.y);
+        line.setAttribute("x2", b.x);
+        line.setAttribute("y2", b.y);
+        line.setAttribute("class", "edge");
+        line.setAttribute("stroke-width", String(1 + Math.min(4, Math.log2((Number(e.effective_exposure_q64) || 1) + 1) / 4)));
+        svg.appendChild(line);
+      }
+      // Nodes.
+      const sizes = (groups.wallet.concat(groups.protocol, groups.asset)).map(n => Number(n.size_q64) || 0);
+      const maxSize = Math.max(...sizes, 1);
+      for (const [, p] of positions) {
+        const r = 6 + Math.sqrt((Number(p.n.size_q64) || 0) / maxSize) * 18;
+        const circle = document.createElementNS(ns, "circle");
+        circle.setAttribute("cx", p.x);
+        circle.setAttribute("cy", p.y);
+        circle.setAttribute("r", r);
+        circle.setAttribute("class", "node");
+        circle.setAttribute("fill",
+          p.n.kind === "wallet" ? "#2c6cff" :
+          p.n.kind === "protocol" ? "#5be1a0" : "#ffc16a");
+        circle.addEventListener("mousemove", (ev) => {
+          tt.style.display = "block";
+          tt.style.left = (ev.clientX + 12) + "px";
+          tt.style.top = (ev.clientY + 12) + "px";
+          tt.innerHTML = `<b>${escapeHtml(p.n.label || p.n.id)}</b><br>kind: ${escapeHtml(p.n.kind)}<br>size_q64: ${escapeHtml(String(p.n.size_q64))}`;
+        });
+        circle.addEventListener("mouseleave", () => { tt.style.display = "none"; });
+        svg.appendChild(circle);
+        const text = document.createElementNS(ns, "text");
+        text.setAttribute("x", p.x);
+        text.setAttribute("y", p.y + r + 12);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("class", "node-label");
+        text.textContent = p.n.label || p.n.id;
+        svg.appendChild(text);
+      }
+    }
+
+    function escapeHtml(s) { return String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+  </script>
+</body>
+</html>

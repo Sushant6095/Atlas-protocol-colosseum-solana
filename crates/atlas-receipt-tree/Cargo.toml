@@ -1,0 +1,18 @@
+[package]
+name = "atlas-receipt-tree"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Per-vault rebalance receipt tree — concurrent merkle, blake3-domain leaves, depth selection, proof verify. Implements directive 07 §5."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

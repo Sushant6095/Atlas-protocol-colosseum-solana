@@ -1,5 +1,95 @@
 # Atlas Changelog
 
+## Unreleased — Phase 7.1 (2026-05-06) — Directive 07 §5 + §8 + §12 closeout
+
+Three crates close the remaining §12 deliverables that don't require
+live changes to `programs/`. The on-chain Pinocchio + zero-copy
+migration plan now ships as a tracked playbook at
+`programs/MIGRATION.md`.
+
+### `atlas-receipt-tree` — per-vault receipt tree (§5)
+
+- `receipt_leaf(rebalance_id, slot, public_input_hash, status) =
+  blake3("atlas.receipt.v1" || ...)` — domain-tagged leaf canonical
+  bytes matching the on-chain shape.
+- `select_depth(projected_lifetime)` enforces the directive's
+  `2^depth ≥ projected × 4` rule. 2200-record vault → depth 14;
+  smaller vaults floor at `MIN_DEPTH = 3`; ceiling at `MAX_DEPTH = 30`
+  (concurrent merkle tree max).
+- `ConcurrentMerkleTree { depth, leaves, authority }` with `append`,
+  `root` (rebuilt bottom-up; pads with zero leaf to capacity), and
+  `proof(leaf_index)` returning a `MerkleProof { leaf, leaf_index,
+  path }`.
+- `proof::verify_proof(proof, expected_root)` reconstructs the root
+  from the path; tampered leaves or path nodes cause a
+  `ProofError::RootMismatch`. `expected_root` comes from the vault
+  state field that the rebalancer updates atomically with the
+  receipt append (§5.3).
+
+### `atlas-pyth-post` — pull-oracle posting as bundle first ix (§8)
+
+- `freshness::verify_freshness(posted_slot, bundle_target_slot,
+  conf_bps)` — same predicate as the on-chain verifier. Boundary at
+  `MAX_LAG_SLOTS = 4` and `MAX_CONF_BPS = 80`. Tests pin the boundary
+  passes and the +1-slot/+1-bp cases reject.
+- `schedule::PostRefreshSchedule { bundle_target_slot, posts }` — the
+  per-rebalance plan. `validate()` enforces freshness on every entry;
+  one stale post fails the whole schedule (atomic-bundle expectation).
+- `bundle::enforce_first_ix(ixs)` refuses any bundle whose first
+  non-`ComputeBudget` instruction isn't the Pyth post — a missing
+  Pyth post or any leading `AtlasIx` / `Other` rejects with
+  `BundleLayoutError::PythPostNotFirst` / `PythPostMissing`.
+
+### `atlas-mollusk-bench` — CU baseline + 5%-regression CI gate (§12)
+
+- `Baseline { program, ix, baseline_cu, note }` — committed at
+  `programs/bench/baseline.json`; updates require a deliberate diff
+  in the same PR that lands the optimization.
+- `BaselineDb` — flat-array storage so on-disk JSON diffs read
+  naturally in PR review. `insert` rejects duplicates; `get(program,
+  ix)` is a linear scan over the small fixed list.
+- `report::check_regressions(db, observations)` — flags any
+  `(program, ix)` whose `regression_bps =
+  (observed - baseline) / baseline × 10_000` exceeds the
+  `REGRESSION_TOLERANCE_BPS = 500` (5 %) directive bound.
+  Improvements pass silently; net-new benchmarks surface as
+  `orphan_observations` so green CI can't hide a missing baseline.
+- `bin/atlas-bench-check` — CI driver: `--baseline <path>`
+  `--observations <path>` `--report <path>`; exits non-zero on any
+  regression.
+
+### Programs migration plan (`programs/MIGRATION.md`)
+
+End-to-end Pinocchio + zero-copy playbook for the four programs that
+will move (`atlas_verifier`, `atlas_rebalancer`, `atlas_alt_keeper`,
+`atlas_vault` — vault stays Anchor; registry stays Anchor). Documents
+the per-program deltas, sequencing (alt-keeper first, then verifier,
+then rebalancer), CI shape (Mollusk bench + lints +
+`DeterminismCheck`), and tracking issues.
+
+### Phase 7.1 telemetry
+
+`atlas-telemetry` adds 3 metrics:
+- `atlas_receipt_tree_root_age_slots` (Histogram, p99 SLO ≤ 600).
+- `atlas_pyth_post_first_ix_violations_total` (Counter, hard alert).
+- `atlas_mollusk_regression_bps{program, ix}` (Histogram, CI fails
+  > 500 bps).
+
+### Test coverage
+
+- atlas-receipt-tree: 13/13 (leaf 2, depth 2, tree 4, proof 3, plus
+  shared bounds).
+- atlas-pyth-post: 11/11 (freshness 5, schedule 3, bundle 5; minus
+  one shared empty case).
+- atlas-mollusk-bench: 8/8 (baseline 3, report 5).
+- Workspace total: **546 tests** green (32 new vs Phase 7.0).
+
+### Open
+
+`programs/` Pinocchio + zero-copy migration tracked in
+`programs/MIGRATION.md`. Lands in the on-chain Cargo workspace, not
+this one.
+
 ## Unreleased — Phase 7.0 (2026-05-06) — Directive 07 (Solana runtime, MEV, CPI, ALT)
 
 Five new crates land the directive's off-chain support code. The

@@ -1,0 +1,24 @@
+[package]
+name = "atlas-mollusk-bench"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Mollusk benchmark harness — CU baselines per program/ix, 5%-regression CI gate. Implements directive 07 §12 last bullet."
+
+[lib]
+
+[[bin]]
+name = "atlas-bench-check"
+path = "src/bin/bench_check.rs"
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+clap.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

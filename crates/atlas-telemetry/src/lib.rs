@@ -578,6 +578,41 @@ pub static RUNTIME_WRITABLE_ACCOUNTS_PER_BUNDLE: Lazy<HistogramVec> = Lazy::new(
     h
 });
 
+// ─── Phase 07 closeout — Receipt tree / Pyth post / Mollusk bench ────────
+
+pub static RECEIPT_TREE_ROOT_AGE_SLOTS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_receipt_tree_root_age_slots",
+        "Slots between vault state root commitment and on-chain anchor leaf. p99 SLO \u{2264} 600.",
+        vec![32.0, 64.0, 128.0, 256.0, 512.0, 600.0, 1024.0]
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static PYTH_POST_FIRST_IX_VIOLATIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_pyth_post_first_ix_violations_total",
+        "Bundles assembled with Pyth post not at the first non-CB ix slot. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static MOLLUSK_REGRESSION_BPS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_mollusk_regression_bps",
+        "Per-(program, ix) CU regression vs baseline in bps. CI fails > 500 (5 %).",
+        vec![0.0, 100.0, 250.0, 500.0, 1_000.0, 2_500.0, 5_000.0]
+    );
+    let h = HistogramVec::new(opts, &["program", "ix"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

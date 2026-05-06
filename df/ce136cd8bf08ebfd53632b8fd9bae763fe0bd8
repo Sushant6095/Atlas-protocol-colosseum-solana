@@ -1,0 +1,65 @@
+crates/atlas-sandbox/src/report.rs
+  c3576656714da0ca 1-140
+ops/runbooks/model-approval.md
+  c3576656714da0ca 1-150
+crates/atlas-sandbox/src/lib.rs
+  c3576656714da0ca 1-29
+crates/atlas-sandbox/src/compare.rs
+  c3576656714da0ca 1-102
+crates/atlas-registry/src/lineage.rs
+  c3576656714da0ca 1-134
+crates/atlas-registry/Cargo.toml
+  c3576656714da0ca 1-29
+crates/atlas-sandbox/src/backtest.rs
+  c3576656714da0ca 1-259
+crates/atlas-registry/src/record.rs
+  c3576656714da0ca 1-220
+crates/atlas-registry/src/anchor.rs
+  c3576656714da0ca 1-86
+crates/atlas-registry/src/drift.rs
+  c3576656714da0ca 1-205
+crates/atlas-registry/src/bin/registryctl.rs
+  c3576656714da0ca 1-367
+crates/atlas-sandbox/src/bin/sandbox.rs
+  c3576656714da0ca 1-269
+crates/atlas-sandbox/src/isolation.rs
+  c3576656714da0ca 1-94
+crates/atlas-registry/src/store.rs
+  c3576656714da0ca 1-199
+crates/atlas-telemetry/src/lib.rs
+  c3576656714da0ca 434-490
+Cargo.toml
+  c3576656714da0ca 23-24
+CHANGELOG.md
+  c3576656714da0ca 3-110
+crates/atlas-registry/src/feature_schema.rs
+  c3576656714da0ca 1-140
+crates/atlas-registry/src/lib.rs
+  c3576656714da0ca 1-27
+crates/atlas-sandbox/src/whatif.rs
+  c3576656714da0ca 1-188
+crates/atlas-sandbox/Cargo.toml
+  c3576656714da0ca 1-32
+crates/atlas-sandbox/src/leakage.rs
+  c3576656714da0ca 1-145
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "dfce136cd8bf08ebfd53632b8fd9bae763fe0bd8",
+  "prompts": {
+    "c3576656714da0ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 2982,
+      "total_deletions": 0,
+      "accepted_lines": 2982,
+      "overriden_lines": 0
+    }
+  }
+}

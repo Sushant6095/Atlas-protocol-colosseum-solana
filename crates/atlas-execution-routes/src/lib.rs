@@ -14,10 +14,14 @@
 #![deny(unsafe_code)]
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
+pub mod predictive;
 pub mod registry;
 pub mod route;
 pub mod twap;
 
+pub use predictive::{
+    forecast_penalty_bps, predictive_routing_drift_bps, ForecastQuotes, PredictiveRoutingDrift,
+};
 pub use registry::{RouteRegistry, RouteSelectError};
 pub use route::{
     DflowRoute, ExecutionRoute, JitoRoute, PlannedLeg, Quote, RouteId, RouteReceipt, SwqosRoute,

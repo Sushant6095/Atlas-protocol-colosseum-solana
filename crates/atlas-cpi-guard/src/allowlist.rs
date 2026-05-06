@@ -19,6 +19,11 @@ pub enum AllowlistedProgram {
     AssociatedTokenAccount,
     ComputeBudget,
     Memo,
+    // Phase 12 — Jupiter program family.
+    JupiterTrigger,
+    JupiterRecurring,
+    JupiterLend,
+    JupiterPerps,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -40,6 +45,10 @@ pub const ALLOWLIST: &[AllowlistedTarget] = &[
     AllowlistedTarget { program: AllowlistedProgram::AssociatedTokenAccount, program_id: derive_id(b"atlas.allow.ata") },
     AllowlistedTarget { program: AllowlistedProgram::ComputeBudget, program_id: derive_id(b"atlas.allow.compute_budget") },
     AllowlistedTarget { program: AllowlistedProgram::Memo, program_id: derive_id(b"atlas.allow.memo") },
+    AllowlistedTarget { program: AllowlistedProgram::JupiterTrigger, program_id: derive_id(b"atlas.allow.jupiter_trigger") },
+    AllowlistedTarget { program: AllowlistedProgram::JupiterRecurring, program_id: derive_id(b"atlas.allow.jupiter_recurring") },
+    AllowlistedTarget { program: AllowlistedProgram::JupiterLend, program_id: derive_id(b"atlas.allow.jupiter_lend") },
+    AllowlistedTarget { program: AllowlistedProgram::JupiterPerps, program_id: derive_id(b"atlas.allow.jupiter_perps") },
 ];
 
 const fn derive_id(seed: &[u8]) -> Pubkey {
@@ -86,9 +95,23 @@ mod tests {
 
     #[test]
     fn allowlist_count_matches_directive() {
-        // 9 programs per §4.2 (Kamino, Drift, Jupiter, Marginfi, Token,
-        // Token-2022, ATA, Compute Budget, Memo). Adding without a
-        // corresponding entry here is a deployment bug.
-        assert_eq!(ALLOWLIST.len(), 9);
+        // 9 programs per Phase 07 §4.2 (Kamino, Drift, Jupiter,
+        // Marginfi, Token, Token-2022, ATA, Compute Budget, Memo)
+        // + 4 Jupiter family programs from Phase 12 (Trigger,
+        // Recurring, Lend, Perps).
+        assert_eq!(ALLOWLIST.len(), 13);
+    }
+
+    #[test]
+    fn jupiter_family_programs_lookup_able() {
+        for p in [
+            AllowlistedProgram::JupiterTrigger,
+            AllowlistedProgram::JupiterRecurring,
+            AllowlistedProgram::JupiterLend,
+            AllowlistedProgram::JupiterPerps,
+        ] {
+            let entry = ALLOWLIST.iter().find(|t| t.program == p).unwrap();
+            assert_eq!(is_allowlisted(&entry.program_id), Some(p));
+        }
     }
 }

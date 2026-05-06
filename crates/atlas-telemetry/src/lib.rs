@@ -874,6 +874,96 @@ pub static INTEL_CROSS_CHAIN_LAG_BLOCKS: Lazy<HistogramVec> = Lazy::new(|| {
     h
 });
 
+// ─── Phase 12 — Jupiter execution SLOs (directive 12 §10) ────────────────
+
+pub static TRIGGER_GATE_CHECK_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_trigger_gate_check_ms",
+        "Wall-time of the gate_check predicate. p99 SLO \u{2264} 200 ms.",
+        vec![5.0, 10.0, 25.0, 50.0, 100.0, 200.0, 500.0]
+    );
+    let h = HistogramVec::new(opts, &["order_type"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static TRIGGER_GATE_REJECT_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_trigger_gate_reject_total",
+        "Trigger gate rejections by reason. Used to compute gate_reject_correctness_rate.",
+        &["reason"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static TRIGGER_FIRE_E2E_SECONDS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_trigger_fire_e2e_seconds",
+        "End-to-end trigger firing wall time (gate pass \u{2192} Jupiter fill). p99 SLO \u{2264} 4.",
+        vec![0.5, 1.0, 2.0, 4.0, 8.0, 16.0]
+    );
+    let h = HistogramVec::new(opts, &[]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static RECURRING_PLAN_UPDATE_LAG_SLOTS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_recurring_plan_update_lag_slots",
+        "Slots between regime-shift detection and the recurring-plan update landing. p99 SLO \u{2264} 150.",
+        vec![32.0, 64.0, 128.0, 150.0, 256.0, 512.0]
+    );
+    let h = HistogramVec::new(opts, &[]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static RECURRING_CADENCE_VIOLATION_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_recurring_cadence_violation_total",
+        "Plan parameters out of strategy-commitment bounds. Hard alert on any.",
+        &["bound_kind"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static LEND_CPI_FAILURE_RATE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_lend_cpi_failure_rate_bps",
+        "Rolling 24h Jupiter Lend CPI failure rate in bps. SLO \u{2264} 50.",
+        &[]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static HEDGE_NAKED_SHORT_ATTEMPTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_hedge_naked_short_attempts_total",
+        "Hedge requests rejected because notional > underlying. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PREDICTIVE_ROUTING_DRIFT_BPS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_predictive_routing_drift_bps",
+        "Observed post-trade impact minus forecast median, in bps. Dashboarded.",
+        vec![0.0, 25.0, 50.0, 100.0, 250.0, 500.0]
+    );
+    let h = HistogramVec::new(opts, &["route"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

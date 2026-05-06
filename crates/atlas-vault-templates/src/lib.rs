@@ -42,6 +42,9 @@ pub enum TemplateId {
     /// PUSD-native treasury default:
     /// idle-heavy, Kamino conservative, large defensive vector.
     PusdTreasuryDefense,
+    /// PUSD + Jupiter Lend conservative template (directive 12 §5):
+    /// Kamino + Jupiter Lend + Marginfi + idle, Drift forbidden.
+    PusdJupiterLendConservative,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -268,6 +271,39 @@ pub fn build(id: TemplateId, band: RiskBand) -> VaultTemplate {
             vol_suppress_agent_weights(),
             72_000,
         ),
+        // pusd-jupiter-lend-conservative (directive 12 §5):
+        // Kamino + Jupiter Lend + Marginfi + idle. Drift forbidden.
+        // ProtocolId(5) is Jupiter Lend per the post-Phase-12 allowlist.
+        (TemplateId::PusdJupiterLendConservative, RiskBand::Conservative) => (
+            vec![
+                alloc(ProtocolId(1), 5_000, "kamino-main"),
+                alloc(ProtocolId(5), 2_500, "jupiter-lend"),
+                alloc(ProtocolId(3), 1_500, "marginfi"),
+                alloc(ProtocolId(0), 1_000, "idle"),
+            ],
+            balanced_agent_weights(),
+            54_000,
+        ),
+        (TemplateId::PusdJupiterLendConservative, RiskBand::Balanced) => (
+            vec![
+                alloc(ProtocolId(1), 4_500, "kamino-main"),
+                alloc(ProtocolId(5), 3_000, "jupiter-lend"),
+                alloc(ProtocolId(3), 2_000, "marginfi"),
+                alloc(ProtocolId(0), 500, "idle"),
+            ],
+            balanced_agent_weights(),
+            36_000,
+        ),
+        (TemplateId::PusdJupiterLendConservative, RiskBand::Aggressive) => (
+            vec![
+                alloc(ProtocolId(1), 4_000, "kamino-main"),
+                alloc(ProtocolId(5), 3_500, "jupiter-lend"),
+                alloc(ProtocolId(3), 2_500, "marginfi"),
+                alloc(ProtocolId(0), 0, "idle"),
+            ],
+            aggressive_agent_weights(),
+            18_000,
+        ),
     };
     let drift_band_bps = match band {
         RiskBand::Conservative => 200,
@@ -335,13 +371,15 @@ pub const ALL_TEMPLATES: &[TemplateId] = &[
     TemplateId::PusdSafeYield,
     TemplateId::PusdYieldBalanced,
     TemplateId::PusdTreasuryDefense,
+    TemplateId::PusdJupiterLendConservative,
 ];
 
-/// Subset of templates that are PUSD-native (directive 10 §2).
+/// Subset of templates that are PUSD-native (directive 10 §2 + 12 §5).
 pub const PUSD_TEMPLATES: &[TemplateId] = &[
     TemplateId::PusdSafeYield,
     TemplateId::PusdYieldBalanced,
     TemplateId::PusdTreasuryDefense,
+    TemplateId::PusdJupiterLendConservative,
 ];
 
 #[cfg(test)]
@@ -376,8 +414,17 @@ mod tests {
     }
 
     #[test]
-    fn pusd_template_count_is_three() {
-        assert_eq!(PUSD_TEMPLATES.len(), 3);
+    fn pusd_template_count_is_four_after_phase_12() {
+        assert_eq!(PUSD_TEMPLATES.len(), 4);
+    }
+
+    #[test]
+    fn pusd_jupiter_lend_template_includes_jupiter_lend_protocol_id() {
+        // Jupiter Lend is ProtocolId(5) per the Phase 12 allowlist.
+        let t = build(TemplateId::PusdJupiterLendConservative, RiskBand::Balanced);
+        assert!(t.allocations.iter().any(|a| a.protocol == ProtocolId(5)));
+        // Drift is excluded (consistent with PusdSafeYield posture).
+        assert!(!t.allocations.iter().any(|a| a.protocol == ProtocolId(2)));
     }
 
     #[test]

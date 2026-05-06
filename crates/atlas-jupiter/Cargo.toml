@@ -1,0 +1,18 @@
+[package]
+name = "atlas-jupiter"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Jupiter Lend + Perps composition — allowlist program ids, hedge sizing, naked-short guard. Implements directive 12 §5 + §6."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+atlas-failure = { path = "../atlas-failure" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

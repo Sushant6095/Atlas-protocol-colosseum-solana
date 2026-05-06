@@ -1,5 +1,79 @@
 # Atlas Changelog
 
+## Unreleased — Phase 12.0 (2026-05-06) — Directive 12 (Atlas Autonomous Execution Engine — Jupiter composition)
+
+Three new crates land the genuinely-novel Jupiter-composition surfaces.
+The Phase 09 §0 / Phase 11 §0 hard rule still holds: Jupiter Quote /
+Price / Trigger reads are advisory, NEVER commitment-path inputs.
+
+- `atlas-trigger-gate` (§3) — proof-gated Jupiter triggers.
+  - `conditions::AtlasCondition` enum (7 variants) +
+    `conditions_hash` over canonical layout under domain tag
+    `b"atlas.cond.v1"`. Clause order is part of the canonical layout.
+  - `attestation::AtlasConditionAttestation` with
+    `MAX_ATTESTATION_STALE_SLOTS = 8`, vault check, authority check,
+    signature-shape check.
+  - `pda::TriggerGate` with immutable `conditions_hash` and validity
+    horizon.
+  - `gate::gate_check` covers all 5 directive §3.6 adversarial cases:
+    stale, wrong vault, wrong conditions, spoofed authority, expired,
+    malformed signature. Tests pin every reject path.
+  - `order_type::TriggerOrderType` — 5 types (StopLoss, TakeProfit,
+    OcoBracket, RegimeExit, LpExitOnDepthCollapse) with stable u8
+    tags + default condition sets.
+- `atlas-recurring-plan` (§4) — adaptive DCA over Jupiter Recurring.
+  - `plan::RecurringPlan` + `validate_plan_update` enforces strategy
+    commitment bounds (max slice, min/max interval, slippage cap),
+    monotonic version, and `commitment_hash` byte-equality.
+  - `cadence::cadence_for_regime` maps `MarketRegime` (Accumulation /
+    Calm / Neutral / HighVol / Panic / Crisis) to slice/interval/
+    slippage multipliers; Crisis fires the pause flag.
+- `atlas-jupiter` (§5 + §6) — Lend + Perps composition.
+  - 5 Jupiter program ids (Swap, Trigger, Recurring, Lend, Perps)
+    pinned with stable derived placeholders.
+  - `lend::LendPosition` + `LendVenue` shapes for the Phase 04
+    dependency-graph entry.
+  - `hedge::validate_hedge_request` rejects: hedging disabled,
+    notional above cap, **naked short** (notional > underlying),
+    leverage above policy cap, leverage above the recommended
+    `RECOMMENDED_MAX_LEVERAGE_BPS = 20_000` (2×).
+- `atlas-vault-templates` adds `PusdJupiterLendConservative` × 3 risk
+  bands (Kamino + Jupiter Lend + Marginfi + idle, Drift forbidden).
+  PUSD template count now 4.
+- `atlas-cpi-guard::ALLOWLIST` extended with `JupiterTrigger`,
+  `JupiterRecurring`, `JupiterLend`, `JupiterPerps` (count 9 → 13).
+- `atlas-execution-routes::predictive` — 3-slot forecast quote
+  routing penalty + drift signal for Phase 01 §9.4 telemetry.
+- `atlas-rs` adds `create_gated_trigger` + `open_adaptive_recurring`.
+- `atlas-public-api` adds 5 endpoints (count 15 → 20). The "no write
+  endpoints" test rewritten to "writeable endpoints are only
+  authoring surfaces" — POSTs limited to `/simulate/{ix}`,
+  `/triggers`, `/recurring`, `/hedging/preview`. Actual on-chain ix
+  must still be user-signed; these endpoints prepare proofs and
+  bundles the signer consumes.
+- Telemetry: 8 Phase 12 metrics (`trigger_gate_check_ms`,
+  `trigger_gate_reject_total`, `trigger_fire_e2e_seconds`,
+  `recurring_plan_update_lag_slots`,
+  `recurring_cadence_violation_total`, `lend_cpi_failure_rate_bps`,
+  `hedge_naked_short_attempts_total`,
+  `predictive_routing_drift_bps`).
+- `sdk/playground/triggers.html` — proof-gated trigger UI with
+  client-side `gate_check` simulator covering the directive's 5
+  adversarial cases.
+- `sdk/playground/recurring.html` — adaptive DCA UI with regime →
+  cadence preview + bounds validator mirroring
+  `validate_plan_update`.
+- `JUPITER-EXECUTION.md` — directive §13 one-pager.
+
+§12 deliverable checklist (off-chain side): `atlas_trigger_gate`
+shape ✅, `atlas_recurring_plan` shape ✅, 5 trigger order types ✅,
+Jupiter Lend integration ✅, optional hedge module ✅, predictive
+routing ✅, SDK methods ✅, docs ✅. Demo videos remain operator
+artifacts. The on-chain Pinocchio programs follow the Phase 07
+`programs/MIGRATION.md` playbook.
+
+Workspace: **780 tests** green (+58 vs Phase 11.1).
+
 ## Unreleased — Phase 11.1 (2026-05-06) — Directive 11 closeout (rationale + /intelligence + cross-chain mirror + published queries)
 
 Final §14 items. The eligibility demo video remains an operator artifact.

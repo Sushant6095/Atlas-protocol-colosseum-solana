@@ -13,6 +13,8 @@ atlas-blackbox = { path = "../atlas-blackbox" }
 atlas-presign = { path = "../atlas-presign" }
 atlas-runtime = { path = "../atlas-runtime" }
 atlas-intelligence = { path = "../atlas-intelligence" }
+atlas-trigger-gate = { path = "../atlas-trigger-gate" }
+atlas-recurring-plan = { path = "../atlas-recurring-plan" }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror.workspace = true

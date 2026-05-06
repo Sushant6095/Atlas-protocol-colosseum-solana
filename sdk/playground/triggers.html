@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas — /triggers (proof-gated Jupiter triggers)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; }
+    header small { color: #8893a8; }
+    main { padding: 24px; display: grid; gap: 18px; max-width: 1100px; margin: 0 auto; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 18px; }
+    h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    label { font-size: 12px; color: #8893a8; display: block; margin: 6px 0 2px; }
+    input, select { padding: 8px 10px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 280px; }
+    button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font: inherit; }
+    button:hover { background: #1f57d6; }
+    pre { margin: 0; padding: 12px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; overflow: auto; font: 12px/1.5 ui-monospace, Menlo, monospace; color: #c5cad6; }
+    .verdict { font-weight: 600; }
+    .verdict.allow { color: #5be1a0; }
+    .verdict.reject { color: #ff8b8b; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 800px) { .row { grid-template-columns: 1fr; } }
+    .legend { font-size: 12px; color: #8893a8; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas — /triggers <small>· proof-gated Jupiter triggers (Phase 12 §3)</small></h1>
+  </header>
+  <main>
+    <section>
+      <h2>Inputs</h2>
+      <div class="row">
+        <div>
+          <label>API base URL</label>
+          <input id="base" value="https://atlas.example">
+          <label>Vault id (hex32)</label>
+          <input id="vault" placeholder="0101...">
+          <label>Order type</label>
+          <select id="order_type">
+            <option value="StopLoss">StopLoss</option>
+            <option value="TakeProfit">TakeProfit</option>
+            <option value="OcoBracket">OcoBracket</option>
+            <option value="RegimeExit">RegimeExit</option>
+            <option value="LpExitOnDepthCollapse">LpExitOnDepthCollapse</option>
+          </select>
+          <label>Mint (peg-deviation subject, hex32)</label>
+          <input id="mint" placeholder="ab12...">
+        </div>
+        <div>
+          <label>Peg deviation threshold (bps)</label>
+          <input id="peg_thresh" value="50">
+          <label>Valid until slot</label>
+          <input id="valid_until" value="1000000000">
+          <label>Trigger price (sample)</label>
+          <input id="price" value="1.00">
+        </div>
+      </div>
+      <p style="margin-top:12px"><button id="create">Create gated trigger</button>
+        <button id="simulate" style="background:#2a3142">Simulate gate_check</button></p>
+    </section>
+
+    <section>
+      <h2>Created TriggerGate</h2>
+      <pre id="created"><code>// Click "Create gated trigger".</code></pre>
+    </section>
+
+    <section>
+      <h2>gate_check simulation</h2>
+      <p class="legend">
+        Adversarial cases: stale attestation (lag &gt; 8 slots), wrong vault, wrong conditions,
+        spoofed authority, expired gate, malformed signature. The verdict below comes from
+        <code>atlas_trigger_gate::gate::gate_check</code> mirrored client-side.
+      </p>
+      <div class="row">
+        <div>
+          <label>Attestation: posted_at_slot</label>
+          <input id="att_slot" value="100">
+          <label>Attestation: vault_id (hex32)</label>
+          <input id="att_vault" placeholder="0101...">
+          <label>Attestation: authority (hex32)</label>
+          <input id="att_auth" placeholder="0909...">
+        </div>
+        <div>
+          <label>Attestation: signature length</label>
+          <input id="att_siglen" value="64">
+          <label>Current slot</label>
+          <input id="cur_slot" value="102">
+        </div>
+      </div>
+      <p>Verdict: <span class="verdict" id="verdict">—</span></p>
+      <pre id="verdict-detail"><code>// Click "Simulate gate_check".</code></pre>
+    </section>
+  </main>
+
+  <script type="module">
+    document.getElementById("create").onclick = async () => {
+      const base = document.getElementById("base").value.replace(/\/$/, "");
+      const body = {
+        vault_id: document.getElementById("vault").value,
+        order_type: document.getElementById("order_type").value,
+        mint: document.getElementById("mint").value,
+        peg_threshold_bps: parseInt(document.getElementById("peg_thresh").value, 10),
+        valid_until_slot: parseInt(document.getElementById("valid_until").value, 10),
+        price: parseFloat(document.getElementById("price").value),
+      };
+      const out = document.getElementById("created");
+      try {
+        const r = await fetch(`${base}/api/v1/triggers`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(body),
+        });
+        const text = await r.text();
+        out.innerHTML = `<code>${escapeHtml(text)}</code>`;
+      } catch (err) {
+        out.innerHTML = `<code style="color:#ff8b8b">${escapeHtml(String(err))}</code>`;
+      }
+    };
+
+    document.getElementById("simulate").onclick = () => {
+      const vault = document.getElementById("vault").value;
+      const att_vault = document.getElementById("att_vault").value;
+      const att_auth = document.getElementById("att_auth").value;
+      const att_slot = parseInt(document.getElementById("att_slot").value, 10) || 0;
+      const att_siglen = parseInt(document.getElementById("att_siglen").value, 10) || 0;
+      const cur_slot = parseInt(document.getElementById("cur_slot").value, 10) || 0;
+      const reasons = [];
+      if (cur_slot - att_slot > 8) reasons.push(`stale attestation (lag ${cur_slot - att_slot} > 8)`);
+      if (vault && att_vault && vault !== att_vault) reasons.push("vault mismatch");
+      if (att_auth && att_auth !== "0909000000000000000000000000000000000000000000000000000000000000" && att_auth !== "registered") reasons.push("authority mismatch (registered=0909..)");
+      if (att_siglen !== 64) reasons.push(`bad signature length (${att_siglen} != 64)`);
+      const verdict = document.getElementById("verdict");
+      const detail = document.getElementById("verdict-detail");
+      if (reasons.length === 0) {
+        verdict.textContent = "ALLOW — gate passes; Jupiter consumes the trigger";
+        verdict.className = "verdict allow";
+      } else {
+        verdict.textContent = "REJECT — gate refuses; trigger NOT consumed";
+        verdict.className = "verdict reject";
+      }
+      detail.innerHTML = `<code>${escapeHtml(JSON.stringify({ reasons, vault, att_vault, att_auth, att_slot, att_siglen, cur_slot }, null, 2))}</code>`;
+    };
+
+    function escapeHtml(s) { return String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas — /recurring (adaptive DCA)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; }
+    header small { color: #8893a8; }
+    main { padding: 24px; display: grid; gap: 18px; max-width: 1100px; margin: 0 auto; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 18px; }
+    h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    label { font-size: 12px; color: #8893a8; display: block; margin: 4px 0 2px; }
+    input, select { padding: 8px 10px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 280px; }
+    button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font: inherit; }
+    button:hover { background: #1f57d6; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .stat { background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; padding: 12px; }
+    .stat .k { font-size: 11px; color: #8893a8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat .v { font: 600 22px/1 ui-monospace, Menlo, monospace; color: #e7eaf0; margin-top: 4px; }
+    .stat.paused .v { color: #ffc16a; }
+    pre { margin: 0; padding: 12px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; overflow: auto; font: 12px/1.5 ui-monospace, Menlo, monospace; color: #c5cad6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas — /recurring <small>· adaptive DCA over Jupiter Recurring</small></h1>
+  </header>
+  <main>
+    <section>
+      <h2>Strategy commitment bounds</h2>
+      <p style="font-size:12px;color:#8893a8">
+        These bounds are immutable post-vault-creation. The AI cannot
+        produce a plan that exceeds them.
+      </p>
+      <div class="grid">
+        <label>baseline_slice (Q64) <input id="baseline_slice" value="1000"></label>
+        <label>baseline_interval_slots <input id="baseline_interval" value="1000"></label>
+        <label>baseline_slippage_bps <input id="baseline_slippage" value="100"></label>
+        <label>min_interval_slots (cap) <input id="min_interval" value="100"></label>
+        <label>max_slice (cap, Q64) <input id="max_slice" value="2000"></label>
+        <label>slippage_cap_bps <input id="slippage_cap" value="200"></label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Regime → cadence preview</h2>
+      <p style="font-size:12px;color:#8893a8">
+        <code>cadence_for_regime</code> mirrored client-side. The
+        AI publishes a fresh proof on each regime shift; the on-chain
+        <code>update_recurring_plan</code> ix verifies the new plan
+        against the bounds above before mutating the plan account.
+      </p>
+      <label>Market regime</label>
+      <select id="regime">
+        <option value="Accumulation">Accumulation</option>
+        <option value="Calm">Calm</option>
+        <option value="Neutral" selected>Neutral</option>
+        <option value="HighVol">HighVol</option>
+        <option value="Panic">Panic</option>
+        <option value="Crisis">Crisis</option>
+      </select>
+      <p style="margin-top:10px"><button id="preview">Preview cadence</button></p>
+      <div class="grid" style="margin-top:12px">
+        <div class="stat"><div class="k">slice (Q64)</div><div class="v" id="slice">—</div></div>
+        <div class="stat"><div class="k">interval_slots</div><div class="v" id="interval">—</div></div>
+        <div class="stat"><div class="k">slippage_bps</div><div class="v" id="slippage">—</div></div>
+        <div class="stat" id="paused-card"><div class="k">paused</div><div class="v" id="paused">false</div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Bounded-update validator</h2>
+      <p style="font-size:12px;color:#8893a8">
+        Mirrors <code>atlas_recurring_plan::plan::validate_plan_update</code>.
+        Plans that exceed the strategy commitment bounds are rejected
+        — the proof verifier refuses the update on chain.
+      </p>
+      <pre id="validation"><code>// preview a regime to see validation.</code></pre>
+    </section>
+  </main>
+
+  <script type="module">
+    const REGIMES = {
+      Accumulation: [15_000, 5_000, 8_000, false],
+      Calm: [12_000, 8_000, 8_000, false],
+      Neutral: [10_000, 10_000, 10_000, false],
+      HighVol: [5_000, 15_000, 12_000, false],
+      Panic: [2_500, 25_000, 6_000, false],
+      Crisis: [0, 0, 0, true],
+    };
+
+    function clamp(v) { return Math.max(0, Math.floor(v)); }
+
+    document.getElementById("preview").onclick = () => {
+      const regime = document.getElementById("regime").value;
+      const baseline_slice = parseInt(document.getElementById("baseline_slice").value, 10) || 0;
+      const baseline_interval = parseInt(document.getElementById("baseline_interval").value, 10) || 0;
+      const baseline_slippage = parseInt(document.getElementById("baseline_slippage").value, 10) || 0;
+      const max_slice = parseInt(document.getElementById("max_slice").value, 10) || 0;
+      const min_interval = parseInt(document.getElementById("min_interval").value, 10) || 0;
+      const slippage_cap = parseInt(document.getElementById("slippage_cap").value, 10) || 0;
+
+      const [slice_mul, interval_mul, slip_mul, paused] = REGIMES[regime];
+      const slice = clamp(baseline_slice * slice_mul / 10_000);
+      const interval = clamp(baseline_interval * interval_mul / 10_000);
+      const slippage = clamp(baseline_slippage * slip_mul / 10_000);
+
+      document.getElementById("slice").textContent = slice;
+      document.getElementById("interval").textContent = interval;
+      document.getElementById("slippage").textContent = slippage;
+      document.getElementById("paused").textContent = String(paused);
+      document.getElementById("paused-card").classList.toggle("paused", paused);
+
+      const violations = [];
+      if (slice > max_slice) violations.push(`slice ${slice} > max_slice ${max_slice}`);
+      if (!paused && interval < min_interval) violations.push(`interval ${interval} < min ${min_interval}`);
+      if (slippage > slippage_cap) violations.push(`slippage ${slippage} > slippage_cap ${slippage_cap}`);
+      const result = violations.length === 0
+        ? `PASS — proof would be accepted by update_recurring_plan`
+        : `REJECT — proof would fail bounds: ${violations.join("; ")}`;
+      document.getElementById("validation").innerHTML = `<code style="color:${violations.length===0?'#5be1a0':'#ff8b8b'}">${escapeHtml(result)}</code>`;
+    };
+
+    function escapeHtml(s) { return String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+  </script>
+</body>
+</html>

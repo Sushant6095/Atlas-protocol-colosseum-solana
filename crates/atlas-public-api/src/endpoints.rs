@@ -60,6 +60,12 @@ pub const fn rest_endpoints() -> &'static [RestEndpoint] {
         RestEndpoint { method: Method::Get, path: "/api/v1/intelligence/exposure-graph/{wallet}", description: "wallet \u{2192} protocol \u{2192} asset exposure graph", rate_limit_per_minute: 300 },
         RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/intelligence", description: "multi-wallet intelligence aggregate for a treasury entity", rate_limit_per_minute: 300 },
         RestEndpoint { method: Method::Get, path: "/api/v1/intel/pusd", description: "stablecoin intelligence dashboard feed (peg / flow / depth)", rate_limit_per_minute: 600 },
+        // Phase 12 — Jupiter execution surfaces.
+        RestEndpoint { method: Method::Post, path: "/api/v1/triggers", description: "create a proof-gated Jupiter trigger order", rate_limit_per_minute: 120 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/triggers/{trigger_id}", description: "read TriggerGate state + most recent attestation", rate_limit_per_minute: 300 },
+        RestEndpoint { method: Method::Post, path: "/api/v1/recurring", description: "open an adaptive Jupiter Recurring plan", rate_limit_per_minute: 120 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/recurring/{vault_id}", description: "read current RecurringPlan + commitment hash + version", rate_limit_per_minute: 300 },
+        RestEndpoint { method: Method::Post, path: "/api/v1/hedging/preview", description: "compute hedge sizing from underlying LP exposure (no submit)", rate_limit_per_minute: 120 },
     ]
 }
 
@@ -77,8 +83,9 @@ mod tests {
     #[test]
     fn rest_endpoints_count_matches_directive() {
         // §7.1 enumerates 9 REST endpoints. Phase 11 adds 6 more for
-        // wallet intelligence + treasury cross-chain.
-        assert_eq!(rest_endpoints().len(), 15);
+        // wallet intelligence + treasury cross-chain. Phase 12 adds
+        // 5 more for Jupiter execution (triggers, recurring, hedging).
+        assert_eq!(rest_endpoints().len(), 20);
     }
 
     #[test]
@@ -97,11 +104,19 @@ mod tests {
     }
 
     #[test]
-    fn no_write_endpoints_in_rest() {
-        // §7.1: "All read endpoints public + rate-limited. No write endpoints."
-        // The single POST is /simulate/{ix} which is a read-side simulator.
+    fn writeable_endpoints_are_only_authoring_surfaces() {
+        // §7.1 banned write endpoints in Phase 09. Phase 12 adds
+        // authoring endpoints for proof-gated triggers, adaptive
+        // recurring plans, and hedge previews; the actual on-chain
+        // ix must still be user-signed. POST endpoints here must be
+        // limited to: /simulate/{ix}, /triggers, /recurring,
+        // /hedging/preview.
         let posts: Vec<_> = rest_endpoints().iter().filter(|r| r.method == Method::Post).collect();
-        assert_eq!(posts.len(), 1);
-        assert_eq!(posts[0].path, "/api/v1/simulate/{ix}");
+        let post_paths: Vec<&str> = posts.iter().map(|r| r.path).collect();
+        assert_eq!(posts.len(), 4);
+        assert!(post_paths.contains(&"/api/v1/simulate/{ix}"));
+        assert!(post_paths.contains(&"/api/v1/triggers"));
+        assert!(post_paths.contains(&"/api/v1/recurring"));
+        assert!(post_paths.contains(&"/api/v1/hedging/preview"));
     }
 }

@@ -143,6 +143,35 @@ impl AtlasClient {
             .await?;
         serde_json::from_slice(&bytes).map_err(ClientError::Decode)
     }
+
+    /// Phase 12 §3 — create a proof-gated Jupiter trigger order.
+    /// Returns the freshly-anchored `TriggerGate` PDA shape; the
+    /// caller submits the corresponding Jupiter `TriggerOrderV2` ix
+    /// authority'd by the PDA.
+    pub async fn create_gated_trigger(
+        &self,
+        request: &serde_json::Value,
+    ) -> Result<atlas_trigger_gate::TriggerGate, ClientError> {
+        let bytes = self
+            .transport
+            .post_json("/api/v1/triggers", request.to_string().as_bytes())
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 12 §4 — open an adaptive Jupiter Recurring plan whose
+    /// parameters are subsequently mutated only via proof-gated
+    /// `update_recurring_plan` ixs.
+    pub async fn open_adaptive_recurring(
+        &self,
+        request: &serde_json::Value,
+    ) -> Result<atlas_recurring_plan::RecurringPlan, ClientError> {
+        let bytes = self
+            .transport
+            .post_json("/api/v1/recurring", request.to_string().as_bytes())
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
 }
 
 fn hex32(b: &[u8; 32]) -> String {

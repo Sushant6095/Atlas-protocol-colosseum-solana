@@ -1,0 +1,19 @@
+[package]
+name = "atlas-trigger-gate"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Proof-gated Jupiter trigger orders — AtlasConditions, TriggerGate PDA, AtlasConditionAttestation, gate_check. Implements directive 12 §3."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+atlas-failure = { path = "../atlas-failure" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

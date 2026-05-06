@@ -1,0 +1,29 @@
+DUNE-QUERIES.md
+  s_c3576656714da0::t_92db1ff2943007 1-50
+sdk/playground/intelligence.html
+  s_c3576656714da0::t_2f2b7e498cf415 1-220
+crates/atlas-birdeye-overlay/src/opportunity.rs
+  s_c3576656714da0::t_639c6576d69af0 143-178
+  s_c3576656714da0::t_b551aca223604d 22-40
+CHANGELOG.md
+  s_c3576656714da0::t_350f0467c6d1a3 3-32
+sdk/playground/treasury.html
+  s_c3576656714da0::t_3cab73dfaeeeba 130-131,138-165
+  s_c3576656714da0::t_cffdf8186c99c6 61-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "c4ddb04c288afb0b7334e78859f5f2509af2359b",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

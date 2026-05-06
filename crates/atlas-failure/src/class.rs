@@ -87,6 +87,18 @@ pub enum FailureClass {
     StaleProofReplayDetected,
     ForgedVaultTarget,
     ManipulatedStateRoot,
+
+    // Phase 18 — Private Execution Layer (8xxx).
+    /// PER session exceeded `max_session_slots`; gateway auto-undelegated.
+    PerSessionExpired { session_id: [u8; 32] },
+    /// Settlement payload failed verifier check (post-state mismatch,
+    /// session id mismatch, cross-vault reuse).
+    SettlementVerifierReject { session_id: [u8; 32], code: u32 },
+    /// Submitter program is not the registered MagicBlock program.
+    /// Session marked Disputed.
+    PerOperatorCensorship { session_id: [u8; 32] },
+    /// Replayed settlement payload.
+    PerSettlementReplay { session_id: [u8; 32] },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -122,6 +134,11 @@ pub enum VariantTag {
     StaleProofReplayDetected = 7001,
     ForgedVaultTarget = 7002,
     ManipulatedStateRoot = 7003,
+
+    PerSessionExpired = 8001,
+    SettlementVerifierReject = 8002,
+    PerOperatorCensorship = 8003,
+    PerSettlementReplay = 8004,
 }
 
 impl FailureClass {
@@ -153,6 +170,10 @@ impl FailureClass {
             FailureClass::StaleProofReplayDetected => VariantTag::StaleProofReplayDetected,
             FailureClass::ForgedVaultTarget => VariantTag::ForgedVaultTarget,
             FailureClass::ManipulatedStateRoot => VariantTag::ManipulatedStateRoot,
+            FailureClass::PerSessionExpired { .. } => VariantTag::PerSessionExpired,
+            FailureClass::SettlementVerifierReject { .. } => VariantTag::SettlementVerifierReject,
+            FailureClass::PerOperatorCensorship { .. } => VariantTag::PerOperatorCensorship,
+            FailureClass::PerSettlementReplay { .. } => VariantTag::PerSettlementReplay,
         }
     }
 
@@ -195,6 +216,10 @@ mod tests {
             VariantTag::StaleProofReplayDetected,
             VariantTag::ForgedVaultTarget,
             VariantTag::ManipulatedStateRoot,
+            VariantTag::PerSessionExpired,
+            VariantTag::SettlementVerifierReject,
+            VariantTag::PerOperatorCensorship,
+            VariantTag::PerSettlementReplay,
         ];
         let mut codes: Vec<u16> = tags.iter().map(|t| *t as u16).collect();
         codes.sort();

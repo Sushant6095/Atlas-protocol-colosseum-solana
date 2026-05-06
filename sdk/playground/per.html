@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas Private Execution Layer — MagicBlock PER</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; letter-spacing: 0.02em; }
+    header small { color: #8893a8; }
+    main { padding: 24px; max-width: 1200px; margin: 0 auto; display: grid; gap: 16px; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 16px 18px; }
+    h2 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    h2 .meta { font-weight: normal; text-transform: none; letter-spacing: 0; color: #5b6479; margin-left: 8px; }
+    table { width: 100%; border-collapse: collapse; font: 12px ui-monospace, Menlo, monospace; }
+    th { text-align: left; padding: 6px 8px; color: #8893a8; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #1d2230; }
+    td { padding: 6px 8px; border-bottom: 1px solid #16192a; }
+    .pill { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+    .status-open { background: #1f2d4d; color: #6aa6ff; }
+    .status-settled { background: #1f3d2e; color: #5be1a0; }
+    .status-expired { background: #4d3d1f; color: #f1d878; }
+    .status-disputed { background: #4d1f1f; color: #ff8b8b; }
+    .privacy-mainnet { background: #2d2d2d; color: #c5cad6; }
+    .privacy-private_er { background: #2d1f4d; color: #c89aff; }
+    .controls { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+    .controls input { padding: 6px 8px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 320px; }
+    .controls button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font: inherit; }
+    pre { margin: 0; padding: 10px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; overflow: auto; font: 11px/1.4 ui-monospace, Menlo, monospace; color: #c5cad6; }
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .compare .col { background: #0b0d11; border: 1px solid #1d2230; border-radius: 6px; padding: 12px; }
+    .compare .col h3 { margin: 0 0 8px; font-size: 13px; }
+    .compare ul { margin: 0; padding-left: 18px; font-size: 12px; color: #c5cad6; }
+    .compare li.hidden { color: #ff8b8b; }
+    .compare li.shown { color: #5be1a0; }
+    .footer { font-size: 11px; color: #5b6479; margin-top: 8px; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas <span style="color:#c89aff">/per</span> <small>— Private Execution Layer (MagicBlock PER)</small></h1>
+  </header>
+  <main>
+
+    <section>
+      <h2>Connection</h2>
+      <div class="controls">
+        <input id="base" value="https://atlas.example" autocomplete="off">
+        <input id="vault" placeholder="vault id (hex32)" autocomplete="off">
+        <button id="load">Load</button>
+      </div>
+      <p class="footer">
+        Phase 14 hides amounts. Phase 18 hides execution paths. Both ship to form
+        the institutional-privacy bundle. Final settlement still produces a publicly
+        verifiable Groth16 proof on mainnet.
+      </p>
+    </section>
+
+    <section>
+      <h2>Vault execution privacy</h2>
+      <div id="privacy"></div>
+    </section>
+
+    <section>
+      <h2>Mainnet vs PrivateER side-by-side <span class="meta">what mainnet sees</span></h2>
+      <div class="compare">
+        <div class="col">
+          <h3>Mainnet vault</h3>
+          <ul>
+            <li class="shown">final allocation (post-settlement)</li>
+            <li class="shown">routing path (visible on block explorer)</li>
+            <li class="shown">intermediate states (each swap leg)</li>
+            <li class="shown">timing pattern (when Atlas decided)</li>
+            <li class="shown">trigger conditions (which agent fired)</li>
+            <li class="shown">agent disagreement trace</li>
+          </ul>
+        </div>
+        <div class="col">
+          <h3>PrivateER vault</h3>
+          <ul>
+            <li class="shown">final allocation (post-settlement)</li>
+            <li class="hidden">routing path — hidden during session</li>
+            <li class="hidden">intermediate states — never on mainnet</li>
+            <li class="hidden">timing pattern — session length only</li>
+            <li class="hidden">trigger conditions — auditor key reveals</li>
+            <li class="hidden">agent disagreement — auditor key reveals</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Active and recent PER sessions</h2>
+      <table>
+        <thead><tr>
+          <th>session_id</th>
+          <th>vault</th>
+          <th>opened</th>
+          <th>deadline</th>
+          <th>settled</th>
+          <th>status</th>
+        </tr></thead>
+        <tbody id="sessions"></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Bubblegum-anchored event log <span class="meta">SessionOpened / Settled / Expired / Disputed</span></h2>
+      <table>
+        <thead><tr><th>event</th><th>vault</th><th>session_id</th><th>slot</th></tr></thead>
+        <tbody id="events"></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Auditor disclosure demo <span class="meta">selective disclosure (Phase 14 + Phase 18)</span></h2>
+      <p style="font-size:12px;color:#c5cad6;margin:0 0 8px">
+        Without an execution-path viewing key, the auditor sees only the
+        public commitments below. With an `ExecutionPathPostHoc` key issued
+        by the FinanceAdmin, the auditor unblinds the full session log
+        (routing path, intermediate states, agent trace).
+      </p>
+      <div class="compare">
+        <div class="col">
+          <h3>Public observer (no key)</h3>
+          <pre><code>{
+  "session_id": "0xb1...b1",
+  "er_state_root": "0xa2...a2",
+  "post_state_commitment": "0xa3...a3",
+  "settled_at_slot": 1100,
+  "proof_verification": "PASS",
+  "routing_path": "(committed; not visible)"
+}</code></pre>
+        </div>
+        <div class="col">
+          <h3>Auditor with ExecutionPathPostHoc key</h3>
+          <pre><code>{
+  "session_id": "0xb1...b1",
+  "settled_at_slot": 1100,
+  "routing_path": [
+    "Kamino USDC → kSOL (12% of NAV)",
+    "Drift kSOL → SOL via spot (6% of NAV)",
+    "Marginfi SOL deposit (18% of NAV)"
+  ],
+  "agent_trace": {
+    "TailRisk": "veto soft (regime tilt)",
+    "Yield": "support",
+    "Liquidity": "support"
+  }
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Raw snapshots</h2>
+      <pre id="raw"><code>// Click "Load" to fetch /api/v1/per/* snapshots.</code></pre>
+    </section>
+
+  </main>
+
+  <script type="module">
+    function client(baseUrl) {
+      const base = baseUrl.replace(/\/$/, "");
+      async function getJson(path) {
+        const r = await fetch(base + path);
+        if (!r.ok) throw new Error(`GET ${path} → ${r.status}`);
+        return r.json();
+      }
+      return {
+        async getSessions() { return getJson("/api/v1/per/sessions"); },
+        async getEvents() { return getJson("/api/v1/per/events"); },
+        async getPrivacy(id) { return getJson(`/api/v1/vaults/${id}/execution_privacy`); },
+      };
+    }
+
+    document.getElementById("load").onclick = async () => {
+      const base = document.getElementById("base").value;
+      const vault = document.getElementById("vault").value;
+      const c = client(base);
+      const raw = document.getElementById("raw");
+      try {
+        const [sessions, events, privacy] = await Promise.all([
+          c.getSessions(),
+          c.getEvents(),
+          vault ? c.getPrivacy(vault).catch(() => null) : Promise.resolve(null),
+        ]);
+        raw.classList.remove("err");
+        raw.innerHTML = `<code>${escapeHtml(JSON.stringify({ sessions, events, privacy }, null, 2))}</code>`;
+
+        renderPrivacy(privacy);
+        renderSessions(sessions);
+        renderEvents(events);
+      } catch (err) {
+        raw.innerHTML = `<code style="color:#ff8b8b">${escapeHtml(String(err))}</code>`;
+      }
+    };
+
+    function renderPrivacy(p) {
+      const el = document.getElementById("privacy");
+      if (!p) {
+        el.innerHTML = `<p style="color:#5b6479;font-size:12px">enter a vault id and click Load</p>`;
+        return;
+      }
+      const kind = p.kind ?? (p.PrivateEr ? "private_er" : "mainnet");
+      const desc = kind === "private_er"
+        ? `<span class="pill privacy-private_er">PrivateER</span> · MagicBlock program ${escapeHtml(short(p.magicblock_program))} · max session ${p.max_session_slots} slots`
+        : `<span class="pill privacy-mainnet">Mainnet</span> · plain mainnet execution`;
+      el.innerHTML = `<div class="row"><strong style="font-size:13px">${desc}</strong></div>`;
+    }
+
+    function renderSessions(list) {
+      const tbody = document.getElementById("sessions");
+      if (!list || !list.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="color:#5b6479">no sessions</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = list.map(s => {
+        const deadline = (s.opened_at_slot ?? 0) + (s.max_session_slots ?? 0);
+        return `<tr>
+          <td>${escapeHtml(short(arrayToHex(s.session_id)))}</td>
+          <td>${escapeHtml(short(arrayToHex(s.vault_id)))}</td>
+          <td>${s.opened_at_slot ?? "—"}</td>
+          <td>${deadline}</td>
+          <td>${s.settled_at_slot ?? "—"}</td>
+          <td><span class="pill status-${s.status}">${escapeHtml(s.status)}</span></td>
+        </tr>`;
+      }).join("");
+    }
+
+    function renderEvents(list) {
+      const tbody = document.getElementById("events");
+      if (!list || !list.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="color:#5b6479">no events</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = list.map(e => {
+        const slot = e.opened_at_slot ?? e.settled_at_slot ?? e.expired_at_slot ?? "—";
+        return `<tr>
+          <td>${escapeHtml(e.kind)}</td>
+          <td>${escapeHtml(short(arrayToHex(e.vault_id)))}</td>
+          <td>${escapeHtml(short(arrayToHex(e.session_id)))}</td>
+          <td>${slot}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    function arrayToHex(a) {
+      if (!a) return "";
+      if (typeof a === "string") return a;
+      if (!Array.isArray(a)) return String(a);
+      return a.map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+    function short(s) { if (!s) return ""; return s.length > 12 ? `${s.slice(0,6)}…${s.slice(-4)}` : s; }
+    function escapeHtml(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]); }
+  </script>
+</body>
+</html>

@@ -27,6 +27,17 @@ pub enum DisclosureScope {
     PerTransaction,
     RecipientList,
     Full,
+    // Phase 18 §7 — execution-path scopes for PrivateER vaults.
+    /// Full PER session log, but only after a configurable delay
+    /// (e.g., 30 days post-settlement). Auditor-friendly default.
+    ExecutionPathPostHoc,
+    /// Session log streamed live to an authorised auditor /
+    /// regulator. Reserved for time-windowed regulator roles.
+    ExecutionPathRealtime,
+    /// Agent-to-agent exchange only. Reveals the consensus trace
+    /// (proposals, vetoes, sub-quorum disagreements) without
+    /// revealing external swap legs.
+    AgentTraceOnly,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -218,8 +229,32 @@ fn scope_within(requested: DisclosureScope, policy: DisclosureScope) -> bool {
         PerTransaction => 2,
         RecipientList => 3,
         Full => 4,
+        // Phase 18 — execution-path scopes are orthogonal to the
+        // amount-disclosure ladder. They do not subsume any of the
+        // amount scopes; we represent them at higher discriminants
+        // so the standard "narrower is allowed under broader" rule
+        // does not accidentally let an ExecutionPathPostHoc grant
+        // unblind balance amounts.
+        AgentTraceOnly => 5,
+        ExecutionPathPostHoc => 6,
+        ExecutionPathRealtime => 7,
     };
-    order(requested) <= order(policy)
+    let req = order(requested);
+    let pol = order(policy);
+    // For the amount-disclosure scopes (0..=4) the original
+    // narrower-is-allowed rule applies. For the new execution-path
+    // scopes the policy must match exactly: a PostHoc grant cannot
+    // be expanded to Realtime by the issuer. The amount scopes and
+    // execution scopes do not subsume each other in either direction.
+    let amount = |x: u8| x <= 4;
+    let exec = |x: u8| x >= 5;
+    if amount(req) && amount(pol) {
+        req <= pol
+    } else if exec(req) && exec(pol) {
+        req == pol
+    } else {
+        false
+    }
 }
 
 #[cfg(test)]

@@ -108,6 +108,12 @@ pub const fn remediation_for(class: &FailureClass) -> Remediation {
         FailureClass::StaleProofReplayDetected => Remediation::RejectAndSecurityEvent("rem.security.stale_proof_replay"),
         FailureClass::ForgedVaultTarget => Remediation::RejectAndSecurityEvent("rem.security.forged_vault"),
         FailureClass::ManipulatedStateRoot => Remediation::RejectAndSecurityEvent("rem.security.state_root_manip"),
+
+        // Phase 18 — Private Execution Layer.
+        FailureClass::PerSessionExpired { .. } => Remediation::RevertAndRetryOnce("rem.per.session_expired.retry_mainnet_next_cycle"),
+        FailureClass::SettlementVerifierReject { .. } => Remediation::RejectInvalid("rem.per.settlement.verifier_reject"),
+        FailureClass::PerOperatorCensorship { .. } => Remediation::RejectAndSecurityEvent("rem.per.operator_censorship"),
+        FailureClass::PerSettlementReplay { .. } => Remediation::RejectAndSecurityEvent("rem.per.settlement_replay"),
     }
 }
 

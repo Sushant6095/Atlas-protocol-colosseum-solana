@@ -336,6 +336,51 @@ impl AtlasClient {
             .await?;
         serde_json::from_slice(&bytes).map_err(ClientError::Decode)
     }
+
+    /// Phase 18 §3 — list active and recent PER sessions for the
+    /// platform. Each entry carries the session lifecycle status,
+    /// opened slot, deadline, and pre-state commitment.
+    pub async fn list_per_sessions(
+        &self,
+    ) -> Result<Vec<atlas_per::ErSession>, ClientError> {
+        let bytes = self.transport.get("/api/v1/per/sessions").await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 18 §3 — fetch a single PER session by id.
+    pub async fn get_per_session(
+        &self,
+        session_id: &[u8; 32],
+    ) -> Result<atlas_per::ErSession, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!("/api/v1/per/sessions/{}", hex32(session_id)))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 18 §8.2 — Bubblegum-anchored PER events
+    /// (SessionOpened / SessionSettled / SessionExpired / SessionDisputed).
+    pub async fn list_per_events(
+        &self,
+    ) -> Result<Vec<atlas_per::GatewayEvent>, ClientError> {
+        let bytes = self.transport.get("/api/v1/per/events").await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 18 I-24 — fetch a vault's execution privacy declaration.
+    /// Returns `Mainnet` or `PrivateER { magicblock_program,
+    /// max_session_slots }`.
+    pub async fn get_execution_privacy(
+        &self,
+        vault_id: &Pubkey,
+    ) -> Result<atlas_per::ExecutionPrivacy, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!("/api/v1/vaults/{}/execution_privacy", hex32(vault_id)))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
 }
 
 fn hex32(b: &[u8; 32]) -> String {

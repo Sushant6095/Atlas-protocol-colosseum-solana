@@ -185,6 +185,45 @@ export interface InfraSnapshot {
   freshness_budgets: FreshnessBudgetView[];
 }
 
+// ─── Phase 18 — Private Execution Layer (PER) ──────────────────────────
+
+export type SessionStatus = "open" | "settled" | "expired" | "disputed";
+
+export interface ErSessionView {
+  vault_id: string;
+  session_id: string;
+  magicblock_program: string;
+  opened_at_slot: number;
+  max_session_slots: number;
+  pre_state_commitment: string;
+  status: SessionStatus;
+  settled_at_slot: number | null;
+  opened_receipt_id: string;
+}
+
+export type GatewayEventKind =
+  | "session_opened"
+  | "session_settled"
+  | "session_expired"
+  | "session_disputed";
+
+export interface GatewayEventView {
+  kind: GatewayEventKind;
+  vault_id: string;
+  session_id: string;
+  opened_at_slot?: number;
+  settled_at_slot?: number;
+  expired_at_slot?: number;
+}
+
+export type ExecutionPrivacyView =
+  | { kind: "mainnet" }
+  | {
+      kind: "private_er";
+      magicblock_program: string;
+      max_session_slots: number;
+    };
+
 export interface PreSignPayload {
   schema: string;
   instruction: "deposit" | "withdraw" | "vault_creation" | "sandbox_approval";
@@ -279,6 +318,28 @@ export class AtlasPlatform {
   ): Promise<{ budget: FreshnessBudgetView; timeline: ProofPipelineTimelineView }> {
     return this.getJson<{ budget: FreshnessBudgetView; timeline: ProofPipelineTimelineView }>(
       `/api/v1/freshness/${vaultId}`,
+    );
+  }
+
+  /** Phase 18 — list active and recent PER sessions. */
+  async listPerSessions(): Promise<ErSessionView[]> {
+    return this.getJson<ErSessionView[]>("/api/v1/per/sessions");
+  }
+
+  /** Phase 18 — fetch a single PER session by id. */
+  async getPerSession(sessionId: string): Promise<ErSessionView> {
+    return this.getJson<ErSessionView>(`/api/v1/per/sessions/${sessionId}`);
+  }
+
+  /** Phase 18 — Bubblegum-anchored PER event log. */
+  async listPerEvents(): Promise<GatewayEventView[]> {
+    return this.getJson<GatewayEventView[]>("/api/v1/per/events");
+  }
+
+  /** Phase 18 — fetch a vault's execution privacy declaration. */
+  async getExecutionPrivacy(vaultId: string): Promise<ExecutionPrivacyView> {
+    return this.getJson<ExecutionPrivacyView>(
+      `/api/v1/vaults/${vaultId}/execution_privacy`,
     );
   }
 

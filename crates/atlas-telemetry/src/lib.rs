@@ -1392,6 +1392,85 @@ pub static RPC_TIER_A_HOT_READ_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
     v
 });
 
+// ─── Phase 18 — Private Execution Layer SLOs (directive 18 §11) ─────────
+
+pub static PER_SESSION_SETTLE_SECONDS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_per_session_settle_seconds",
+        "Wall time from PER session open to mainnet settlement. p99 SLO ≤ 30 s.",
+        vec![1.0, 3.0, 5.0, 10.0, 20.0, 30.0, 60.0, 120.0]
+    );
+    let h = HistogramVec::new(opts, &["vault_id"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static PER_SESSION_EXPIRED_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_per_session_expired_total",
+        "PER sessions auto-undelegated past MAX_PER_SESSION_SLOTS. Hard alert on rate spike.",
+        &["vault_id"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PER_SETTLEMENT_VERIFIER_REJECT_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_per_settlement_verifier_reject_total",
+        "PER settlements rejected by the verifier (post-state mismatch / session id mismatch / cross-vault). Hard alert on any.",
+        &["reason"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PER_REPLAY_ATTEMPTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_per_replay_attempts_total",
+        "Replayed PER settlement payloads caught by the gateway dedupe check. Hard alert on any.",
+        &["session_id"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PER_UNDELEGATION_SAFETY_DRILLS_PASSED_24H: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_per_undelegation_safety_drills_passed_24h",
+        "Daily synthetic safety drill: stall a session, verify auto-undelegate. SLO = 1.",
+        &[]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static DISCLOSURE_EXECUTION_PATH_UNBLINDING_EVENTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_disclosure_execution_path_unblinding_events_total",
+        "Execution-path disclosure events bucketed by scope (post_hoc / realtime / agent_trace_only).",
+        &["scope", "role"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PER_OPERATOR_CENSORSHIP_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_per_operator_censorship_total",
+        "Settlement payloads from non-registered submitters (operator-impersonation). Hard alert on any.",
+        &["session_id"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

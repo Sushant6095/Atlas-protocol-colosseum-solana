@@ -1,0 +1,20 @@
+[package]
+name = "atlas-per"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas Private Execution Layer — MagicBlock Private Ephemeral Rollups (PER) integration. Implements directive 18."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+atlas-confidential = { path = "../atlas-confidential" }
+atlas-failure = { path = "../atlas-failure" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

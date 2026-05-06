@@ -26,6 +26,11 @@ pub enum AllowlistedProgram {
     JupiterPerps,
     // Phase 14 — Cloak shielded program for Pattern B wrapper mints.
     CloakShielded,
+    // Phase 18 — MagicBlock Private Ephemeral Rollup + Atlas's own
+    // PER gateway. The rebalancer CPIs into the gateway, which in
+    // turn delegates to the registered MagicBlock program.
+    AtlasPerGateway,
+    MagicBlockEr,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -52,6 +57,8 @@ pub const ALLOWLIST: &[AllowlistedTarget] = &[
     AllowlistedTarget { program: AllowlistedProgram::JupiterLend, program_id: derive_id(b"atlas.allow.jupiter_lend") },
     AllowlistedTarget { program: AllowlistedProgram::JupiterPerps, program_id: derive_id(b"atlas.allow.jupiter_perps") },
     AllowlistedTarget { program: AllowlistedProgram::CloakShielded, program_id: derive_id(b"atlas.allow.cloak_shielded") },
+    AllowlistedTarget { program: AllowlistedProgram::AtlasPerGateway, program_id: derive_id(b"atlas.allow.per_gateway") },
+    AllowlistedTarget { program: AllowlistedProgram::MagicBlockEr, program_id: derive_id(b"atlas.allow.magicblock_er") },
 ];
 
 const fn derive_id(seed: &[u8]) -> Pubkey {
@@ -102,8 +109,9 @@ mod tests {
         // Marginfi, Token, Token-2022, ATA, Compute Budget, Memo)
         // + 4 Jupiter family programs from Phase 12 (Trigger,
         // Recurring, Lend, Perps) + 1 Cloak shielded program from
-        // Phase 14.
-        assert_eq!(ALLOWLIST.len(), 14);
+        // Phase 14 + 2 PER programs from Phase 18 (atlas_per_gateway
+        // + MagicBlock ER).
+        assert_eq!(ALLOWLIST.len(), 16);
     }
 
     #[test]

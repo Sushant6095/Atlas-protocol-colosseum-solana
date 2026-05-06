@@ -128,6 +128,24 @@ pub enum ChaosInject {
     /// Stale attestation replay: action lands but the attestation
     /// was signed > MAX_ATTESTATION_STALENESS_SLOTS ago.
     AttestationStale { lag_slots: u32 },
+
+    // ── Phase 18 — PER adversarial (directive 18 §9 + §13) ────────
+    /// Rollup operator stalls beyond MAX_PER_SESSION_SLOTS. Atlas's
+    /// keeper must auto-undelegate; vault state must be unchanged.
+    PerOperatorStall { session: [u8; 32], stall_slots: u32 },
+    /// Replay a previously-settled settlement payload. Gateway must
+    /// reject on the dedupe check.
+    PerSettlementReplay { session: [u8; 32] },
+    /// Submit a settlement for vault A using session opened for
+    /// vault B. Gateway must assert `session.vault_id ==
+    /// settlement.vault_id`.
+    PerCrossVaultSettlement { from: Pubkey, to: Pubkey, session: [u8; 32] },
+    /// Submit a forged er_state_root that does not match the proof's
+    /// public input. Verifier must reject.
+    PerForgedStateRoot { session: [u8; 32], forged_root: [u8; 32] },
+    /// Operator inserts a non-allowlist CPI inside the ER session.
+    /// ER must mirror Phase 07 §4.2 allowlist; rebalancer rejects.
+    PerNonAllowlistCpi { session: [u8; 32], program_id: Pubkey },
 }
 
 impl ChaosInject {
@@ -164,7 +182,12 @@ impl ChaosInject {
             | ChaosInject::KeeperCrossRoleAttempt { .. }
             | ChaosInject::MandateExpiredReuse { .. }
             | ChaosInject::AttestationSameSigner { .. }
-            | ChaosInject::AttestationStale { .. } => InjectorCategory::Adversarial,
+            | ChaosInject::AttestationStale { .. }
+            | ChaosInject::PerOperatorStall { .. }
+            | ChaosInject::PerSettlementReplay { .. }
+            | ChaosInject::PerCrossVaultSettlement { .. }
+            | ChaosInject::PerForgedStateRoot { .. }
+            | ChaosInject::PerNonAllowlistCpi { .. } => InjectorCategory::Adversarial,
         }
     }
 
@@ -199,6 +222,11 @@ impl ChaosInject {
             ChaosInject::MandateExpiredReuse { .. } => "mandate_expired_reuse",
             ChaosInject::AttestationSameSigner { .. } => "attestation_same_signer",
             ChaosInject::AttestationStale { .. } => "attestation_stale",
+            ChaosInject::PerOperatorStall { .. } => "per_operator_stall",
+            ChaosInject::PerSettlementReplay { .. } => "per_settlement_replay",
+            ChaosInject::PerCrossVaultSettlement { .. } => "per_cross_vault_settlement",
+            ChaosInject::PerForgedStateRoot { .. } => "per_forged_state_root",
+            ChaosInject::PerNonAllowlistCpi { .. } => "per_non_allowlist_cpi",
         }
     }
 }

@@ -1,5 +1,79 @@
 # Atlas Changelog
 
+## Unreleased — Phase 18.0 (2026-05-07) — Directive 18 (Atlas Private Execution Layer — MagicBlock PER)
+
+One new crate (`atlas-per`, 5 modules) implements the Private
+Ephemeral Rollup integration. Phase 14 (Cloak) hides amounts; Phase
+18 hides the execution path. Together they form the institutional-
+privacy bundle.
+
+- `atlas-per::execution_privacy` (I-24 + I-25) — `ExecutionPrivacy`
+  enum (`Mainnet | PrivateER { magicblock_program,
+  max_session_slots }`); `MAX_PER_SESSION_SLOTS = 256`;
+  `commitment_hash()` folds into the strategy commitment;
+  `require_execution_path_scope()` rejects PrivateER without an
+  `ExecutionPath*` disclosure scope (CI invariant).
+- `atlas-per::session` (§3.2 + §8.2) — `ErSession` PDA shape with
+  `(vault_id, session_id, magicblock_program, opened_at_slot,
+  max_session_slots, pre_state_commitment, status, settled_at_slot,
+  opened_receipt_id)`; deadline + expiry helpers; rejects null
+  programs / zero slots / over-cap.
+- `atlas-per::settlement` (§4.3 + §9) — `verify_settlement`
+  enforces session-id match, cross-vault rejection, submitter ==
+  registered MagicBlock program (sets Disputed otherwise),
+  deadline (sets Expired otherwise), post-state-commitment
+  consistency. State changes are conditional on success.
+- `atlas-per::gateway` (§3.2 + §8.2) — `PerGateway` mirror of the
+  on-chain Pinocchio program: `open_session`, `settle`,
+  `sweep_stalled` (auto-undelegation safety primitive), event log
+  with Bubblegum-anchored `SessionOpened / SessionSettled /
+  SessionExpired / SessionDisputed`. Duplicate open rejected.
+- `atlas-per::public_input_v4` (§4.2) — 396-byte layout adding
+  `er_session_id` (offset 300), `er_state_root` (332),
+  `post_state_commitment` (364) on top of v3. `disclosure_policy_hash`
+  stays at offset 268 so verifier extraction code is unchanged.
+  Flags: bit2=confidential, bit3=private_execution.
+- `atlas-confidential::disclosure::DisclosureScope` extends with
+  `ExecutionPathPostHoc / ExecutionPathRealtime / AgentTraceOnly`.
+  `scope_within` enforces that execution scopes match exactly (a
+  PostHoc grant cannot expand to Realtime).
+- `atlas-cpi-guard::ALLOWLIST` adds `AtlasPerGateway` +
+  `MagicBlockEr` (count 14 → 16).
+- `atlas-failure` adds 4 PER classes (8001 PerSessionExpired,
+  8002 SettlementVerifierReject, 8003 PerOperatorCensorship,
+  8004 PerSettlementReplay) with remediation policies.
+- `atlas-chaos::GameDayScenario::PerOperatorAdversarial` adds 5
+  cases (operator stall past window, settlement replay, cross-vault
+  settlement, forged er_state_root, non-allowlist CPI inside the
+  ER); mandatory game days count 7 → 8. New `ChaosInject` variants
+  for each case.
+- `atlas-public-api::endpoints` adds 4 endpoints (`/per/sessions`,
+  `/per/sessions/{id}`, `/per/events`, `/vaults/{id}/execution_privacy`)
+  — count 38 → 42.
+- `atlas-rs::client` adds `list_per_sessions / get_per_session /
+  list_per_events / get_execution_privacy`.
+- `@atlas/sdk::AtlasPlatform` adds `listPerSessions / getPerSession /
+  listPerEvents / getExecutionPrivacy` plus 4 TS types
+  (SessionStatus, ErSessionView, GatewayEventView,
+  ExecutionPrivacyView).
+- `atlas-telemetry` adds 7 PER metrics:
+  `atlas_per_session_settle_seconds`,
+  `atlas_per_session_expired_total`,
+  `atlas_per_settlement_verifier_reject_total`,
+  `atlas_per_replay_attempts_total`,
+  `atlas_per_undelegation_safety_drills_passed_24h`,
+  `atlas_disclosure_execution_path_unblinding_events_total`,
+  `atlas_per_operator_censorship_total`.
+- `sdk/playground/per.html` — Private Execution Layer playground
+  with vault execution-privacy declaration display, mainnet-vs-PrivateER
+  side-by-side demo (what mainnet sees vs hidden), session list,
+  Bubblegum event log, and auditor disclosure demo (with vs without
+  ExecutionPathPostHoc key).
+- `PRIVATE-EXECUTION.md` — one-pager: hard rules, topology, public
+  input v4 layout, settlement flow, scope ladder, failure classes,
+  acceptance bar, "why both phases" threat-model table.
+- 43 unit tests in `atlas-per`; full workspace passes.
+
 ## Unreleased — Phase 17.0 (2026-05-07) — Directive 17 (Latency-Tier-A RPC + /infra Public Observatory — RPC Fast)
 
 One new crate (`atlas-rpc-router`, 4 modules) and one new npm

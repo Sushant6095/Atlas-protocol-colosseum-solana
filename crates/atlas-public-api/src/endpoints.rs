@@ -89,6 +89,11 @@ pub const fn rest_endpoints() -> &'static [RestEndpoint] {
         RestEndpoint { method: Method::Get, path: "/api/v1/infra/attribution", description: "slot-drift attribution heatmap (per-source outlier share over rolling window)", rate_limit_per_minute: 600 },
         RestEndpoint { method: Method::Get, path: "/api/v1/freshness", description: "per-vault freshness budget (slot drift + verification window remaining)", rate_limit_per_minute: 600 },
         RestEndpoint { method: Method::Get, path: "/api/v1/freshness/{vault_id}", description: "single-vault freshness budget + proof-pipeline timeline drilldown", rate_limit_per_minute: 600 },
+        // Phase 18 — Private Execution Layer (MagicBlock PER).
+        RestEndpoint { method: Method::Get, path: "/api/v1/per/sessions", description: "active and recent PER sessions (open / settled / expired / disputed)", rate_limit_per_minute: 600 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/per/sessions/{session_id}", description: "single PER session — status, opened slot, deadline, pre-state commitment", rate_limit_per_minute: 600 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/per/events", description: "Bubblegum-anchored PER events (SessionOpened / SessionSettled / SessionExpired / SessionDisputed)", rate_limit_per_minute: 600 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/vaults/{id}/execution_privacy", description: "per-vault execution privacy declaration (Mainnet | PrivateER) + commitment hash", rate_limit_per_minute: 600 },
     ]
 }
 
@@ -116,7 +121,10 @@ mod tests {
         // mandates, pending-approval queue). Phase 17 adds 4 for the
         // RPC Router + /infra observatory (infra page, attribution
         // heatmap, freshness list, single-vault freshness drilldown).
-        assert_eq!(rest_endpoints().len(), 38);
+        // Phase 18 adds 4 for the Private Execution Layer (sessions
+        // list, single session, event log, per-vault execution
+        // privacy declaration).
+        assert_eq!(rest_endpoints().len(), 42);
     }
 
     #[test]

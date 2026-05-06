@@ -19,6 +19,7 @@ atlas-payments = { path = "../atlas-payments" }
 atlas-confidential = { path = "../atlas-confidential" }
 atlas-operator-agent = { path = "../atlas-operator-agent" }
 atlas-rpc-router = { path = "../atlas-rpc-router" }
+atlas-per = { path = "../atlas-per" }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror.workspace = true

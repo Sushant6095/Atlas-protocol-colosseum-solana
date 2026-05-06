@@ -78,6 +78,13 @@ pub enum GameDayScenario {
     /// reuse an expired mandate + self-attest. Every variant must
     /// be rejected by the registry program.
     CompromisedKeeperMandateBreaches,
+    /// Phase 18 — Private Execution Layer adversarial game day.
+    /// Operator stalls past the session window; replays a settled
+    /// payload; submits a cross-vault settlement; forges an
+    /// er_state_root; inserts a non-allowlist CPI inside the ER.
+    /// Each must be rejected by the gateway / verifier; vault
+    /// state must be unchanged.
+    PerOperatorAdversarial,
 }
 
 impl GameDayScenario {
@@ -90,6 +97,7 @@ impl GameDayScenario {
             GameDayScenario::ProverOutage => "prover-outage",
             GameDayScenario::BubblegumKeeperLoss => "bubblegum-keeper-loss",
             GameDayScenario::CompromisedKeeperMandateBreaches => "compromised-keeper-mandate-breaches",
+            GameDayScenario::PerOperatorAdversarial => "per-operator-adversarial",
         }
     }
 
@@ -103,6 +111,9 @@ impl GameDayScenario {
             GameDayScenario::BubblegumKeeperLoss => "ops/runbooks/bubblegum-keeper-loss.md",
             GameDayScenario::CompromisedKeeperMandateBreaches => {
                 "ops/runbooks/compromised-keeper-mandate-breaches.md"
+            }
+            GameDayScenario::PerOperatorAdversarial => {
+                "ops/runbooks/per-operator-adversarial.md"
             }
         }
     }
@@ -191,6 +202,48 @@ impl GameDayScenario {
                     expected: ExpectedOutcome::RejectAtVerifier,
                 },
             ],
+            GameDayScenario::PerOperatorAdversarial => vec![
+                ScenarioCase {
+                    label: "rollup_operator_stalls_past_window",
+                    injector: ChaosInject::PerOperatorStall {
+                        session: [0xb1; 32],
+                        // 256 + 64 = 320 — well past MAX_PER_SESSION_SLOTS.
+                        stall_slots: 320,
+                    },
+                    // Auto-undelegate triggers; no commitment proceeds.
+                    expected: ExpectedOutcome::Halt,
+                },
+                ScenarioCase {
+                    label: "settlement_payload_replay",
+                    injector: ChaosInject::PerSettlementReplay { session: [0xb1; 32] },
+                    expected: ExpectedOutcome::RejectAtVerifier,
+                },
+                ScenarioCase {
+                    label: "cross_vault_settlement_attempt",
+                    injector: ChaosInject::PerCrossVaultSettlement {
+                        from: [0x01; 32],
+                        to: [0x02; 32],
+                        session: [0xb1; 32],
+                    },
+                    expected: ExpectedOutcome::RejectAtVerifier,
+                },
+                ScenarioCase {
+                    label: "forged_er_state_root",
+                    injector: ChaosInject::PerForgedStateRoot {
+                        session: [0xb1; 32],
+                        forged_root: [0xff; 32],
+                    },
+                    expected: ExpectedOutcome::RejectAtVerifier,
+                },
+                ScenarioCase {
+                    label: "non_allowlist_cpi_inside_er",
+                    injector: ChaosInject::PerNonAllowlistCpi {
+                        session: [0xb1; 32],
+                        program_id: [0xee; 32],
+                    },
+                    expected: ExpectedOutcome::BundleAborts,
+                },
+            ],
         }
     }
 }
@@ -203,6 +256,7 @@ pub const MANDATORY_GAME_DAYS: &[GameDayScenario] = &[
     GameDayScenario::ProverOutage,
     GameDayScenario::BubblegumKeeperLoss,
     GameDayScenario::CompromisedKeeperMandateBreaches,
+    GameDayScenario::PerOperatorAdversarial,
 ];
 
 pub fn game_day_scenarios() -> &'static [GameDayScenario] {
@@ -232,9 +286,10 @@ mod tests {
     }
 
     #[test]
-    fn mandatory_game_days_count_is_seven() {
-        // Phase 15 adds the operator-agent compromised-keeper game day.
-        assert_eq!(MANDATORY_GAME_DAYS.len(), 7);
+    fn mandatory_game_days_count_is_eight() {
+        // Phase 15 added the operator-agent compromised-keeper game day;
+        // Phase 18 adds the PER operator-adversarial game day.
+        assert_eq!(MANDATORY_GAME_DAYS.len(), 8);
     }
 
     #[test]

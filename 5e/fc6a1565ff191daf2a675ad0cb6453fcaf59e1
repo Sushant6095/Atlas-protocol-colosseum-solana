@@ -1,0 +1,53 @@
+Cargo.toml
+  s_c3576656714da0::t_b5c784da9c8eb0 35
+crates/atlas-chaos/Cargo.toml
+  s_c3576656714da0::t_b5a91ed8721fff 1-34
+ops/runbooks/bubblegum-keeper-loss.md
+  s_c3576656714da0::t_cee1ec7e5a7ce8 1-56
+crates/atlas-chaos/src/scenario.rs
+  s_c3576656714da0::t_2a63edb23fc3ed 1-215
+crates/atlas-chaos/src/bin/chaos.rs
+  s_c3576656714da0::t_de7411c84b56a4 1-147
+ops/runbooks/drift-abi-break.md
+  s_c3576656714da0::t_741f86f31efe81 1-46
+crates/atlas-chaos/src/outcome.rs
+  s_c3576656714da0::t_2a055bec60c701 1-92
+crates/atlas-chaos/src/env.rs
+  s_c3576656714da0::t_5ef3e8ad8d82c5 1-103
+crates/atlas-chaos/src/report.rs
+  s_c3576656714da0::t_e4c98df40f9eff 1-187
+crates/atlas-chaos/src/inject.rs
+  s_c3576656714da0::t_ddee5b7b168899 1-276
+crates/atlas-chaos/src/lib.rs
+  s_c3576656714da0::t_645b41b8858a11 1-42
+ops/runbooks/helius-outage.md
+  s_c3576656714da0::t_0a02435b14e0d6 1-51
+ops/runbooks/pyth-hermes-degraded.md
+  s_c3576656714da0::t_5120a33abc79f4 1-44
+ops/runbooks/prover-outage.md
+  s_c3576656714da0::t_ff072689002b95 1-46
+crates/atlas-telemetry/src/lib.rs
+  s_c3576656714da0::t_90519a6f8d669b 616-672
+ops/runbooks/mainnet-congestion.md
+  s_c3576656714da0::t_77b35de42c96c3 1-48
+crates/atlas-chaos/src/seed.rs
+  s_c3576656714da0::t_cb9992ec8752fe 1-104
+CHANGELOG.md
+  s_c3576656714da0::t_753bcc3d6d163a 3-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "5efc6a1565ff191daf2a675ad0cb6453fcaf59e1",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

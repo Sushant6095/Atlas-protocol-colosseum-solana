@@ -39,6 +39,7 @@ members = [
     "crates/atlas-presign",
     "crates/atlas-vault-templates",
     "crates/atlas-public-api",
+    "crates/atlas-rs",
     "tests/invariants",
     "tests/adversarial",
     "tests/warehouse",

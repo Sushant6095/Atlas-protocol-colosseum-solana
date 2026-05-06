@@ -1,0 +1,22 @@
+[package]
+name = "atlas-rs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas platform client (Rust) — thin client over /api/v1/* with client-side proof verification. Implements directive 09 §7.2."
+
+[lib]
+
+[dependencies]
+atlas-public-api = { path = "../atlas-public-api" }
+atlas-blackbox = { path = "../atlas-blackbox" }
+atlas-presign = { path = "../atlas-presign" }
+atlas-runtime = { path = "../atlas-runtime" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+async-trait = "0.1"
+tokio = { workspace = true, features = ["full"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full", "macros"] }

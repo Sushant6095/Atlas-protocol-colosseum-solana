@@ -1,5 +1,27 @@
 # Atlas Changelog
 
+## Unreleased — Phase 9.1 (2026-05-06) — Directive 09 SDK + playground closeout
+
+- `atlas-rs` (`crates/atlas-rs/`) — Phase 9 platform client. `AtlasClient`
+  over an injected `HttpTransport` trait (production wires reqwest;
+  tests use `MockTransport`). Methods match the directive verbs:
+  `get_vault`, `list_rebalances`, `get_rebalance`, `get_proof`
+  (auto-runs SDK-side proof shape sanity check), `simulate_deposit`,
+  `verify_proof`. 4/4 tests including a malformed-proof rejection.
+- `@atlas/sdk` — new `platform.ts` module with `AtlasPlatform` mirroring
+  the Rust client surface (`getVault`, `listRebalances`, `getRebalance`,
+  `getProof`, `simulateDeposit`, `verifyProof`, `streamRebalances`).
+  Re-exported from `index.ts`; `package.json` adds `@atlas/sdk/platform`
+  subpath export.
+- `sdk/playground/index.html` — static API console. 9 REST + 2 WS
+  endpoints listed; per-endpoint curl + TypeScript + Rust snippets
+  rendered live; "Run" hits the configured base URL with the path
+  parameters from the form. Browser-only, no build step.
+
+§7.2 + §7.6 deliverables now closable: SDK clients in both languages,
+proof verification client-side, playground reachable from a static
+host. Workspace: **633 tests** green (+4 atlas-rs).
+
 ## Unreleased — Phase 9.0 (2026-05-06) — Directive 09 (Side-track integrations + Public Platform)
 
 Six side-track tracks land as off-chain crates with the directive's

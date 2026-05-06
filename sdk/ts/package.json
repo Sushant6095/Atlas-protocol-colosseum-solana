@@ -11,7 +11,8 @@
   "exports": {
     ".": "./dist/index.js",
     "./pda": "./dist/pda.js",
-    "./constants": "./dist/constants.js"
+    "./constants": "./dist/constants.js",
+    "./platform": "./dist/platform.js"
   },
   "dependencies": {
     "@solana/kit": "^2.1.0",

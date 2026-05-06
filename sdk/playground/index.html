@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas Playground</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; letter-spacing: 0.02em; }
+    header small { color: #8893a8; }
+    main { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 60px); }
+    nav { padding: 16px; border-right: 1px solid #1d2230; background: #0e121a; }
+    nav h2 { font-size: 11px; text-transform: uppercase; color: #8893a8; letter-spacing: 0.08em; margin: 16px 0 6px; }
+    nav button { display: block; width: 100%; text-align: left; padding: 8px 10px; margin: 2px 0; background: transparent; color: #c5cad6; border: 1px solid transparent; border-radius: 4px; font: inherit; cursor: pointer; }
+    nav button:hover { background: #161b27; border-color: #2a3142; }
+    nav button.active { background: #1d2230; border-color: #3a4357; color: #fff; }
+    section.console { display: grid; grid-template-rows: auto 1fr 1fr; gap: 12px; padding: 16px 24px; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+    .toolbar label { font-size: 12px; color: #8893a8; display: flex; flex-direction: column; gap: 4px; }
+    .toolbar input { padding: 6px 8px; background: #0e121a; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 280px; }
+    .toolbar button.run { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 0 14px; cursor: pointer; align-self: end; height: 32px; }
+    .toolbar button.run:hover { background: #1f57d6; }
+    pre { margin: 0; padding: 12px; background: #0e121a; border: 1px solid #1d2230; border-radius: 4px; overflow: auto; font: 12px/1.5 ui-monospace, Menlo, monospace; }
+    pre.snippet code { color: #b9d3ff; }
+    pre.response code { color: #b8eecf; }
+    pre.response.err code { color: #ff8b8b; }
+    .row-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; margin: 0 0 4px; }
+    .endpoint-meta { font-size: 11px; color: #8893a8; }
+    .endpoint-meta code { color: #c5cad6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas Playground <small>— /api/v1/* live console</small></h1>
+  </header>
+  <main>
+    <nav id="nav"></nav>
+    <section class="console">
+      <div class="toolbar">
+        <label>Base URL <input id="base" value="https://atlas.example" autocomplete="off"></label>
+        <label id="param-label" hidden>Param <input id="param" autocomplete="off"></label>
+        <label id="from-label" hidden>From <input id="from" autocomplete="off"></label>
+        <label id="to-label" hidden>To <input id="to" autocomplete="off"></label>
+        <button class="run" id="run">Run</button>
+      </div>
+      <div>
+        <p class="row-label">Snippets <span id="endpoint-meta" class="endpoint-meta"></span></p>
+        <div id="snippets"></div>
+      </div>
+      <div>
+        <p class="row-label">Response</p>
+        <pre class="response" id="response"><code>// Pick an endpoint and click Run.</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    const ENDPOINTS = [
+      { id: "vaults", label: "GET /api/v1/vaults", method: "GET", path: () => "/api/v1/vaults", desc: "list vaults" },
+      { id: "vault", label: "GET /api/v1/vaults/{id}", method: "GET", path: (p) => `/api/v1/vaults/${p}`, params: ["param:vault id (hex32)"], desc: "current state, allocation, NAV, last rebalance" },
+      { id: "rebalances", label: "GET /api/v1/vaults/{id}/rebalances", method: "GET", path: (p, f, t) => `/api/v1/vaults/${p}/rebalances?from=${f}&to=${t}`, params: ["param:vault id", "from:slot", "to:slot"], desc: "paginated rebalance history with Bubblegum proofs" },
+      { id: "rebalance", label: "GET /api/v1/rebalance/{public_input_hash}", method: "GET", path: (p) => `/api/v1/rebalance/${p}`, params: ["param:public_input_hash"], desc: "full black-box record" },
+      { id: "proof", label: "GET /api/v1/rebalance/{public_input_hash}/proof", method: "GET", path: (p) => `/api/v1/rebalance/${p}/proof`, params: ["param:public_input_hash"], desc: "Groth16 proof bytes + Bubblegum path for client-side verify" },
+      { id: "explanation", label: "GET /api/v1/rebalance/{public_input_hash}/explanation", method: "GET", path: (p) => `/api/v1/rebalance/${p}/explanation`, params: ["param:public_input_hash"], desc: "canonical structured explanation + human render" },
+      { id: "opportunities", label: "GET /api/v1/opportunities", method: "GET", path: () => "/api/v1/opportunities", desc: "Birdeye-overlaid opportunity scanner output" },
+      { id: "execution", label: "GET /api/v1/execution/analytics", method: "GET", path: () => "/api/v1/execution/analytics", desc: "per-route landed + slippage stats" },
+      { id: "simulate", label: "POST /api/v1/simulate/deposit", method: "POST", path: () => "/api/v1/simulate/deposit", desc: "pre-sign simulation", postBody: () => ({ vault_id: document.getElementById("param").value || "<vault-id>", amount_q64: "1000000" }) },
+    ];
+
+    const STREAMS = [
+      { id: "stream-network", label: "WS /stream/network", path: () => "/api/v1/stream/network", desc: "public network-intelligence stream" },
+      { id: "stream-vault", label: "WS /stream/vault/{id}", path: (p) => `/api/v1/stream/vault/${p}`, params: ["param:vault id"], desc: "per-vault rebalance event stream" },
+    ];
+
+    const nav = document.getElementById("nav");
+    function navSection(title, items) {
+      const h = document.createElement("h2");
+      h.textContent = title;
+      nav.appendChild(h);
+      for (const e of items) {
+        const b = document.createElement("button");
+        b.textContent = e.label;
+        b.dataset.id = e.id;
+        b.onclick = () => select(e);
+        nav.appendChild(b);
+      }
+    }
+    navSection("REST", ENDPOINTS);
+    navSection("WebSocket", STREAMS);
+
+    let current = ENDPOINTS[0];
+    function select(endpoint) {
+      current = endpoint;
+      for (const b of nav.querySelectorAll("button")) {
+        b.classList.toggle("active", b.dataset.id === endpoint.id);
+      }
+      const meta = document.getElementById("endpoint-meta");
+      meta.innerHTML = `· <code>${endpoint.method ?? "WS"}</code> · ${endpoint.desc}`;
+      const params = endpoint.params ?? [];
+      ["param", "from", "to"].forEach((k) => {
+        const lbl = document.getElementById(`${k}-label`);
+        lbl.hidden = !params.some((p) => p.startsWith(`${k}:`));
+        const placeholder = (params.find((p) => p.startsWith(`${k}:`)) ?? "").split(":")[1] ?? "";
+        document.getElementById(k).placeholder = placeholder;
+      });
+      renderSnippets();
+    }
+
+    function buildPath() {
+      const p = document.getElementById("param").value;
+      const f = document.getElementById("from").value || "0";
+      const t = document.getElementById("to").value || "1000000000";
+      return current.path(p, f, t);
+    }
+
+    function renderSnippets() {
+      const base = document.getElementById("base").value;
+      const path = buildPath();
+      const url = `${base}${path}`;
+      const isWs = current.method === undefined;
+      const snippets = document.getElementById("snippets");
+      const tsBody = current.method === "POST"
+        ? `await client.simulateDeposit("<vault>", "1000000");`
+        : isWs
+          ? `client.streamRebalances("<vault>", (msg) => console.log(msg));`
+          : `await client.${current.id.replace(/-/g, "_")}();`;
+      snippets.innerHTML = "";
+      for (const [lang, body] of [
+        ["curl", isWs ? `wscat -c ${url.replace(/^http/, "ws")}` : current.method === "POST" ? `curl -X POST ${url} -H 'content-type: application/json' -d '{"vault_id":"...","amount_q64":"1000000"}'` : `curl ${url}`],
+        ["typescript", `import { AtlasPlatform } from "@atlas/sdk/platform";\nconst client = new AtlasPlatform({ baseUrl: "${base}" });\n${tsBody}`],
+        ["rust",
+          isWs
+            ? `// websocket client wires its own transport; see atlas-rs docs.`
+            : `let client = AtlasClient::new(transport);\nclient.${current.id.replace(/-/g, "_")}().await?;`],
+      ]) {
+        const pre = document.createElement("pre");
+        pre.className = "snippet";
+        const code = document.createElement("code");
+        code.textContent = `# ${lang}\n${body}`;
+        pre.appendChild(code);
+        snippets.appendChild(pre);
+      }
+    }
+
+    document.getElementById("run").onclick = async () => {
+      const out = document.getElementById("response");
+      out.classList.remove("err");
+      const base = document.getElementById("base").value;
+      try {
+        if (current.method === undefined) {
+          out.innerHTML = `<code>// WebSocket: connect via wscat / browser console:\n// wscat -c ${base.replace(/^http/, "ws")}${buildPath()}</code>`;
+          return;
+        }
+        const init = current.method === "POST"
+          ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(current.postBody()) }
+          : undefined;
+        const r = await fetch(base + buildPath(), init);
+        const text = await r.text();
+        out.innerHTML = `<code>${escapeHtml(text)}</code>`;
+        if (!r.ok) out.classList.add("err");
+      } catch (err) {
+        out.classList.add("err");
+        out.innerHTML = `<code>${escapeHtml(String(err))}</code>`;
+      }
+    };
+
+    function escapeHtml(s) {
+      return s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+    }
+
+    select(ENDPOINTS[0]);
+  </script>
+</body>
+</html>

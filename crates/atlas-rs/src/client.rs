@@ -1,0 +1,245 @@
+//! `AtlasClient` — thin client over /api/v1/*.
+
+use crate::transport::{HttpTransport, TransportError};
+use atlas_blackbox::BlackBoxRecord;
+use atlas_presign::PreSignPayload;
+use atlas_public_api::sdk::{verify_proof_response, ApiVerifyError, ProofResponse};
+use atlas_runtime::Pubkey;
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+
+#[derive(Debug, thiserror::Error)]
+pub enum ClientError {
+    #[error("transport: {0}")]
+    Transport(#[from] TransportError),
+    #[error("decode: {0}")]
+    Decode(serde_json::Error),
+    #[error("proof response invalid: {0}")]
+    Proof(#[from] ApiVerifyError),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RebalanceListing {
+    pub public_input_hash: [u8; 32],
+    pub slot: u64,
+    pub status: String,
+}
+
+pub struct AtlasClient {
+    transport: Arc<dyn HttpTransport>,
+}
+
+impl AtlasClient {
+    pub fn new(transport: Arc<dyn HttpTransport>) -> Self {
+        Self { transport }
+    }
+
+    pub async fn get_vault(&self, id: &Pubkey) -> Result<serde_json::Value, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!("/api/v1/vaults/{}", hex32(id)))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    pub async fn list_rebalances(
+        &self,
+        vault_id: &Pubkey,
+        from: u64,
+        to: u64,
+    ) -> Result<Vec<RebalanceListing>, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!(
+                "/api/v1/vaults/{}/rebalances?from={}&to={}",
+                hex32(vault_id),
+                from,
+                to,
+            ))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    pub async fn get_rebalance(
+        &self,
+        public_input_hash: &[u8; 32],
+    ) -> Result<BlackBoxRecord, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!(
+                "/api/v1/rebalance/{}",
+                hex32(public_input_hash)
+            ))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Fetch the proof + Bubblegum path. The caller hands the
+    /// returned `ProofResponse` to `verify_proof` (which validates
+    /// shape) and then to the on-chain `sp1-solana` verifier ix for
+    /// the cryptographic check. Letting a third party verify Atlas
+    /// without trusting Atlas's API is the directive's hard
+    /// requirement (§9 acceptance bar).
+    pub async fn get_proof(
+        &self,
+        public_input_hash: &[u8; 32],
+    ) -> Result<ProofResponse, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!(
+                "/api/v1/rebalance/{}/proof",
+                hex32(public_input_hash)
+            ))
+            .await?;
+        let r: ProofResponse = serde_json::from_slice(&bytes).map_err(ClientError::Decode)?;
+        verify_proof_response(&r)?;
+        Ok(r)
+    }
+
+    /// Convenience: returns Ok(()) iff the proof response shape
+    /// passes the SDK-side sanity check.
+    pub fn verify_proof(&self, response: &ProofResponse) -> Result<(), ClientError> {
+        verify_proof_response(response).map_err(Into::into)
+    }
+
+    pub async fn simulate_deposit(
+        &self,
+        vault_id: &Pubkey,
+        amount_q64: u128,
+    ) -> Result<PreSignPayload, ClientError> {
+        let body = serde_json::json!({ "vault_id": hex32(vault_id), "amount_q64": amount_q64.to_string() });
+        let bytes = self
+            .transport
+            .post_json("/api/v1/simulate/deposit", body.to_string().as_bytes())
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+}
+
+fn hex32(b: &[u8; 32]) -> String {
+    let mut s = String::with_capacity(64);
+    for c in b {
+        s.push_str(&format!("{:02x}", c));
+    }
+    s
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::transport::MockTransport;
+    use atlas_blackbox::{BlackBoxStatus, Timings, BLACKBOX_SCHEMA};
+
+    fn skel() -> BlackBoxRecord {
+        BlackBoxRecord {
+            schema: BLACKBOX_SCHEMA.into(),
+            vault_id: [1u8; 32],
+            slot: 100,
+            status: BlackBoxStatus::Landed,
+            before_state_hash: [0u8; 32],
+            after_state_hash: Some([0u8; 32]),
+            balances_before: vec![1_000, 2_000],
+            balances_after: Some(vec![1_500, 1_500]),
+            feature_root: [0u8; 32],
+            consensus_root: [0u8; 32],
+            agent_proposals_uri: "s3://a".into(),
+            explanation_hash: [0u8; 32],
+            explanation_canonical_uri: "s3://b".into(),
+            risk_state_hash: [0u8; 32],
+            risk_topology_uri: "s3://c".into(),
+            public_input_hex: "00".repeat(268),
+            proof_uri: "s3://d".into(),
+            cpi_trace: vec![],
+            post_conditions: vec![],
+            failure_class: None,
+            tx_signature: Some(vec![0u8; 64]),
+            landed_slot: Some(101),
+            bundle_id: [0u8; 32],
+            prover_id: [0u8; 32],
+            timings_ms: Timings::default(),
+            telemetry_span_id: "x".into(),
+        }
+    }
+
+    #[tokio::test]
+    async fn list_rebalances_round_trip() {
+        let mock = MockTransport::new();
+        let listing = vec![
+            RebalanceListing {
+                public_input_hash: [1u8; 32],
+                slot: 100,
+                status: "landed".into(),
+            },
+            RebalanceListing {
+                public_input_hash: [2u8; 32],
+                slot: 110,
+                status: "landed".into(),
+            },
+        ];
+        mock.put(
+            "/api/v1/vaults/0101010101010101010101010101010101010101010101010101010101010101/rebalances?from=0&to=200",
+            serde_json::to_vec(&listing).unwrap(),
+        )
+        .await;
+        let client = AtlasClient::new(Arc::new(mock));
+        let r = client.list_rebalances(&[1u8; 32], 0, 200).await.unwrap();
+        assert_eq!(r.len(), 2);
+        assert_eq!(r[0].slot, 100);
+    }
+
+    #[tokio::test]
+    async fn get_rebalance_round_trip() {
+        let mock = MockTransport::new();
+        mock.put(
+            "/api/v1/rebalance/0202020202020202020202020202020202020202020202020202020202020202",
+            serde_json::to_vec(&skel()).unwrap(),
+        )
+        .await;
+        let client = AtlasClient::new(Arc::new(mock));
+        let r = client.get_rebalance(&[2u8; 32]).await.unwrap();
+        assert_eq!(r.slot, 100);
+    }
+
+    #[tokio::test]
+    async fn get_proof_validates_shape() {
+        let mock = MockTransport::new();
+        let resp = ProofResponse {
+            public_input_hex: "00".repeat(268),
+            proof_bytes: vec![1u8; 192],
+            archive_root_slot: 200,
+            archive_root: [9u8; 32],
+            merkle_proof_path: vec![[1u8; 32], [2u8; 32]],
+            blackbox: skel(),
+        };
+        mock.put(
+            "/api/v1/rebalance/0303030303030303030303030303030303030303030303030303030303030303/proof",
+            serde_json::to_vec(&resp).unwrap(),
+        )
+        .await;
+        let client = AtlasClient::new(Arc::new(mock));
+        let r = client.get_proof(&[3u8; 32]).await.unwrap();
+        assert_eq!(r.archive_root_slot, 200);
+    }
+
+    #[tokio::test]
+    async fn get_proof_rejects_bad_shape() {
+        let mock = MockTransport::new();
+        let mut resp = ProofResponse {
+            public_input_hex: "ab".into(), // too short
+            proof_bytes: vec![1u8; 8],
+            archive_root_slot: 0,
+            archive_root: [0u8; 32],
+            merkle_proof_path: vec![[1u8; 32]],
+            blackbox: skel(),
+        };
+        resp.public_input_hex = "ab".into();
+        mock.put(
+            "/api/v1/rebalance/0404040404040404040404040404040404040404040404040404040404040404/proof",
+            serde_json::to_vec(&resp).unwrap(),
+        )
+        .await;
+        let client = AtlasClient::new(Arc::new(mock));
+        let r = client.get_proof(&[4u8; 32]).await;
+        assert!(matches!(r, Err(ClientError::Proof(_))));
+    }
+}

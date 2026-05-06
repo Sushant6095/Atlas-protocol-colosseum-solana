@@ -1,0 +1,115 @@
+crates/atlas-capital/src/lib.rs
+  c3576656714da0ca 1-385
+ops/runbooks/archival.md
+  c3576656714da0ca 1-29
+crates/atlas-alert/src/render.rs
+  c3576656714da0ca 1-221
+crates/atlas-alert/src/bin/alertctl.rs
+  c3576656714da0ca 1-152
+CHANGELOG.md
+  c3576656714da0ca 3-172
+crates/atlas-failure/src/lib.rs
+  c3576656714da0ca 1-19
+ops/alerts/templates/quorum_disagreement.txt
+  c3576656714da0ca 1-5
+crates/atlas-forensic/src/heuristics.rs
+  c3576656714da0ca 1-362
+ops/alerts/templates/consensus_disagreement_spike.txt
+  c3576656714da0ca 1-4
+ops/runbooks/inference.md
+  c3576656714da0ca 1-26
+ops/alerts/templates/prover_network_down.txt
+  c3576656714da0ca 1-5
+ops/alerts/templates/defensive_mode_entered.txt
+  c3576656714da0ca 1-4
+crates/atlas-forensic/src/engine.rs
+  c3576656714da0ca 1-166
+ops/runbooks/proof.md
+  c3576656714da0ca 1-25
+crates/atlas-blackbox/src/write.rs
+  c3576656714da0ca 1-143
+ops/alerts/templates/digest_daily.txt
+  c3576656714da0ca 1-14
+ops/runbooks/oracle.md
+  c3576656714da0ca 1-26
+ops/secrets/.gitignore
+  c3576656714da0ca 1-3
+crates/atlas-failure/Cargo.toml
+  c3576656714da0ca 1-16
+crates/atlas-alert/src/engine.rs
+  c3576656714da0ca 1-299
+crates/atlas-failure/src/class.rs
+  c3576656714da0ca 1-215
+crates/atlas-alert/src/lib.rs
+  c3576656714da0ca 1-33
+crates/atlas-capital/Cargo.toml
+  c3576656714da0ca 1-17
+crates/atlas-blackbox/src/lib.rs
+  c3576656714da0ca 1-18
+crates/atlas-alert/src/kind.rs
+  c3576656714da0ca 1-155
+crates/atlas-forensic/Cargo.toml
+  c3576656714da0ca 1-20
+ops/alerts/templates/source_quarantine.txt
+  c3576656714da0ca 1-4
+crates/atlas-alert/Cargo.toml
+  c3576656714da0ca 1-28
+ops/runbooks/README.md
+  c3576656714da0ca 1-18
+ops/alerts/templates/oracle_deviation.txt
+  c3576656714da0ca 1-4
+crates/atlas-forensic/src/lib.rs
+  c3576656714da0ca 1-26
+ops/secrets/README.md
+  c3576656714da0ca 1-29
+ops/runbooks/execution.md
+  c3576656714da0ca 1-30
+crates/atlas-blackbox/src/record.rs
+  c3576656714da0ca 1-281
+crates/atlas-failure/src/log.rs
+  c3576656714da0ca 1-103
+ops/runbooks/ingestion.md
+  c3576656714da0ca 1-27
+ops/runbooks/adversarial.md
+  c3576656714da0ca 1-34
+ops/alerts/templates/security_event.txt
+  c3576656714da0ca 1-6
+crates/atlas-forensic/src/signal.rs
+  c3576656714da0ca 1-206
+ops/alerts/templates/post_condition_violation.txt
+  c3576656714da0ca 1-6
+Cargo.toml
+  c3576656714da0ca 18-22
+crates/atlas-blackbox/src/bin/inspect.rs
+  c3576656714da0ca 1-195
+crates/atlas-telemetry/src/lib.rs
+  c3576656714da0ca 14-15,377-433
+ops/alerts/templates/archival_failure.txt
+  c3576656714da0ca 1-6
+crates/atlas-blackbox/Cargo.toml
+  c3576656714da0ca 1-28
+crates/atlas-failure/src/remediation.rs
+  c3576656714da0ca 1-223
+crates/atlas-alert/src/sink.rs
+  c3576656714da0ca 1-88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "a02b53bbd0e4b04fb33466ec0b11a858fcdaaebb",
+  "prompts": {
+    "c3576656714da0ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 3945,
+      "total_deletions": 9,
+      "accepted_lines": 3938,
+      "overriden_lines": 0
+    }
+  }
+}

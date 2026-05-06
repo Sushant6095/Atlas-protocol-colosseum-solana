@@ -1,5 +1,75 @@
 # Atlas Changelog
 
+## Unreleased — Phase 6.1 (2026-05-06) — Directive 06 §3.1 + §4 + §7 closeout
+
+### Sandbox database mirror (`atlas_sandbox::db`)
+
+- `SandboxTable` enum mirrors all 7 production warehouse tables
+  (`rebalances`, `account_states`, `oracle_ticks`, `pool_snapshots`,
+  `agent_proposals`, `events`, `failure_classifications`). Each
+  variant exposes its `prod_name()` and `sandbox_name()` (always
+  `sandbox_<prod>`). Parity test pins the count — adding a new
+  production table without a sandbox mirror fails the build.
+- `enforce_sandbox_uri(uri)` rejects `s3://` / `clickhouse://`
+  loudly, passes through `sandbox://` and `mock://`, and prefixes
+  unknown shapes so a sandbox row can never be confused with prod.
+- `enforce_sandbox_topic(topic)` forces the `sandbox.` prefix on
+  event topics; idempotent.
+
+### Mandatory test corpus (`atlas_sandbox::corpus`)
+
+- `CorpusRequirement` enumerates the five §4 gates:
+  `HistoricalReplay`, `ChaosSuite`, `AbCompareApproved`,
+  `LeakageProbe`, `Determinism`.
+- `CorpusReport::record(req, passed, detail, report_uri)` and
+  `all_pass()` / `missing_or_failing()` produce the artifact CI
+  attaches to the `Draft → Audited` transition.
+- `atlas-registryctl audit` now requires `--corpus-report <path>` and
+  refuses the audit if `model_id` doesn't match or any requirement is
+  missing/failing on a `Pass` verdict.
+
+### `atlas-governance` — multisig approval flow (§3.1)
+
+- New crate. `SignerSet { pubkeys, threshold }` with sorted /
+  deduplicated pubkey storage and `signer_set_root` — binary blake3
+  merkle over leaves padded to next power of two; matches the
+  Bubblegum commitment shape used elsewhere in Atlas.
+- `ApprovalProposal::register_signer` is idempotent; transitions the
+  decision from `Pending` to `Ready` once the threshold is reached.
+  `submit()` returns a `ProposalSubmission { proposal_id, model_id,
+  prev_status, new_status, slot, signer_set_root, signers }` matching
+  the registry's `RegistryAnchor` shape so Bubblegum anchoring is a
+  one-step write. Finalised proposals reject further `register_signer`
+  / `submit` calls — replay protection on the orchestrator side.
+- `proposal_id` = `blake3("atlas.gov.proposal.v1" || model_id ||
+  prev_status_byte || new_status_byte || slot_le)`. Tests pin
+  determinism and distinct ids per transition.
+
+### `atlas-monitor` — drift → alert wiring (§2.4 + §5)
+
+- New crate bridging `atlas-registry` drift signals to the
+  `atlas-alert` engine. `MonitorWindow` carries paired (predicted,
+  realised) APY series, defensive baseline + observed rate, and the
+  agent confidence series; `DriftMonitor::observe(window, engine,
+  sink)` evaluates drift and dispatches one alert per `DriftAlert`.
+- All `DriftAlert` variants currently funnel into
+  `AlertKind::DegradedModeEntered` (Notify class) — sustained drift
+  escalates via the registry `DriftFlagged → Slashed` path which is
+  governance-driven, not auto.
+- The 60-s dedup on the alert engine is what stops drift floods —
+  pinned by a test that fires the same drifty window 3× and asserts
+  exactly one dispatched alert.
+- `bin/atlas-monitorctl` reads a JSON `MonitorWindow` and writes the
+  drift report + dispatched alert bodies to `--output`.
+
+### Test coverage
+
+- atlas-sandbox: 34/34 (10 new — corpus 5, db 5).
+- atlas-governance: 15/15 (signer set 7, proposal 8).
+- atlas-monitor: 3/3 (clean / drifty / dedup).
+- atlas-registry: 30/30 unchanged.
+- Workspace total: **440 tests** green (28 new vs Phase 6.0).
+
 ## Unreleased — Phase 6.0 (2026-05-06) — Directive 06 §1–§3 (Sandbox / Registry / Governance)
 
 ### Two new crates

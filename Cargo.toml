@@ -22,6 +22,8 @@ members = [
     "crates/atlas-capital",
     "crates/atlas-sandbox",
     "crates/atlas-registry",
+    "crates/atlas-governance",
+    "crates/atlas-monitor",
     "tests/invariants",
     "tests/adversarial",
     "tests/warehouse",

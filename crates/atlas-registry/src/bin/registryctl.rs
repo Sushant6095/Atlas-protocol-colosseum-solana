@@ -23,6 +23,7 @@ use atlas_registry::{
     store::ModelRegistry,
     validate_lineage, InMemoryRegistry, RegistryAnchor,
 };
+use atlas_sandbox::corpus::CorpusReport;
 use clap::{Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 
@@ -72,6 +73,11 @@ enum Cmd {
         signed_report_hash_hex: String,
         #[arg(long)]
         slot: u64,
+        /// Path to a `CorpusReport` JSON. The Draft → Audited transition
+        /// is gated on every directive §4 requirement passing. CI
+        /// produces this file at the end of the mandatory sandbox suite.
+        #[arg(long)]
+        corpus_report: std::path::PathBuf,
     },
     Approve {
         #[arg(long)]
@@ -224,8 +230,26 @@ fn main() -> Result<()> {
             verdict,
             signed_report_hash_hex,
             slot,
+            corpus_report,
         } => {
             let id = parse_hex32(&model_id_hex)?;
+            // CI gate (directive §4): refuse the audit transition unless
+            // every corpus requirement passed.
+            let corpus: CorpusReport =
+                serde_json::from_slice(&std::fs::read(&corpus_report)?)?;
+            if corpus.model_id != id {
+                return Err(anyhow!(
+                    "corpus report model_id ({}) != audit subject ({})",
+                    hex32(corpus.model_id),
+                    hex32(id)
+                ));
+            }
+            if !corpus.all_pass() && verdict == AuditVerdict::Pass {
+                return Err(anyhow!(
+                    "corpus report has failing/missing requirements; refusing Audited transition: {:?}",
+                    corpus.missing_or_failing()
+                ));
+            }
             let entry = AuditEntry {
                 auditor_pubkey: parse_hex32(&auditor_pubkey_hex)?,
                 verdict,

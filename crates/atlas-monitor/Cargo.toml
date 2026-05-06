@@ -1,20 +1,20 @@
 [package]
-name = "atlas-registry"
+name = "atlas-monitor"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Atlas model registry — record schema, lineage, feature schema versioning, drift monitoring. Implements directive 06 §2."
+description = "Atlas drift monitor — bridges atlas-registry drift signals to atlas-alert. Implements directive 06 §2.4 + §5."
 
 [lib]
 
 [[bin]]
-name = "atlas-registryctl"
-path = "src/bin/registryctl.rs"
+name = "atlas-monitorctl"
+path = "src/bin/monitorctl.rs"
 
 [dependencies]
-atlas-warehouse = { path = "../atlas-warehouse" }
+atlas-registry = { path = "../atlas-registry" }
+atlas-alert = { path = "../atlas-alert" }
 atlas-telemetry = { path = "../atlas-telemetry" }
-atlas-sandbox = { path = "../atlas-sandbox" }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror.workspace = true
@@ -23,8 +23,7 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 clap.workspace = true
 anyhow.workspace = true
-blake3.workspace = true
+async-trait = "0.1"
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["full", "macros"] }
-proptest = "1.5"

@@ -16,6 +16,8 @@
 
 pub mod backtest;
 pub mod compare;
+pub mod corpus;
+pub mod db;
 pub mod isolation;
 pub mod leakage;
 pub mod report;
@@ -23,6 +25,8 @@ pub mod whatif;
 
 pub use backtest::{BacktestConfig, BacktestEngine, BacktestError, BacktestReport};
 pub use compare::{paired_bootstrap_ci, ComparisonReport, MetricDelta};
+pub use corpus::{CorpusReport, CorpusRequirement, CorpusResult};
+pub use db::{enforce_sandbox_topic, enforce_sandbox_uri, SandboxTable};
 pub use isolation::{SandboxGuard, SandboxIsolationError};
 pub use leakage::{LeakageProbe, LeakageViolation};
 pub use report::{report_id, AggregateMetrics, RebalanceSimResult};

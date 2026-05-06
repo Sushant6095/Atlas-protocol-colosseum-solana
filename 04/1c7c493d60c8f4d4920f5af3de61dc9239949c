@@ -1,0 +1,57 @@
+crates/atlas-treasury/Cargo.toml
+  s_c3576656714da0::t_4e6c7b215a6bbf 1-21
+crates/atlas-treasury/src/intel.rs
+  s_c3576656714da0::t_205b8370fd6bac 1-23,25-247
+  s_c3576656714da0::t_d5c866fe122997 24
+crates/atlas-treasury/src/yield_account.rs
+  s_c3576656714da0::t_eb3a25641ce617 1-117
+crates/atlas-telemetry/src/lib.rs
+  s_c3576656714da0::t_9ca10a221e4ff3 752-819
+crates/atlas-assets/src/extension.rs
+  s_c3576656714da0::t_b246e69f3bfd41 1-172
+Cargo.toml
+  s_c3576656714da0::t_bc4fc43b8275a9 43-44
+crates/atlas-treasury/src/policy.rs
+  s_c3576656714da0::t_6677e48fac25cd 1-152
+crates/atlas-treasury/src/stable_swap.rs
+  s_c3576656714da0::t_4cd3b63ad26d3f 1-121
+sdk/playground/treasury.html
+  s_c3576656714da0::t_d2694bf0e0ecf9 1-149
+crates/atlas-assets/Cargo.toml
+  s_c3576656714da0::t_dff01a9f01f491 1-17
+crates/atlas-treasury/src/emergency.rs
+  s_c3576656714da0::t_8802471ec99cfc 1-142
+CHANGELOG.md
+  s_c3576656714da0::t_8039f5a0abf676 3-59
+crates/atlas-assets/src/transfer_fee.rs
+  s_c3576656714da0::t_e967db2909e679 1-53
+crates/atlas-assets/src/lib.rs
+  s_c3576656714da0::t_49a60b2c2f6c3b 1-21
+crates/atlas-treasury/src/entity.rs
+  s_c3576656714da0::t_f906eb15e86601 1-165
+crates/atlas-assets/src/pusd.rs
+  s_c3576656714da0::t_13308a0336104b 1-97
+crates/atlas-vault-templates/src/lib.rs
+  s_c3576656714da0::t_ebaab24c06c87f 201-270
+  s_c3576656714da0::t_6647695ca72c9c 335-344
+  s_c3576656714da0::t_b4423ba7360283 362-382
+  s_c3576656714da0::t_4197297e0a2819 36-44
+crates/atlas-treasury/src/lib.rs
+  s_c3576656714da0::t_5c72df41a99bb9 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "041c7c493d60c8f4d4920f5af3de61dc9239949c",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

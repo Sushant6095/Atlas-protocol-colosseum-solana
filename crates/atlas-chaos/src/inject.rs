@@ -113,6 +113,21 @@ pub enum ChaosInject {
     ProofSubstitution { swap_with: Pubkey },
     ProverByzantine { invalid_proof: bool, delay_ms: u32 },
     KeeperRaceCondition { duplicate_sub: bool },
+
+    // ── Phase 15 — keeper-mandate adversarial (directive 15 §11) ──
+    /// Compromised keeper attempts an action outside its role's
+    /// allowed bitset (I-18). Program must reject; chaos verifies
+    /// the rejection happened at the program ix entry, not later.
+    KeeperCrossRoleAttempt { keeper: Pubkey, presented_action: u8 },
+    /// Compromised keeper tries to land an action against an expired
+    /// mandate (I-19). Program must reject with `MandateExpired`.
+    MandateExpiredReuse { keeper: Pubkey, slots_past_expiry: u32 },
+    /// Action keeper tries to self-attest (skip the I-20 second
+    /// signer). Program must reject with `SameSigner`.
+    AttestationSameSigner { keeper: Pubkey },
+    /// Stale attestation replay: action lands but the attestation
+    /// was signed > MAX_ATTESTATION_STALENESS_SLOTS ago.
+    AttestationStale { lag_slots: u32 },
 }
 
 impl ChaosInject {
@@ -145,7 +160,11 @@ impl ChaosInject {
             | ChaosInject::ForgedStateRoot { .. }
             | ChaosInject::ProofSubstitution { .. }
             | ChaosInject::ProverByzantine { .. }
-            | ChaosInject::KeeperRaceCondition { .. } => InjectorCategory::Adversarial,
+            | ChaosInject::KeeperRaceCondition { .. }
+            | ChaosInject::KeeperCrossRoleAttempt { .. }
+            | ChaosInject::MandateExpiredReuse { .. }
+            | ChaosInject::AttestationSameSigner { .. }
+            | ChaosInject::AttestationStale { .. } => InjectorCategory::Adversarial,
         }
     }
 
@@ -176,6 +195,10 @@ impl ChaosInject {
             ChaosInject::ProofSubstitution { .. } => "proof_substitution",
             ChaosInject::ProverByzantine { .. } => "prover_byzantine",
             ChaosInject::KeeperRaceCondition { .. } => "keeper_race_condition",
+            ChaosInject::KeeperCrossRoleAttempt { .. } => "keeper_cross_role_attempt",
+            ChaosInject::MandateExpiredReuse { .. } => "mandate_expired_reuse",
+            ChaosInject::AttestationSameSigner { .. } => "attestation_same_signer",
+            ChaosInject::AttestationStale { .. } => "attestation_stale",
         }
     }
 }

@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas Operator Agents — Scoped Keepers + Mandates</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; letter-spacing: 0.02em; }
+    header small { color: #8893a8; }
+    main { padding: 24px; display: grid; gap: 18px; max-width: 1180px; margin: 0 auto; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 18px; }
+    h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    label { font-size: 12px; color: #8893a8; display: block; margin: 8px 0 2px; }
+    input { padding: 8px 10px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 360px; }
+    button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font: inherit; }
+    button:hover { background: #1f57d6; }
+    button.secondary { background: transparent; border: 1px solid #2a3142; color: #c5cad6; }
+    pre { margin: 0; padding: 12px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; overflow: auto; font: 12px/1.5 ui-monospace, Menlo, monospace; }
+    pre.ok code { color: #b8eecf; }
+    pre.err code { color: #ff8b8b; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .card { background: #0b0d11; border: 1px solid #1d2230; border-radius: 6px; padding: 14px; }
+    .card h3 { margin: 0 0 6px; font-size: 14px; color: #fff; }
+    .card .one-liner { font-size: 12px; color: #c5cad6; margin: 0 0 10px; }
+    .pill { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; margin: 0 4px 4px 0; }
+    .pill.det { background: #1f3d2e; color: #5be1a0; }
+    .pill.proof { background: #1f2d4d; color: #6aa6ff; }
+    .pill.attest { background: #2d1f4d; color: #c89aff; }
+    .reality { font: 11px ui-monospace, Menlo, monospace; color: #8893a8; }
+    .reality b { color: #c5cad6; font-weight: 500; }
+    ul.resp { margin: 6px 0 10px 18px; padding: 0; font-size: 12px; color: #c5cad6; }
+    table { width: 100%; border-collapse: collapse; font: 12px ui-monospace, Menlo, monospace; }
+    th { text-align: left; padding: 6px 8px; color: #8893a8; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #1d2230; }
+    td { padding: 6px 8px; border-bottom: 1px solid #16192a; }
+    .priority-critical { color: #ff8b8b; font-weight: 600; }
+    .priority-normal { color: #f1d878; }
+    .priority-low { color: #8893a8; }
+    .state-pending { color: #6aa6ff; }
+    .state-approved { color: #5be1a0; }
+    .state-rejected { color: #ff8b8b; }
+    .state-stale { color: #8893a8; }
+    .state-executed { color: #c5cad6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas Operator Agents <small>— /agents · /treasury/{id}/keepers · /treasury/{id}/pending</small></h1>
+  </header>
+  <main>
+
+    <section>
+      <h2>Connection</h2>
+      <label>API base URL</label>
+      <input id="base" value="https://atlas.example" autocomplete="off">
+      <label>Treasury entity id (hex32)</label>
+      <input id="entity" placeholder="ab12...cd34" autocomplete="off">
+      <p style="margin-top:12px">
+        <button id="load-agents">Load agent cards</button>
+        <button class="secondary" id="load-keepers">Load keeper mandates</button>
+        <button class="secondary" id="load-pending">Load pending queue</button>
+      </p>
+    </section>
+
+    <section>
+      <h2>Agent dashboard (Risk · Yield · Compliance · Execution)</h2>
+      <p style="font-size:12px;color:#8893a8;margin-top:0">
+        Each persona is a user-facing label over an existing
+        deterministic Atlas crate. No hidden LLM, no opaque policy —
+        every "agent" maps to code an auditor can read.
+      </p>
+      <div class="grid" id="cards"></div>
+    </section>
+
+    <section>
+      <h2>Keeper mandates (scoped, time-bounded, ratcheted)</h2>
+      <p style="font-size:12px;color:#8893a8;margin-top:0">
+        Each keeper holds a distinct on-chain key. The mandate
+        carries <code>valid_until_slot</code>, <code>max_actions</code>,
+        <code>max_notional_total_q64</code>; usage ratchets on every
+        action. Scope expansion or renewal goes through Squads.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>keeper</th>
+            <th>role</th>
+            <th>valid until</th>
+            <th>actions used / max</th>
+            <th>notional used / max (Q64)</th>
+            <th>issued by</th>
+          </tr>
+        </thead>
+        <tbody id="keepers"></tbody>
+      </table>
+      <pre id="keepers-raw"><code>// Click "Load keeper mandates" to fetch /treasury/{id}/keepers.</code></pre>
+    </section>
+
+    <section>
+      <h2>Pending-approval queue (multisig gate)</h2>
+      <p style="font-size:12px;color:#8893a8;margin-top:0">
+        Anything that would silently widen scope — mandate renewal,
+        a one-off action above the auto-execute threshold,
+        cap-exhaustion follow-ups — lands here. The agent never
+        auto-promotes; only a Squads vote can advance an entry.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>priority</th>
+            <th>state</th>
+            <th>action</th>
+            <th>role</th>
+            <th>summary</th>
+            <th>valid until slot</th>
+          </tr>
+        </thead>
+        <tbody id="pending"></tbody>
+      </table>
+      <pre id="pending-raw"><code>// Click "Load pending queue" to fetch /treasury/{id}/pending.</code></pre>
+    </section>
+
+  </main>
+
+  <script type="module">
+    function client(baseUrl) {
+      const base = baseUrl.replace(/\/$/, "");
+      async function getJson(path) {
+        const r = await fetch(base + path);
+        if (!r.ok) throw new Error(`GET ${path} → ${r.status}`);
+        return r.json();
+      }
+      return {
+        async getAgents() { return getJson(`/api/v1/agents`); },
+        async getKeepers(id) { return getJson(`/api/v1/treasury/${id}/keepers`); },
+        async getPending(id) { return getJson(`/api/v1/treasury/${id}/pending`); },
+      };
+    }
+
+    document.getElementById("load-agents").onclick = async () => {
+      const base = document.getElementById("base").value;
+      const c = client(base);
+      const root = document.getElementById("cards");
+      root.innerHTML = "";
+      try {
+        const cards = await c.getAgents();
+        for (const card of cards) {
+          const el = document.createElement("div");
+          el.className = "card";
+          const det = card.reality.deterministic ? `<span class="pill det">deterministic</span>` : "";
+          const pr = card.reality.gated_by_proof ? `<span class="pill proof">proof-gated</span>` : "";
+          const at = card.reality.gated_by_attestation ? `<span class="pill attest">attestation-gated</span>` : "";
+          const resp = (card.responsibilities ?? []).map(r => `<li>${escapeHtml(r)}</li>`).join("");
+          el.innerHTML = `
+            <h3>${escapeHtml(card.display_name)}</h3>
+            <p class="one-liner">${escapeHtml(card.one_liner)}</p>
+            ${det}${pr}${at}
+            <ul class="resp">${resp}</ul>
+            <p class="reality">backed by <b>${escapeHtml(card.reality.concrete_crate)}</b>${
+              card.reality.concrete_program
+                ? ` · program <b>${escapeHtml(card.reality.concrete_program)}</b>`
+                : ""
+            }</p>`;
+          root.appendChild(el);
+        }
+      } catch (err) {
+        root.innerHTML = `<pre class="err"><code>${escapeHtml(String(err))}</code></pre>`;
+      }
+    };
+
+    document.getElementById("load-keepers").onclick = async () => {
+      const base = document.getElementById("base").value;
+      const id = document.getElementById("entity").value;
+      const c = client(base);
+      const tbody = document.getElementById("keepers");
+      const raw = document.getElementById("keepers-raw");
+      tbody.innerHTML = "";
+      try {
+        const list = await c.getKeepers(id);
+        raw.classList.remove("err"); raw.classList.add("ok");
+        raw.innerHTML = `<code>${escapeHtml(JSON.stringify(list, null, 2))}</code>`;
+        for (const m of list) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${escapeHtml(short(m.keeper_pubkey))}</td>
+            <td>${escapeHtml(m.role)}</td>
+            <td>${m.valid_until_slot}</td>
+            <td>${m.usage?.actions_used ?? m.actions_used} / ${m.max_actions}</td>
+            <td>${m.usage?.notional_used_q64 ?? m.notional_used_q64} / ${m.max_notional_total_q64}</td>
+            <td>${escapeHtml(short(arrayToHex(m.issued_by)))}</td>`;
+          tbody.appendChild(tr);
+        }
+      } catch (err) {
+        raw.classList.add("err");
+        raw.innerHTML = `<code>${escapeHtml(String(err))}</code>`;
+      }
+    };
+
+    document.getElementById("load-pending").onclick = async () => {
+      const base = document.getElementById("base").value;
+      const id = document.getElementById("entity").value;
+      const c = client(base);
+      const tbody = document.getElementById("pending");
+      const raw = document.getElementById("pending-raw");
+      tbody.innerHTML = "";
+      try {
+        const list = await c.getPending(id);
+        raw.classList.remove("err"); raw.classList.add("ok");
+        raw.innerHTML = `<code>${escapeHtml(JSON.stringify(list, null, 2))}</code>`;
+        for (const b of list) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td class="priority-${b.priority}">${escapeHtml(b.priority)}</td>
+            <td class="state-${b.state}">${escapeHtml(b.state)}</td>
+            <td>${escapeHtml(b.action)}</td>
+            <td>${escapeHtml(b.role)}</td>
+            <td>${escapeHtml(b.summary)}</td>
+            <td>${b.valid_until_slot}</td>`;
+          tbody.appendChild(tr);
+        }
+      } catch (err) {
+        raw.classList.add("err");
+        raw.innerHTML = `<code>${escapeHtml(String(err))}</code>`;
+      }
+    };
+
+    function short(s) {
+      if (!s) return "";
+      const str = String(s);
+      return str.length > 12 ? `${str.slice(0, 6)}…${str.slice(-4)}` : str;
+    }
+    function arrayToHex(a) {
+      if (typeof a === "string") return a;
+      if (!Array.isArray(a)) return String(a);
+      return a.map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+    function escapeHtml(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]); }
+  </script>
+</body>
+</html>

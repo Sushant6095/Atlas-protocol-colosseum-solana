@@ -250,6 +250,44 @@ impl AtlasClient {
             .await?;
         serde_json::from_slice(&bytes).map_err(ClientError::Decode)
     }
+
+    /// Phase 15 §5 — fetch the four-persona agent dashboard cards.
+    /// Maps each user-facing persona (Risk / Yield / Compliance /
+    /// Execution) onto the deterministic crate that produces the
+    /// behaviour, so an auditor can follow each "agent" back to the
+    /// code that runs.
+    pub async fn get_agents(&self) -> Result<Vec<atlas_operator_agent::AgentCard>, ClientError> {
+        let bytes = self.transport.get("/api/v1/agents").await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 15 §4 — fetch active keeper mandates for a treasury,
+    /// each carrying its ratcheted usage counters and remaining
+    /// caps. The frontend renders this on `/agents`.
+    pub async fn get_keepers(
+        &self,
+        treasury_id: &Pubkey,
+    ) -> Result<Vec<atlas_operator_agent::KeeperMandate>, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!("/api/v1/treasury/{}/keepers", hex32(treasury_id)))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 15 §6 — fetch the pending-approval queue for a
+    /// treasury. Each bundle requires a Squads multisig vote before
+    /// the agent can advance it; the agent itself never auto-promotes.
+    pub async fn get_pending(
+        &self,
+        treasury_id: &Pubkey,
+    ) -> Result<Vec<atlas_operator_agent::PendingBundle>, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!("/api/v1/treasury/{}/pending", hex32(treasury_id)))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
 }
 
 fn hex32(b: &[u8; 32]) -> String {

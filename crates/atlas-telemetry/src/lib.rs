@@ -1201,6 +1201,107 @@ pub static CONFIDENTIAL_AML_CLEARANCE_FAILURES_TOTAL: Lazy<CounterVec> = Lazy::n
     v
 });
 
+// ─── Phase 15 — Operator-Agent / Keeper Mandate SLOs (directive 15 §9) ───
+
+pub static KEEPER_CROSS_ROLE_ATTEMPTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_keeper_cross_role_attempts_total",
+        "Cross-role signing attempts rejected by the program (I-18). Hard alert on any.",
+        &["presented_role", "action_class"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static KEEPER_MANDATE_ADMIT_FAILURES_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_keeper_mandate_admit_failures_total",
+        "Mandate admit() failures bucketed by reason (expired / cap exhausted / scope / etc).",
+        &["reason"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static KEEPER_MANDATE_REMAINING_ACTIONS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_keeper_mandate_remaining_actions",
+        "Remaining actions on each active keeper mandate. Dashboarded; alert if < 5% before renewal.",
+        &["keeper_pubkey", "role"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static KEEPER_MANDATE_REMAINING_NOTIONAL_Q64: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_keeper_mandate_remaining_notional_q64",
+        "Remaining notional cap (Q64) on each active keeper mandate.",
+        &["keeper_pubkey", "role"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static ATTESTATION_FRESHNESS_VIOLATIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_attestation_freshness_violations_total",
+        "Execution attestations rejected because slot lag > MAX_ATTESTATION_STALENESS_SLOTS. Hard alert on any (I-20).",
+        &["attestation_kind"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static ATTESTATION_SAME_SIGNER_VIOLATIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_attestation_same_signer_violations_total",
+        "Attestation submissions where attestation_keeper == action_keeper. I-20 forbids this. Hard alert on any.",
+        &["attestation_kind"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PENDING_QUEUE_DEPTH: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_pending_queue_depth",
+        "Awaiting-decision pending bundles per treasury. Dashboarded.",
+        &["treasury_id", "priority"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PENDING_DECISION_LAG_SLOTS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_pending_decision_lag_slots",
+        "Slots between bundle enqueue and multisig decision. p99 SLO ≤ 8_000 (Critical) / 40_000 (Normal).",
+        vec![100.0, 500.0, 2_000.0, 8_000.0, 20_000.0, 40_000.0]
+    );
+    let h = HistogramVec::new(opts, &["priority"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static MANDATE_SCOPE_EXPANSION_ATTEMPTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_mandate_scope_expansion_attempts_total",
+        "Mandate construction attempts that tried to widen scope past the canonical role bitset (I-21). Hard alert on any.",
+        &["role"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

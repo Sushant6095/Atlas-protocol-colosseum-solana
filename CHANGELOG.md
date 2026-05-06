@@ -1,5 +1,77 @@
 # Atlas Changelog
 
+## Unreleased — Phase 15.0 (2026-05-06) — Directive 15 (Atlas Operator Agent — Zerion-Style Policy-Constrained Treasury Agents)
+
+One new crate (`atlas-operator-agent`, 6 modules) and one new
+"flagship" framing: institutional-grade scoped-keeper architecture
+backed by on-chain mandates and independent execution attestations.
+Principle: **the agent only ever does what its mandate permits, the
+mandate is enforced by the program, and renewal is a multisig event.**
+
+- `atlas-operator-agent::role` (§2 + I-18) — 7 `KeeperRole`s and 8
+  `ActionClass`es; 64-byte `ActionBitset` (8 in use, 56 reserved for
+  future actions without layout migration); `canonical_bitset()` per
+  role; `assert_action_authorized()` enforces I-18 cross-role
+  rejection.
+- `atlas-operator-agent::mandate` (§4 + I-19) — `KeeperMandate` with
+  `valid_from_slot`/`valid_until_slot`/`max_actions`/
+  `max_notional_per_action_q64`/`max_notional_total_q64` +
+  ratcheted `MandateUsage`; `admit()` is the atomic
+  check-and-ratchet; rejects `Expired` / `NotYetValid` /
+  `ActionCapExhausted` / `NotionalCapExhausted` /
+  `PerActionCapBreached`; constructor rejects scope wider than
+  canonical (I-21).
+- `atlas-operator-agent::registry` (§11) — `KeeperRegistry`
+  off-chain mirror of the `atlas_keeper_registry` program;
+  `issue` / `revoke` / `rotate` / `admit` / `check`; revoked
+  mandates retained for audit with `RevocationReason`.
+- `atlas-operator-agent::attestation` (§3 + I-20) —
+  `ExecutionAttestation` with `attestation_keeper`, `action_keeper`,
+  `payload_hash`, `oracle_quorum_hash`, `slot`;
+  `MAX_ATTESTATION_STALENESS_SLOTS = 16`;
+  `verify_execution_attestation` rejects stale, future, same-signer,
+  kind/role mismatch, payload-hash mismatch.
+- `atlas-operator-agent::pending` (§6 + I-21) — `PendingQueue` with
+  `Critical/Normal/Low` priority and `Pending → Approved/Rejected/
+  Stale → Executed` state machine; agent never auto-promotes;
+  `decide` past the `valid_until_slot` flips to `Stale`; `sweep_stale`.
+- `atlas-operator-agent::agents` (§5 + §13) — four-persona dashboard
+  (Risk / Yield / Compliance / Execution) with explicit `AgentReality`
+  pointing each persona at the deterministic crate that does the work.
+  No hidden LLM. No opaque policy.
+- `atlas-public-api::endpoints` adds `GET /api/v1/agents`,
+  `GET /api/v1/treasury/{id}/keepers`, `GET /api/v1/treasury/{id}/pending`
+  (count 31 → 34).
+- `atlas-rs::client` adds `get_agents` / `get_keepers` / `get_pending`.
+- `atlas-rs::Cargo.toml` adds `atlas-operator-agent` dep.
+- `@atlas/sdk::AtlasPlatform` adds `getAgents` / `getKeepers` /
+  `getPending` plus 7 new TS types (KeeperRole, ActionClass,
+  AgentPersona, AgentReality, AgentCard, KeeperMandateView,
+  PendingBundleView, PendingPriority, PendingState, PendingReason).
+- `sdk/rust/src/lib.rs` adds `ATLAS_KEEPER_REGISTRY` program id and
+  `pda::keeper_mandate` / `pda::revoked_mandate` /
+  `pda::execution_attestation` / `pda::pending_bundle` helpers.
+- `atlas-telemetry` adds 9 Phase 15 metrics:
+  `atlas_keeper_cross_role_attempts_total`,
+  `atlas_keeper_mandate_admit_failures_total`,
+  `atlas_keeper_mandate_remaining_actions`,
+  `atlas_keeper_mandate_remaining_notional_q64`,
+  `atlas_attestation_freshness_violations_total`,
+  `atlas_attestation_same_signer_violations_total`,
+  `atlas_pending_queue_depth`,
+  `atlas_pending_decision_lag_slots`,
+  `atlas_mandate_scope_expansion_attempts_total`.
+- `atlas-chaos` adds `ChaosInject::KeeperCrossRoleAttempt`,
+  `MandateExpiredReuse`, `AttestationSameSigner`, `AttestationStale`
+  injectors and `GameDayScenario::CompromisedKeeperMandateBreaches`
+  (count 6 → 7); 4 cases verifying I-18 / I-19 / I-20 enforcement.
+- `sdk/playground/agents.html` — operator-agent dashboard playground
+  rendering the four agent cards, the keeper-mandate table with
+  ratcheted usage, and the pending-approval queue.
+- `AGENTS.md` — one-pager: hard rules, topology, mandate lifecycle,
+  attestation flow, multi-agent mapping, Zerion comparison.
+- 59 unit tests across `atlas-operator-agent`; full workspace passes.
+
 ## Unreleased — Phase 14.0 (2026-05-07) — Directive 14 (Atlas Confidential Treasury Layer — Cloak)
 
 One new crate (`atlas-confidential`, 8 modules) lands the Cloak

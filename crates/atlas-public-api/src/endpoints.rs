@@ -80,6 +80,10 @@ pub const fn rest_endpoints() -> &'static [RestEndpoint] {
         RestEndpoint { method: Method::Post, path: "/api/v1/disclosure/viewing-keys/revoke", description: "revoke a viewing key (past disclosures still verify)", rate_limit_per_minute: 120 },
         RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/disclosure", description: "disclosure policy + Bubblegum-anchored audit log entries", rate_limit_per_minute: 300 },
         RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/confidential/payroll", description: "most recent confidential payroll batch (aggregate commitment + entry count)", rate_limit_per_minute: 300 },
+        // Phase 15 — Atlas Operator Agent (Zerion-style policy-constrained agents).
+        RestEndpoint { method: Method::Get, path: "/api/v1/agents", description: "four-persona agent dashboard (Risk / Yield / Compliance / Execution)", rate_limit_per_minute: 600 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/keepers", description: "active keeper mandates + ratcheted usage counters", rate_limit_per_minute: 300 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/pending", description: "pending-approval queue (mandate renewals, scope expansions, above-auto-threshold)", rate_limit_per_minute: 300 },
     ]
 }
 
@@ -102,8 +106,10 @@ mod tests {
         // Phase 13 adds 4 + 3 (closeout: ledger, settlement quote,
         // compliance) for the Dodo treasury OS. Phase 14 adds 4 for
         // the Cloak confidential layer (viewing key issue/revoke,
-        // disclosure log, confidential payroll batch).
-        assert_eq!(rest_endpoints().len(), 31);
+        // disclosure log, confidential payroll batch). Phase 15 adds
+        // 3 for the operator-agent surface (agents dashboard, keeper
+        // mandates, pending-approval queue).
+        assert_eq!(rest_endpoints().len(), 34);
     }
 
     #[test]

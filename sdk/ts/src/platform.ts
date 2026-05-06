@@ -27,6 +27,93 @@ export interface ProofResponse {
   blackbox: unknown;
 }
 
+// ─── Phase 15 — Operator Agent surface ──────────────────────────────────
+
+export type KeeperRole =
+  | "rebalance_keeper"
+  | "settlement_keeper"
+  | "alt_keeper"
+  | "archive_keeper"
+  | "hedge_keeper"
+  | "pyth_post_keeper"
+  | "attestation_keeper";
+
+export type ActionClass =
+  | "rebalance_execute"
+  | "settlement_settle"
+  | "alt_mutate"
+  | "archive_append"
+  | "hedge_open_close_resize"
+  | "pyth_post"
+  | "attestation_sign"
+  | "disclosure_log_write";
+
+export type AgentPersona = "risk" | "yield" | "compliance" | "execution";
+
+export interface AgentReality {
+  concrete_crate: string;
+  concrete_program: string | null;
+  deterministic: boolean;
+  gated_by_proof: boolean;
+  gated_by_attestation: boolean;
+}
+
+export interface AgentCard {
+  persona: AgentPersona;
+  display_name: string;
+  one_liner: string;
+  responsibilities: string[];
+  reality: AgentReality;
+}
+
+export interface KeeperMandateView {
+  keeper_pubkey: string;
+  role: KeeperRole;
+  valid_from_slot: number;
+  valid_until_slot: number;
+  max_actions: number;
+  max_notional_per_action_q64: string;
+  max_notional_total_q64: string;
+  actions_used: number;
+  notional_used_q64: string;
+  remaining_actions: number;
+  remaining_notional_q64: string;
+  issued_by_squads_tx: string;
+}
+
+export type PendingPriority = "critical" | "normal" | "low";
+
+export type PendingState =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "stale"
+  | "executed";
+
+export type PendingReason =
+  | "mandate_renewal"
+  | "mandate_scope_expansion"
+  | "above_auto_threshold"
+  | "caps_exhausted"
+  | "compliance_hold"
+  | "manual";
+
+export interface PendingBundleView {
+  bundle_id: string;
+  treasury_id: string;
+  keeper_pubkey: string;
+  role: KeeperRole;
+  action: ActionClass;
+  priority: PendingPriority;
+  reason: PendingReason;
+  notional_q64: string;
+  submitted_at_slot: number;
+  valid_until_slot: number;
+  summary: string;
+  state: PendingState;
+  decision_squads_tx: string | null;
+}
+
 export interface PreSignPayload {
   schema: string;
   instruction: "deposit" | "withdraw" | "vault_creation" | "sandbox_approval";
@@ -83,6 +170,21 @@ export class AtlasPlatform {
       vault_id: vaultId,
       amount_q64: amountQ64,
     });
+  }
+
+  /** Phase 15 — fetch the four-persona agent dashboard cards. */
+  async getAgents(): Promise<AgentCard[]> {
+    return this.getJson<AgentCard[]>("/api/v1/agents");
+  }
+
+  /** Phase 15 — fetch active keeper mandates + ratcheted usage for a treasury. */
+  async getKeepers(treasuryId: string): Promise<KeeperMandateView[]> {
+    return this.getJson<KeeperMandateView[]>(`/api/v1/treasury/${treasuryId}/keepers`);
+  }
+
+  /** Phase 15 — fetch the pending-approval queue for a treasury. */
+  async getPending(treasuryId: string): Promise<PendingBundleView[]> {
+    return this.getJson<PendingBundleView[]>(`/api/v1/treasury/${treasuryId}/pending`);
   }
 
   /** Sanity-check that a `ProofResponse` carries every field the

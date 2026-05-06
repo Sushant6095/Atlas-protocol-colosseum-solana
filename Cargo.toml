@@ -48,6 +48,7 @@ members = [
     "crates/atlas-jupiter",
     "crates/atlas-payments",
     "crates/atlas-confidential",
+    "crates/atlas-operator-agent",
     "tests/invariants",
     "tests/adversarial",
     "tests/warehouse",

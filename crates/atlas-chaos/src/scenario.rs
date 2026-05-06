@@ -73,6 +73,11 @@ pub enum GameDayScenario {
     ProverOutage,
     /// Bubblegum anchor keeper key loss.
     BubblegumKeeperLoss,
+    /// Phase 15 — operator agent mandate enforcement game day.
+    /// Compromised rebalance keeper tries to land a settlement +
+    /// reuse an expired mandate + self-attest. Every variant must
+    /// be rejected by the registry program.
+    CompromisedKeeperMandateBreaches,
 }
 
 impl GameDayScenario {
@@ -84,6 +89,7 @@ impl GameDayScenario {
             GameDayScenario::MainnetCongestion => "mainnet-congestion",
             GameDayScenario::ProverOutage => "prover-outage",
             GameDayScenario::BubblegumKeeperLoss => "bubblegum-keeper-loss",
+            GameDayScenario::CompromisedKeeperMandateBreaches => "compromised-keeper-mandate-breaches",
         }
     }
 
@@ -95,6 +101,9 @@ impl GameDayScenario {
             GameDayScenario::MainnetCongestion => "ops/runbooks/mainnet-congestion.md",
             GameDayScenario::ProverOutage => "ops/runbooks/prover-outage.md",
             GameDayScenario::BubblegumKeeperLoss => "ops/runbooks/bubblegum-keeper-loss.md",
+            GameDayScenario::CompromisedKeeperMandateBreaches => {
+                "ops/runbooks/compromised-keeper-mandate-breaches.md"
+            }
         }
     }
 
@@ -153,6 +162,35 @@ impl GameDayScenario {
                     expected: ExpectedOutcome::Halt,
                 },
             ],
+            GameDayScenario::CompromisedKeeperMandateBreaches => vec![
+                ScenarioCase {
+                    label: "rebalance_keeper_signs_settlement",
+                    injector: ChaosInject::KeeperCrossRoleAttempt {
+                        keeper: [0xa1; 32],
+                        // SettlementSettle bit (see atlas-operator-agent::role::action_bit).
+                        presented_action: 1,
+                    },
+                    expected: ExpectedOutcome::RejectAtVerifier,
+                },
+                ScenarioCase {
+                    label: "expired_mandate_replayed_after_rotation",
+                    injector: ChaosInject::MandateExpiredReuse {
+                        keeper: [0xa1; 32],
+                        slots_past_expiry: 200,
+                    },
+                    expected: ExpectedOutcome::RejectAtVerifier,
+                },
+                ScenarioCase {
+                    label: "rebalance_keeper_self_attests",
+                    injector: ChaosInject::AttestationSameSigner { keeper: [0xa1; 32] },
+                    expected: ExpectedOutcome::RejectAtVerifier,
+                },
+                ScenarioCase {
+                    label: "stale_execution_attestation_replayed",
+                    injector: ChaosInject::AttestationStale { lag_slots: 64 },
+                    expected: ExpectedOutcome::RejectAtVerifier,
+                },
+            ],
         }
     }
 }
@@ -164,6 +202,7 @@ pub const MANDATORY_GAME_DAYS: &[GameDayScenario] = &[
     GameDayScenario::MainnetCongestion,
     GameDayScenario::ProverOutage,
     GameDayScenario::BubblegumKeeperLoss,
+    GameDayScenario::CompromisedKeeperMandateBreaches,
 ];
 
 pub fn game_day_scenarios() -> &'static [GameDayScenario] {
@@ -193,8 +232,9 @@ mod tests {
     }
 
     #[test]
-    fn mandatory_game_days_count_is_six() {
-        assert_eq!(MANDATORY_GAME_DAYS.len(), 6);
+    fn mandatory_game_days_count_is_seven() {
+        // Phase 15 adds the operator-agent compromised-keeper game day.
+        assert_eq!(MANDATORY_GAME_DAYS.len(), 7);
     }
 
     #[test]

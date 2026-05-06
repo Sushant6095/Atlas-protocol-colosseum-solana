@@ -1,5 +1,34 @@
 # Atlas Changelog
 
+## Unreleased — Phase 10.1 (2026-05-06) — Directive 10 closeout (drift CI + defensive ladder + dashboard + one-pager)
+
+Final §12 items.
+
+- `bin/atlas-drift-check` (in `atlas-assets`) — daily Token-2022
+  extension drift CI driver. Reads observed extensions JSON, runs
+  `check_drift` against the PUSD allowed/forbidden manifests,
+  pretty-prints the drift report, exits non-zero on any drift so CI
+  pages governance.
+- `atlas-treasury::defensive` (§7.1) — `StableDefensiveAction`
+  ladder with three rungs: `Defensive` (peg deviation on deposit
+  asset), `DefensiveAndIsolate` (pool depth collapse — protocol
+  evicted from the universe for the cooldown), `FrozenDeposit`
+  (issuer authority change — withdrawals continue, new deposits
+  refused). 7 tests pin all three rungs + the silent paths
+  (peg-on-other-mint, depth-on-unknown-pool, issuer mint-spike,
+  flow spike).
+- `sdk/playground/intel.html` — stablecoin intelligence dashboard
+  (peg / flow / depth / issuer panels) polling
+  `/api/v1/intel/pusd` with PUSD-specific SLO thresholds driving
+  card colour. Static page, no build step.
+- `docs/atlas-treasury-for-pusd.md` — directive §13 positioning
+  one-pager: architecture diagram, deliverable status, hard rules,
+  demo URLs, code links, audit posture.
+
+§12 deliverable checklist (off-chain): all closed.
+
+Workspace: **690 tests** green (+7 vs Phase 10.0).
+
 ## Unreleased — Phase 10.0 (2026-05-06) — Directive 10 (PUSD treasury layer)
 
 PUSD as the primary reserve asset of Atlas. Two new crates and three

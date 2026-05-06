@@ -7,11 +7,19 @@ description = "Atlas asset registry — PUSD mint, Token-2022 extension manifest
 
 [lib]
 
+[[bin]]
+name = "atlas-drift-check"
+path = "src/bin/drift_check.rs"
+
 [dependencies]
 atlas-runtime = { path = "../atlas-runtime" }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror.workspace = true
+anyhow.workspace = true
+clap.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
 
 [dev-dependencies]
 proptest = "1.5"

@@ -1,6 +1,6 @@
 //! atlas-treasury — PUSD treasury layer (directive 10).
 //!
-//! Six modules:
+//! Seven modules:
 //!
 //! * `policy`        — `TreasuryRiskPolicy` schema (§3.2) + commitment hash.
 //! * `entity`        — `TreasuryEntity` (§3.1) wrapping multisig + vaults + policy.
@@ -12,10 +12,13 @@
 //! * `intel`         — stablecoin intelligence triggers (§6): peg
 //!                     deviation, flow spike, depth collapse, issuer
 //!                     event.
+//! * `defensive`     — stable-vault trigger ladder (§7.1) mapping
+//!                     intel signals to `StableDefensiveAction`.
 
 #![deny(unsafe_code)]
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
+pub mod defensive;
 pub mod emergency;
 pub mod entity;
 pub mod intel;
@@ -23,6 +26,7 @@ pub mod policy;
 pub mod stable_swap;
 pub mod yield_account;
 
+pub use defensive::{evaluate_stable_defensive, StableDefensiveAction};
 pub use emergency::{prepare_emergency_pull, EmergencyPullError, EmergencyPullProposal};
 pub use entity::{TreasuryEntity, TreasuryEntityError};
 pub use intel::{

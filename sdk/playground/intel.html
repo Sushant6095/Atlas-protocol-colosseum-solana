@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas Stablecoin Intelligence</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; letter-spacing: 0.02em; }
+    header small { color: #8893a8; }
+    main { padding: 24px; display: grid; gap: 18px; max-width: 1200px; margin: 0 auto; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 18px; }
+    h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .stat { background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; padding: 12px; }
+    .stat .k { font-size: 11px; color: #8893a8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat .v { font: 600 22px/1 ui-monospace, Menlo, monospace; color: #e7eaf0; margin-top: 4px; }
+    .stat .b { font-size: 11px; color: #6aa6ff; margin-top: 6px; }
+    .stat.alert .v { color: #ff8b8b; }
+    .stat.warn .v { color: #ffc16a; }
+    .stat.ok .v { color: #5be1a0; }
+    table { border-collapse: collapse; width: 100%; font: 12px ui-monospace, Menlo, monospace; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #1d2230; }
+    th { font-size: 11px; text-transform: uppercase; color: #8893a8; letter-spacing: 0.06em; }
+    .signal-row.peg { color: #ff8b8b; }
+    .signal-row.depth { color: #ffc16a; }
+    .signal-row.issuer { color: #6aa6ff; }
+    .signal-row.flow { color: #b8eecf; }
+    label { font-size: 12px; color: #8893a8; display: block; margin: 4px 0 2px; }
+    input { padding: 8px 10px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 320px; }
+    button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font: inherit; }
+    button:hover { background: #1f57d6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas Stablecoin Intelligence <small>— PUSD peg, flow, depth panels</small></h1>
+  </header>
+  <main>
+    <section>
+      <h2>Source</h2>
+      <label>API base URL</label>
+      <input id="base" value="https://atlas.example" autocomplete="off">
+      <label>Refresh interval (ms)</label>
+      <input id="refresh" value="5000" autocomplete="off">
+      <p style="margin-top:12px"><button id="start">Start polling</button> <button id="stop" style="background:#2a3142">Stop</button></p>
+    </section>
+
+    <section>
+      <h2>PUSD peg (Phase 04 §2.1 TWAP consensus mid)</h2>
+      <div class="grid">
+        <div class="stat ok"><div class="k">peg deviation (bps)</div><div class="v" id="peg-current">—</div><div class="b">τ_peg = 50 bps · K = 8 slots</div></div>
+        <div class="stat ok"><div class="k">peg deviation p99 (24h)</div><div class="v" id="peg-p99">—</div><div class="b">SLO: dashboarded</div></div>
+        <div class="stat ok"><div class="k">consensus sources</div><div class="v" id="peg-sources">—</div><div class="b">DEX TWAPs only — never Birdeye in commitment path</div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Stable flow (5σ tracker per protocol)</h2>
+      <div class="grid">
+        <div class="stat ok"><div class="k">inflow notional 1h (Q64)</div><div class="v" id="flow-inflow">—</div></div>
+        <div class="stat ok"><div class="k">outflow notional 1h (Q64)</div><div class="v" id="flow-outflow">—</div></div>
+        <div class="stat ok"><div class="k">flow spikes (24h)</div><div class="v" id="flow-spikes">—</div><div class="b">5σ threshold over trailing 24h distribution</div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Pool depth (±25 bps)</h2>
+      <div class="grid">
+        <div class="stat ok"><div class="k">min depth across pools (Q64)</div><div class="v" id="depth-min">—</div></div>
+        <div class="stat ok"><div class="k">depth collapses (24h)</div><div class="v" id="depth-collapses">—</div><div class="b">τ = 40 % drop in 60 s</div></div>
+        <div class="stat ok"><div class="k">protocols isolated</div><div class="v" id="depth-isolated">—</div><div class="b">Phase 7.1 → DefensiveAndIsolate</div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recent signals</h2>
+      <table id="signals"><thead><tr><th>slot</th><th>kind</th><th>mint / pool</th><th>severity</th></tr></thead><tbody></tbody></table>
+    </section>
+  </main>
+
+  <script type="module">
+    let timer = null;
+
+    async function tick() {
+      const base = document.getElementById("base").value.replace(/\/$/, "");
+      try {
+        const r = await fetch(base + "/api/v1/intel/pusd");
+        if (!r.ok) throw new Error("/api/v1/intel/pusd → " + r.status);
+        render(await r.json());
+      } catch (err) {
+        // Silent on transient errors so the dashboard doesn't flap; the
+        // stat cards keep their prior values.
+        console.warn("intel poll failed:", err);
+      }
+    }
+
+    function render(d) {
+      set("peg-current", d.peg?.current_deviation_bps);
+      set("peg-p99", d.peg?.p99_24h_bps);
+      set("peg-sources", (d.peg?.sources ?? []).join(", "));
+      set("flow-inflow", d.flow?.inflow_1h_q64);
+      set("flow-outflow", d.flow?.outflow_1h_q64);
+      set("flow-spikes", d.flow?.spikes_24h);
+      set("depth-min", d.depth?.min_q64);
+      set("depth-collapses", d.depth?.collapses_24h);
+      set("depth-isolated", (d.defensive?.isolated_protocols ?? []).length);
+
+      // Recolour stat cards based on PUSD-specific SLOs.
+      colour("peg-current", n(d.peg?.current_deviation_bps), { ok: 25, warn: 50, alert: 100 });
+      colour("peg-p99", n(d.peg?.p99_24h_bps), { ok: 25, warn: 50, alert: 100 });
+
+      const tbody = document.querySelector("#signals tbody");
+      tbody.innerHTML = "";
+      for (const s of (d.recent_signals ?? []).slice(0, 20)) {
+        const tr = document.createElement("tr");
+        tr.className = "signal-row " + (s.kind ?? "").split("_")[0];
+        tr.innerHTML = `<td>${s.slot ?? ""}</td><td>${s.kind ?? ""}</td><td>${s.subject ?? ""}</td><td>${s.severity ?? ""}</td>`;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function set(id, v) {
+      document.getElementById(id).textContent = v ?? "—";
+    }
+    function n(x) { return typeof x === "number" ? x : parseFloat(x ?? "NaN"); }
+    function colour(id, value, thresholds) {
+      const el = document.getElementById(id).parentElement;
+      el.classList.remove("ok", "warn", "alert");
+      if (Number.isFinite(value)) {
+        if (value >= thresholds.alert) el.classList.add("alert");
+        else if (value >= thresholds.warn) el.classList.add("warn");
+        else el.classList.add("ok");
+      } else {
+        el.classList.add("ok");
+      }
+    }
+
+    document.getElementById("start").onclick = () => {
+      const ms = parseInt(document.getElementById("refresh").value, 10) || 5000;
+      tick();
+      if (timer) clearInterval(timer);
+      timer = setInterval(tick, ms);
+    };
+    document.getElementById("stop").onclick = () => { if (timer) clearInterval(timer); timer = null; };
+  </script>
+</body>
+</html>

@@ -1,5 +1,139 @@
 # Atlas Changelog
 
+## Unreleased — Phase 9.0 (2026-05-06) — Directive 09 (Side-track integrations + Public Platform)
+
+Six side-track tracks land as off-chain crates with the directive's
+**hard rule** enforced: no third-party API output enters the Poseidon
+commitment path. The Phase 09 lint pins this at CI time.
+
+### `atlas-fee-oracle` — QuickNode (§2)
+
+- `FeeRecommendation { account_set_hash, p50, p75, p99,
+  recommended, slot, source }` — content-addressed by the writable
+  account set so cache hits dedupe across vaults.
+- `pick_source` falls back from QuickNode to native quorum after
+  `QUICKNODE_STALE_AFTER_SLOTS = 4`.
+- `validate_drift(recommended, actually_landed, tolerance)` powers
+  the §10 SLO `fee_oracle.recommendation_drift_bps p99 ≤ 500`.
+
+### `atlas-birdeye-overlay` — Birdeye (§3)
+
+**Monitoring only — never in commitment path.**
+- `opportunity::rank_opportunities` — risk-adjusted score
+  `apy × liquidity_quality / (volatility × risk)`. Top quartile is
+  `eligible_for_universe` only when risk < 5_000 bps.
+- `heatmap::build_heatmap` — 24h smart-money rotation aggregation
+  over `SmartMoneyMigration` signals; bridges
+  `atlas_forensic::ProtocolId` → `atlas_failure::ProtocolId`.
+- `quality::compute_quality_score` — composite over depth +
+  dispersion + age + inverse toxicity (35/25/15/25 weights).
+- `attribution::attribution_join` — per-rebalance preceding-signal
+  list within a configurable window for ex-post analyst review.
+
+### `atlas-execution-routes` — DFlow + TWAP (§4)
+
+- `ExecutionRoute` trait with concrete `JitoRoute`, `SwqosRoute`,
+  `DflowRoute`. DFlow only `supports` MEV-sensitive legs; quote
+  dampens slippage by ~10 bps vs the naïve route.
+- `RouteRegistry` — EMA over (route, landed, cost) drives
+  `select(leg)` to the highest-scoring supporting route.
+- `twap::TwapScheduler` — proof-per-slice executor.
+  `build_slices(plan)` produces evenly-spaced slices with even
+  notional. `execute(plan, step)` runs the closure per slice and
+  registers landed bundle ids in an `IdempotencyGuard`; aborts
+  cleanly on first failure or duplicate id.
+- `twap_threshold_check(notional, tvl, depth, ...)` — directive's
+  TVL × pool-depth gate for switching from single-bundle to TWAP.
+
+### `atlas-presign` — Solflare (§5)
+
+- `PreSignPayload { schema, instruction, vault_id,
+  projected_share_balance, projected_apy_bps,
+  projected_protocol_exposure_after, risk_delta_bps,
+  fees_total_lamports, compute_units_estimated, warnings,
+  human_summary }`. Schema pinned to `atlas.presign.v1`.
+- `validate()` enforces: schema matches, exposure rows sum to
+  10_000 bps (or empty), withdraws are non-empty, no `Error`-severity
+  warnings escape to a signing flow.
+- `high_risk()` — fires on any `Warn` severity OR
+  `risk_delta_bps.abs() ≥ 500`.
+
+### `atlas-vault-templates` — Kamino (§6)
+
+- 3 templates × 3 risk bands = 9 canonical configurations.
+  `kamino-stable-balanced`, `kamino-yield-aggressive`,
+  `kamino-vol-suppress`. Risk band drift_band_bps:
+  Conservative=200, Balanced=500, Aggressive=1000.
+- `commitment_hash = blake3("atlas.template.v1" ||
+  canonical_bytes)` — once committed, the band cannot drift.
+  `validate()` enforces alloc + agent weights both sum to 10_000
+  bps and the commitment hash matches `compute_commitment_hash`.
+- Every template carries a `backtest_report_uri`; empty URI rejects.
+
+### `atlas-public-api` — Developer Platform (§7)
+
+- `endpoints::rest_endpoints()` — compile-time const slice of 9 REST
+  endpoints. `websocket_endpoints()` — 2 WS streams. Test pins the
+  count + path uniqueness + the `/simulate/{ix}` POST as the only
+  write-shaped (still read-side) verb.
+- `sdk::ProofResponse { public_input_hex, proof_bytes,
+  archive_root_slot, archive_root, merkle_proof_path, blackbox }` +
+  `verify_proof_response` sanity check. Lets a third party verify
+  Atlas without trusting the Atlas API.
+- `webhook::sign_payload` HMAC-SHA256 over `timestamp || payload`.
+  `verify_signature(secret, ts, payload, sig, now)` enforces the
+  600 s replay window. 6 `WebhookEvent` variants covering rebalance,
+  defensive mode, alert, forensic signal.
+
+### Commitment-path lint (§0 hard rule)
+
+`atlas_runtime::lints::forbid_third_party_in_commitment(source,
+forbidden)` — substring scans for `BirdeyeYieldRow`,
+`BirdeyeRiskFlag`, `DflowQuote`, `DflowRouteReceipt`,
+`SolflareSimulation`, `HeliusParsedTx`, `QuicknodeFeeSample`. Caller
+extension list lets file-family-specific bans land alongside.
+
+### Phase 09 telemetry (§10)
+
+7 metrics:
+- `atlas_api_read_latency_ms{endpoint}` (p99 SLO ≤ 400 ms).
+- `atlas_api_error_rate_5m_bps{endpoint}` (SLO ≤ 50).
+- `atlas_stream_network_lag_slots` (p99 SLO ≤ 2).
+- `atlas_webhook_delivery_success_rate_bps{subscription_id}` (SLO ≥ 9_900).
+- `atlas_fee_oracle_recommendation_drift_bps{account_set_hash}`
+  (p99 SLO ≤ 500).
+- `atlas_dflow_route_landed_rate_bps` (SLO ≥ 9_200).
+- `atlas_presign_simulation_failure_rate_bps{instruction}` (SLO < 100).
+
+### §12 deliverable checklist
+
+- ✅ `atlas-fee-oracle` crate with QuickNode adapter.
+- ✅ Public network-intelligence WSS stream — schema in
+  `atlas-public-api::endpoints`.
+- ✅ Birdeye opportunity scanner + `/api/opportunities` shape.
+- ✅ `DflowRoute` in the execution registry; TWAP scheduler with
+  proof-per-slice (chaos-tested by `execute_aborts_on_first_failure`
+  + `execute_rejects_duplicate_bundle_ids`).
+- ✅ Solflare wallet-standard adapter + `/api/simulate/{ix}` schema.
+- ✅ Three Kamino-targeted vault templates with backtest URIs +
+  commitment hashes.
+- ✅ `/api/v1/*` REST + WS contract, SDK proof response shape,
+  webhook HMAC + replay protection.
+- ✅ Commitment-path lint blocking third-party API outputs.
+
+### Test coverage
+
+- atlas-fee-oracle: 6/6.
+- atlas-birdeye-overlay: 10/10 (opportunity 3, heatmap 2,
+  quality 3, attribution 2).
+- atlas-execution-routes: 13/13 (route 3, registry 3, twap 4 + 3
+  shared).
+- atlas-presign: 6/6.
+- atlas-vault-templates: 5/5.
+- atlas-public-api: 12/12 (endpoints 4, sdk 4, webhook 4).
+- atlas-runtime: 35/35 (3 commitment-path-lint tests added).
+- Workspace total: **629 tests** green (52 new vs Phase 8.0).
+
 ## Unreleased — Phase 8.0 (2026-05-06) — Directive 08 (Chaos / Adversarial Harness / Game Days)
 
 ### `atlas-chaos` — typed failure-injection harness

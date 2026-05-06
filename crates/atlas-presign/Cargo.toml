@@ -1,0 +1,18 @@
+[package]
+name = "atlas-presign"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Pre-sign transaction simulation schema (Solflare embed + /api/simulate). Implements directive 09 §5."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+atlas-failure = { path = "../atlas-failure" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

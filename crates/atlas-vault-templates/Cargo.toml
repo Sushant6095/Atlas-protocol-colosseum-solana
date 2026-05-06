@@ -1,0 +1,19 @@
+[package]
+name = "atlas-vault-templates"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Kamino-targeted vault templates with risk bands + commitment hashes. Implements directive 09 §6."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+atlas-failure = { path = "../atlas-failure" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

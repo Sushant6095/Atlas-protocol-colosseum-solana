@@ -1,0 +1,21 @@
+[package]
+name = "atlas-public-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Public REST + WebSocket + webhook surface (atlas-rs SDK ground truth). Implements directive 09 §7."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+atlas-blackbox = { path = "../atlas-blackbox" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+hmac.workspace = true
+sha2.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

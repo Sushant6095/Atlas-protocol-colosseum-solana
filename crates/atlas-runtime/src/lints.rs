@@ -87,6 +87,45 @@ pub struct DisallowedMethod {
     pub reason: String,
 }
 
+/// Phase 09 §0 hard rule: no third-party API output ever enters a
+/// Poseidon commitment path. The lint substring-scans a source file
+/// (the canonical commitment-path source files are listed in
+/// `atlas_pipeline::canonical_json` and `atlas_public_input`) and
+/// flags any reference to known third-party output types.
+///
+/// Forbidden symbol list defaults: `BirdeyeYieldRow`,
+/// `BirdeyeRiskFlag`, `DflowQuote`, `DflowRouteReceipt`,
+/// `SolflareSimulation`, `HeliusParsedTx`, `QuicknodeFeeSample`.
+/// Callers may extend the list per file family.
+pub fn forbid_third_party_in_commitment(
+    source: &str,
+    forbidden_types: &[&str],
+) -> Vec<ThirdPartyCommitmentViolation> {
+    const DEFAULT: &[&str] = &[
+        "BirdeyeYieldRow",
+        "BirdeyeRiskFlag",
+        "DflowQuote",
+        "DflowRouteReceipt",
+        "SolflareSimulation",
+        "HeliusParsedTx",
+        "QuicknodeFeeSample",
+    ];
+    let mut out = Vec::new();
+    for needle in DEFAULT.iter().chain(forbidden_types.iter()) {
+        if source.contains(needle) {
+            out.push(ThirdPartyCommitmentViolation {
+                forbidden_type: (*needle).to_string(),
+            });
+        }
+    }
+    out
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct ThirdPartyCommitmentViolation {
+    pub forbidden_type: String,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -161,5 +200,35 @@ mod tests {
         let src = r#"msg!("ok"); let s = ctx.accounts.vault.balance;"#;
         let v = lint_disallowed_methods(src);
         assert!(v.is_empty());
+    }
+
+    #[test]
+    fn third_party_in_commitment_flagged() {
+        let src = r#"
+            use birdeye::BirdeyeYieldRow;
+            fn build_public_input(row: BirdeyeYieldRow) -> PublicInput {
+                PublicInput::from(row)
+            }
+        "#;
+        let v = forbid_third_party_in_commitment(src, &[]);
+        assert!(v.iter().any(|x| x.forbidden_type == "BirdeyeYieldRow"));
+    }
+
+    #[test]
+    fn clean_commitment_source_passes_lint() {
+        let src = r#"
+            fn build_public_input(state: &VaultState, oracle: &OracleConsensus) -> PublicInput {
+                PublicInput::new(state.commitment_root, oracle.median_q64)
+            }
+        "#;
+        let v = forbid_third_party_in_commitment(src, &[]);
+        assert!(v.is_empty());
+    }
+
+    #[test]
+    fn caller_extension_list_works() {
+        let src = "fn foo(x: CustomBadType) {}";
+        let v = forbid_third_party_in_commitment(src, &["CustomBadType"]);
+        assert_eq!(v.len(), 1);
     }
 }

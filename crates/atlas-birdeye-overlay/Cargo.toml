@@ -1,0 +1,19 @@
+[package]
+name = "atlas-birdeye-overlay"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Birdeye intelligence overlay — opportunity scanner, rotation heatmap, yield-quality (NEVER in commitment path). Implements directive 09 §3."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+atlas-failure = { path = "../atlas-failure" }
+atlas-forensic = { path = "../atlas-forensic" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

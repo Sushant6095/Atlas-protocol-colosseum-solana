@@ -670,6 +670,85 @@ pub static CHAOS_SHADOW_DRIFT_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
     v
 });
 
+// ─── Phase 09 — Side-track + public API SLOs (directive 09 §10) ──────────
+
+pub static API_READ_LATENCY_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_api_read_latency_ms",
+        "Public API read latency. p99 SLO \u{2264} 400 ms.",
+        vec![10.0, 25.0, 50.0, 100.0, 200.0, 400.0, 1_000.0]
+    );
+    let h = HistogramVec::new(opts, &["endpoint"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static API_ERROR_RATE_5M_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_api_error_rate_5m_bps",
+        "Rolling 5-minute error rate in bps. SLO \u{2264} 50 (0.5 %).",
+        &["endpoint"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static STREAM_NETWORK_LAG_SLOTS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_stream_network_lag_slots",
+        "Slots between leader-included tx and network-stream emit. p99 SLO \u{2264} 2.",
+        vec![0.0, 1.0, 2.0, 4.0, 8.0]
+    );
+    let h = HistogramVec::new(opts, &[]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static WEBHOOK_DELIVERY_SUCCESS_RATE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_webhook_delivery_success_rate_bps",
+        "Rolling 24h webhook delivery success rate in bps. SLO \u{2265} 9_900.",
+        &["subscription_id"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static FEE_ORACLE_DRIFT_BPS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_fee_oracle_recommendation_drift_bps",
+        "Predicted vs actually-needed fee drift in bps. p99 SLO \u{2264} 500.",
+        vec![50.0, 100.0, 250.0, 500.0, 1_000.0, 2_500.0]
+    );
+    let h = HistogramVec::new(opts, &["account_set_hash"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static DFLOW_ROUTE_LANDED_RATE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_dflow_route_landed_rate_bps",
+        "Rolling 24h DFlow route landed rate in bps. SLO \u{2265} 9_200.",
+        &[]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PRESIGN_FAILURE_RATE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_presign_simulation_failure_rate_bps",
+        "Pre-sign simulation failure rate in bps on valid inputs. SLO < 100.",
+        &["instruction"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

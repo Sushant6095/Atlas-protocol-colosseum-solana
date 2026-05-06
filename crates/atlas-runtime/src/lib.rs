@@ -28,8 +28,9 @@ pub use compute_budget::{
 };
 pub use determinism::{DeterminismCheck, DeterminismViolation};
 pub use lints::{
-    check_readonly_discipline, lint_disallowed_methods, lint_no_borsh_on_hot_path,
-    DisallowedMethod, ReadonlyDisciplineViolation,
+    check_readonly_discipline, forbid_third_party_in_commitment, lint_disallowed_methods,
+    lint_no_borsh_on_hot_path, DisallowedMethod, ReadonlyDisciplineViolation,
+    ThirdPartyCommitmentViolation,
 };
 pub use locks::{lock_collision_set, AccountLockSet, LockClassification, Pubkey};
 pub use tx_size::{BundleSizeError, TX_SIZE_LIMIT};

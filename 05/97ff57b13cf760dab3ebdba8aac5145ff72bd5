@@ -1,0 +1,80 @@
+CHANGELOG.md
+  s_c3576656714da0::t_31eee28533dd0c 3-77
+crates/atlas-rpc-router/src/freshness.rs
+  s_c3576656714da0::t_2b7ef25597c829 1-235
+crates/atlas-rs/src/client.rs
+  s_c3576656714da0::t_e6bc369624aa7a 291-338
+crates/atlas-bus/src/adapters.rs
+  s_c3576656714da0::t_c9c55b661971f0 218
+  s_c3576656714da0::t_71dad243390e86 188-197
+sdk/widgets/src/rpc-latency.ts
+  s_c3576656714da0::t_2400d4b256ce93 1-103
+INFRA.md
+  s_c3576656714da0::t_417b1e32ac03d8 1-109
+crates/atlas-rpc-router/src/router.rs
+  s_c3576656714da0::t_c4db89e576f0bd 10
+  s_c3576656714da0::t_dde81f278fa73e 243
+  s_c3576656714da0::t_f058584b54e5ac 1-9,11-242,244-339
+Cargo.toml
+  s_c3576656714da0::t_6ac899b1bcf6fe 52
+crates/atlas-rpc-router/src/role.rs
+  s_c3576656714da0::t_ee16d3b3721534 1-297
+crates/atlas-rs/Cargo.toml
+  s_c3576656714da0::t_367074311368de 21
+crates/atlas-runtime/src/lints.rs
+  s_c3576656714da0::t_ceef59f4e01d65 309-350
+  s_c3576656714da0::t_7ac076020b4908 145-203
+sdk/playground/infra.html
+  s_c3576656714da0::t_b0396d3585d31c 1-300
+crates/atlas-rpc-router/Cargo.toml
+  s_c3576656714da0::t_9c6e5b27824d3c 1-18
+crates/atlas-public-api/src/endpoints.rs
+  s_c3576656714da0::t_fec21006e13676 87-91
+  s_c3576656714da0::t_b0aa937adf1f78 116-119
+sdk/playground/freshness.html
+  s_c3576656714da0::t_02e68c402f97c2 1-160
+sdk/widgets/src/proof-gen.ts
+  s_c3576656714da0::t_fc3cb8fba218ab 1-96
+sdk/ts/src/platform.ts
+  s_c3576656714da0::t_419c47631ffcd7 117-187
+  s_c3576656714da0::t_036bbc756eeec3 261-284
+sdk/widgets/package.json
+  s_c3576656714da0::t_8cf8a71776028b 1-21
+crates/atlas-bus/src/event.rs
+  s_c3576656714da0::t_6110062ac44cf7 31-34
+  s_c3576656714da0::t_c7db44a88e1d5b 54
+sdk/widgets/tsconfig.json
+  s_c3576656714da0::t_4042abfa9a2f2a 1-13
+crates/atlas-telemetry/src/lib.rs
+  s_c3576656714da0::t_1fc12d0785a100 1305-1394
+sdk/widgets/src/freshness.ts
+  s_c3576656714da0::t_d15710eaf190de 1-115
+sdk/widgets/src/iframe.ts
+  s_c3576656714da0::t_9db190c6f60dd6 1-40
+sdk/widgets/src/index.ts
+  s_c3576656714da0::t_cbbb86a7288450 1-19
+crates/atlas-rpc-router/src/attribution.rs
+  s_c3576656714da0::t_26a8d9df4ab640 1-13,15-146,151-320
+  s_c3576656714da0::t_e70c816f70de56 147-150
+  s_c3576656714da0::t_d389e43b7aa35e 14
+crates/atlas-rpc-router/src/lib.rs
+  s_c3576656714da0::t_8a3ec5dc314cff 1-46
+sdk/widgets/example.html
+  s_c3576656714da0::t_23fce0a91da39c 1-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "0597ff57b13cf760dab3ebdba8aac5145ff72bd5",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "unknown"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

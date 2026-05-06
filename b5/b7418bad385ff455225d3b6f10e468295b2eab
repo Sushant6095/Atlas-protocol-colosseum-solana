@@ -1,0 +1,31 @@
+crates/atlas-treasury/src/lib.rs
+  s_c3576656714da0::t_9d99d8485bf510 3,15-16,21,29
+crates/atlas-assets/src/bin/drift_check.rs
+  s_c3576656714da0::t_6e1c053c1a1208 1-63
+sdk/playground/intel.html
+  s_c3576656714da0::t_469241ecd8c32e 1-149
+CHANGELOG.md
+  s_c3576656714da0::t_f144433f9d7dfc 3-31
+crates/atlas-assets/Cargo.toml
+  s_c3576656714da0::t_08d6d09f2c7c00 10-13,19-22
+ATLAS-TREASURY-FOR-PUSD.md
+  ai_agent 1-125
+crates/atlas-treasury/src/defensive.rs
+  s_c3576656714da0::t_373e38f2fc752e 1-191
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "b5b7418bad385ff455225d3b6f10e468295b2eab",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

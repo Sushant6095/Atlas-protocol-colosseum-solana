@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas — Treasury OS for internet businesses</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; }
+    header small { color: #8893a8; }
+    main { padding: 24px; display: grid; gap: 18px; max-width: 1200px; margin: 0 auto; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 18px; }
+    h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    label { font-size: 12px; color: #8893a8; display: block; margin: 4px 0 2px; }
+    input { padding: 8px 10px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 280px; }
+    button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font: inherit; }
+    button:hover { background: #1f57d6; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .stat { background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; padding: 12px; }
+    .stat .k { font-size: 11px; color: #8893a8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat .v { font: 600 22px/1 ui-monospace, Menlo, monospace; color: #e7eaf0; margin-top: 4px; }
+    .stat.healthy .v { color: #5be1a0; }
+    .stat.cautious .v { color: #ffe27a; }
+    .stat.constrained .v { color: #ffc16a; }
+    .stat.critical .v { color: #ff8b8b; }
+    table { border-collapse: collapse; width: 100%; font: 12px ui-monospace, Menlo, monospace; }
+    th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #1d2230; }
+    th { font-size: 11px; text-transform: uppercase; color: #8893a8; letter-spacing: 0.06em; }
+    tr.critical td { color: #ff8b8b; }
+    tr.high td { color: #ffc16a; }
+    tr.normal td { color: #c5cad6; }
+    tr.low td { color: #8893a8; }
+    .decision-tag { font-size: 10px; padding: 1px 6px; border-radius: 3px; }
+    .decision-tag.single { background: #1f3d2e; color: #5be1a0; }
+    .decision-tag.split { background: #1f2d4d; color: #6aa6ff; }
+    .decision-tag.deferred { background: #4d3d1f; color: #ffc16a; }
+    .decision-tag.alert { background: #4d1f1f; color: #ff8b8b; }
+    pre { margin: 0; padding: 12px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; overflow: auto; font: 12px/1.5 ui-monospace, Menlo, monospace; color: #c5cad6; }
+    .legend { font-size: 11px; color: #8893a8; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas Treasury OS <small>· /payments — internet-business treasury (Phase 13)</small></h1>
+  </header>
+  <main>
+    <section>
+      <h2>Inputs</h2>
+      <label>API base URL</label>
+      <input id="base" value="https://atlas.example">
+      <label>Treasury entity id (hex32)</label>
+      <input id="treasury" placeholder="0xab...">
+      <p style="margin-top:12px"><button id="load">Load runway + schedule + invoices</button></p>
+      <p class="legend">
+        Hard rule: Dodo payload contents are scheduling metadata, never
+        commitment-path inputs. Webhook ingest at
+        <code>/api/v1/payments/webhook</code> is HMAC-verified +
+        replay-protected before any state change.
+      </p>
+    </section>
+
+    <section>
+      <h2>Runway forecast</h2>
+      <div class="grid">
+        <div class="stat" id="p10-card"><div class="k">runway p10 (days)</div><div class="v" id="p10">—</div></div>
+        <div class="stat"><div class="k">runway p50 (days)</div><div class="v" id="p50">—</div></div>
+        <div class="stat"><div class="k">confidence (bps)</div><div class="v" id="conf">—</div></div>
+        <div class="stat" id="tier-card"><div class="k">constraint tier</div><div class="v" id="tier">—</div></div>
+      </div>
+      <p class="legend">
+        Runway can only <em>tighten</em> the allocation, never loosen it.
+        Off-chain Dodo data weakens proof guarantees if used as a
+        loosening input.
+      </p>
+    </section>
+
+    <section>
+      <h2>Verified payment schedule</h2>
+      <table>
+        <thead><tr><th>intent</th><th>priority</th><th>amount</th><th>mint</th><th>earliest_at</th><th>latest_at</th><th>decision</th></tr></thead>
+        <tbody id="schedule"><tr><td colspan="7" style="color:#8893a8">load to populate</td></tr></tbody>
+      </table>
+      <p class="legend">
+        Critical entries always pre-warm. High entries split when APY
+        cap is breached. Normal/Low entries defer within their
+        <code>[earliest_at, latest_at]</code> band; if no band, the
+        engine alerts the multisig.
+      </p>
+    </section>
+
+    <section>
+      <h2>Invoice intelligence (open AR)</h2>
+      <div class="grid">
+        <div class="stat"><div class="k">open balance (Q64)</div><div class="v" id="open-bal">—</div></div>
+        <div class="stat"><div class="k">overdue count</div><div class="v" id="overdue">—</div></div>
+        <div class="stat"><div class="k">p50 settlement (days)</div><div class="v" id="set-p50">—</div></div>
+        <div class="stat"><div class="k">p90 settlement (days)</div><div class="v" id="set-p90">—</div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Raw API responses</h2>
+      <pre id="raw"><code>// click "Load"</code></pre>
+    </section>
+  </main>
+
+  <script type="module">
+    document.getElementById("load").onclick = async () => {
+      const base = document.getElementById("base").value.replace(/\/$/, "");
+      const t = document.getElementById("treasury").value.trim();
+      if (!t) return;
+      const out = document.getElementById("raw");
+      try {
+        const [runway, schedule, invoices] = await Promise.all([
+          fetchJson(`${base}/api/v1/treasury/${t}/runway`),
+          fetchJson(`${base}/api/v1/treasury/${t}/payments/schedule`),
+          fetchJson(`${base}/api/v1/treasury/${t}/invoices`),
+        ]);
+        renderRunway(runway);
+        renderSchedule(schedule);
+        renderInvoices(invoices);
+        out.innerHTML = `<code>${escapeHtml(JSON.stringify({ runway, schedule, invoices }, null, 2))}</code>`;
+      } catch (err) {
+        out.innerHTML = `<code style="color:#ff8b8b">${escapeHtml(String(err))}</code>`;
+      }
+    };
+
+    async function fetchJson(url) {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(`GET ${url} → ${r.status}`);
+      return r.json();
+    }
+
+    function renderRunway(r) {
+      set("p10", r.runway_p10_days);
+      set("p50", r.runway_p50_days);
+      set("conf", r.confidence_bps);
+      const tier = tierFor(r.runway_p10_days);
+      const tierEl = document.getElementById("tier");
+      tierEl.textContent = tier.label;
+      const card = document.getElementById("tier-card");
+      card.classList.remove("healthy", "cautious", "constrained", "critical");
+      card.classList.add(tier.class);
+      const p10card = document.getElementById("p10-card");
+      p10card.classList.remove("healthy", "cautious", "constrained", "critical");
+      p10card.classList.add(tier.class);
+    }
+    function tierFor(p10) {
+      if (p10 >= 180) return { label: "Healthy", class: "healthy" };
+      if (p10 >= 90) return { label: "Cautious", class: "cautious" };
+      if (p10 >= 30) return { label: "Constrained", class: "constrained" };
+      return { label: "Critical", class: "critical" };
+    }
+
+    function renderSchedule(s) {
+      const tbody = document.getElementById("schedule");
+      tbody.innerHTML = "";
+      const intents = (s.schedule?.schedule ?? s.schedule ?? s) ?? [];
+      for (const i of intents) {
+        const tr = document.createElement("tr");
+        tr.className = (i.priority || "normal").toLowerCase();
+        const decision = i.decision?.kind ?? i.decision ?? "single_rebalance";
+        const tagClass = decision.includes("alert") ? "alert" : decision.includes("defer") ? "deferred" : decision.includes("split") ? "split" : "single";
+        tr.innerHTML = `
+          <td>${escapeHtml(i.intent_id)}</td>
+          <td>${escapeHtml(i.priority || "")}</td>
+          <td>${escapeHtml(String(i.amount_q64 ?? ""))}</td>
+          <td>${escapeHtml(i.mint || "")}</td>
+          <td>${escapeHtml(String(i.earliest_at_slot ?? ""))}</td>
+          <td>${escapeHtml(String(i.latest_at_slot ?? ""))}</td>
+          <td><span class="decision-tag ${tagClass}">${escapeHtml(decision)}</span></td>`;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function renderInvoices(d) {
+      set("open-bal", d.open_balance_q64);
+      set("overdue", d.overdue_count);
+      set("set-p50", d.settlement_distribution?.p50_days);
+      set("set-p90", d.settlement_distribution?.p90_days);
+    }
+
+    function set(id, v) { document.getElementById(id).textContent = v ?? "—"; }
+    function escapeHtml(s) { return String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+  </script>
+</body>
+</html>

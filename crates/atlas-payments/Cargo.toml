@@ -1,0 +1,23 @@
+[package]
+name = "atlas-payments"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas Treasury OS for internet businesses — Dodo Payments composition. Business identity, KYB hash, payment buffer engine, runway forecast, invoice intelligence. Implements directive 13."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+atlas-failure = { path = "../atlas-failure" }
+atlas-treasury = { path = "../atlas-treasury" }
+atlas-governance = { path = "../atlas-governance" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+hmac.workspace = true
+sha2.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

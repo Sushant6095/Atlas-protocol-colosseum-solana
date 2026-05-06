@@ -1,5 +1,53 @@
 # Atlas Changelog
 
+## Unreleased — Phase 13.0 (2026-05-06) — Directive 13 (Atlas Treasury OS for Internet Businesses — Dodo Payments)
+
+One new crate (`atlas-payments`, 6 modules) lands the business-treasury
+positioning on top of the existing stack. The §1 hard rule holds: Dodo
+output is scheduling metadata, never a commitment-path input.
+
+- `atlas-payments::business` (§3) — `BusinessTreasury` extends Phase
+  10 `TreasuryEntity` with KYB hash, payment account id, and
+  `SignerRoster` with role-bound caps. `business_commitment_hash`
+  protocol-order-invariant; immutable post-creation. `Role` enum
+  covers CEO / CFO / Treasurer / Operator / ReadOnly with single +
+  daily payout caps + cooldown slots.
+- `atlas-payments::dodo` (§4.1) — `DodoWebhookPayload` with
+  HMAC-SHA256 verification, schema pin
+  (`atlas.dodo.payment_schedule.v1`), treasury-binding check,
+  freshness gate (`MAX_WEBHOOK_AGE_SECONDS = 600`), inverted-window
+  guard, `IntentDedup` for replay protection.
+- `atlas-payments::prewarm` (§4.2) — `plan_prewarm` resolves intents
+  per priority: Critical always single-rebalance, High split when
+  APY cap breached, Normal / Low deferred within band → else
+  `AlertConstraintViolation`. Atlas never silently misses a
+  `latest_at_slot`.
+- `atlas-payments::runway` (§5) — `forecast_runway` computes p10/p50
+  runway days from a sample distribution + inflows.
+  `runway_constraint` maps p10 to four tiers (Healthy / Cautious /
+  Constrained / Critical). Critical invariant: this signal can only
+  **tighten** allocation, never loosen.
+- `atlas-payments::invoice` (§6) — `InvoiceLedger` with
+  amount-weighted `settlement_distribution`. Open + overdue invoices
+  feed the runway forecast.
+- `atlas-payments::kyb` (§3.3) — `kyb_commitment_hash` over provider
+  + payload URI + payload sha256 + provider signer.
+- `atlas-rs` SDK adds `get_runway` + `get_payment_schedule`.
+- `atlas-public-api` adds 4 endpoints (count 20 → 24); the Dodo
+  webhook ingest joins the writable-endpoint authoring-surface set
+  (now 5 POSTs).
+- 8 Phase 13 telemetry metrics (`payment_buffer_prewarm_latency_slots`,
+  `payment_deadline_miss_total`, `payment_dodo_signature_reject_total`,
+  `payment_intent_replay_total`, `runway_p10_days`, `runway_tier`,
+  `invoice_open_balance_q64`,
+  `prewarm_constraint_violations_total`).
+- `sdk/playground/payments.html` — runway tier card recolours by SLO
+  band; pre-warm decisions render with per-priority and per-decision
+  tags.
+- `BUSINESS-TREASURY.md` — §13 positioning one-pager.
+
+Workspace: **816 tests** green (+36 vs Phase 12.0).
+
 ## Unreleased — Phase 12.0 (2026-05-06) — Directive 12 (Atlas Autonomous Execution Engine — Jupiter composition)
 
 Three new crates land the genuinely-novel Jupiter-composition surfaces.

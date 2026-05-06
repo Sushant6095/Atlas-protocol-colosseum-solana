@@ -964,6 +964,96 @@ pub static PREDICTIVE_ROUTING_DRIFT_BPS: Lazy<HistogramVec> = Lazy::new(|| {
     h
 });
 
+// ─── Phase 13 — Atlas Treasury OS / Dodo Payments SLOs ───────────────────
+
+pub static PAYMENT_BUFFER_PREWARM_LATENCY_SLOTS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_payment_buffer_prewarm_latency_slots",
+        "Slots from Dodo schedule receipt to buffer-target rebalance landing. p99 SLO \u{2264} 600.",
+        vec![32.0, 64.0, 128.0, 256.0, 600.0, 1_024.0]
+    );
+    let h = HistogramVec::new(opts, &["priority"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static PAYMENT_DEADLINE_MISS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_payment_deadline_miss_total",
+        "Payment intents that missed their latest_at_slot. Hard alert on any.",
+        &["priority"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PAYMENT_DODO_SIGNATURE_REJECT_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_payment_dodo_signature_reject_total",
+        "Dodo webhook payloads rejected before any state change. Bucketed by reason.",
+        &["reason"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PAYMENT_INTENT_REPLAY_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_payment_intent_replay_total",
+        "Dodo intent_id replay attempts caught by IntentDedup. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static RUNWAY_P10_DAYS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_runway_p10_days",
+        "Worst-case (10th percentile) days of runway per business treasury.",
+        &["treasury_id"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static RUNWAY_TIER_GAUGE: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_runway_tier",
+        "Runway constraint tier: 0=Healthy 1=Cautious 2=Constrained 3=Critical.",
+        &["treasury_id"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static INVOICE_OPEN_BALANCE_Q64: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_invoice_open_balance_q64",
+        "Open + overdue invoice notional in Q64.",
+        &["treasury_id"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PREWARM_CONSTRAINT_VIOLATIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_prewarm_constraint_violations_total",
+        "Pre-warm engine emitted AlertConstraintViolation. Hard alert on any.",
+        &["treasury_id"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

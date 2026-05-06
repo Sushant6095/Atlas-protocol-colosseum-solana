@@ -15,6 +15,7 @@ atlas-runtime = { path = "../atlas-runtime" }
 atlas-intelligence = { path = "../atlas-intelligence" }
 atlas-trigger-gate = { path = "../atlas-trigger-gate" }
 atlas-recurring-plan = { path = "../atlas-recurring-plan" }
+atlas-payments = { path = "../atlas-payments" }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror.workspace = true

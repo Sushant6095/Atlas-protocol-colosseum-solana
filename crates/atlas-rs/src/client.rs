@@ -172,6 +172,35 @@ impl AtlasClient {
             .await?;
         serde_json::from_slice(&bytes).map_err(ClientError::Decode)
     }
+
+    /// Phase 13 §5 — fetch the cashflow runway forecast for a
+    /// business treasury entity.
+    pub async fn get_runway(
+        &self,
+        treasury_id: &Pubkey,
+    ) -> Result<atlas_payments::RunwayForecast, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!("/api/v1/treasury/{}/runway", hex32(treasury_id)))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 13 §4 — fetch the most recent verified Dodo payment
+    /// schedule for a treasury entity.
+    pub async fn get_payment_schedule(
+        &self,
+        treasury_id: &Pubkey,
+    ) -> Result<atlas_payments::DodoPaymentSchedule, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!(
+                "/api/v1/treasury/{}/payments/schedule",
+                hex32(treasury_id)
+            ))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
 }
 
 fn hex32(b: &[u8; 32]) -> String {

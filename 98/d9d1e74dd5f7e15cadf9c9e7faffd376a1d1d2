@@ -1,0 +1,52 @@
+crates/atlas-payments/src/prewarm.rs
+  s_c3576656714da0::t_291959041bfc07 1-215
+crates/atlas-payments/src/dodo.rs
+  s_c3576656714da0::t_d4bfdbb6996b34 1-268
+crates/atlas-payments/src/runway.rs
+  s_c3576656714da0::t_5ba3b04b31d320 1-170
+crates/atlas-rs/src/client.rs
+  s_c3576656714da0::t_44e67265001f82 175-203
+Cargo.toml
+  s_c3576656714da0::t_169faeb1506bbd 49
+crates/atlas-payments/src/lib.rs
+  s_c3576656714da0::t_ac81fee9f9a5ce 38-39,43-44,47
+  s_c3576656714da0::t_4b6304a813c828 1-37,40-42,45-46,48-55
+crates/atlas-payments/src/kyb.rs
+  s_c3576656714da0::t_462368955f501b 1-90
+crates/atlas-payments/src/invoice.rs
+  s_c3576656714da0::t_fad6ba82df0d06 1-172
+crates/atlas-public-api/src/endpoints.rs
+  s_c3576656714da0::t_3440083a3b15dd 69-73
+  s_c3576656714da0::t_0fdbf039e85110 93-94
+  s_c3576656714da0::t_0ab7328d94043e 114-118,121,126
+BUSINESS-TREASURY.md
+  s_c3576656714da0::t_fb09a1f5294c27 1-113
+crates/atlas-payments/src/business.rs
+  s_c3576656714da0::t_41ceafe2f9d885 1-265
+crates/atlas-payments/Cargo.toml
+  s_c3576656714da0::t_f28db9d3a04a2c 1-23
+crates/atlas-telemetry/src/lib.rs
+  s_c3576656714da0::t_ebac0c8f2bb8ea 967-1056
+sdk/playground/payments.html
+  s_c3576656714da0::t_9e39442edcb016 1-188
+CHANGELOG.md
+  s_c3576656714da0::t_ff0c1451d6e327 3-50
+crates/atlas-rs/Cargo.toml
+  s_c3576656714da0::t_e514d542863a35 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "98d9d1e74dd5f7e15cadf9c9e7faffd376a1d1d2",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

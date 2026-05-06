@@ -1,0 +1,21 @@
+{
+  "name": "@atlas/widgets",
+  "version": "0.1.0",
+  "description": "Embeddable Atlas infra widgets — Slot Freshness Monitor, RPC Latency, Proof-Gen Latency. Phase 17 §4.3.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./freshness": "./dist/freshness.js",
+    "./rpc-latency": "./dist/rpc-latency.js",
+    "./proof-gen": "./dist/proof-gen.js",
+    "./iframe": "./dist/iframe.js"
+  },
+  "scripts": {
+    "build": "tsc -p ."
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

@@ -28,6 +28,10 @@ pub enum SourceId {
     Meteora = 0x0C,
     Orca = 0x0D,
     Raydium = 0x0E,
+    /// Phase 17 — RPC Fast tier-A latency provider. Yellowstone gRPC
+    /// + JSON-RPC + WSS transport on a region-localised endpoint.
+    /// Default role tag: `tier_a_latency` only.
+    RpcFast = 0x0F,
 }
 
 impl SourceId {
@@ -47,6 +51,7 @@ impl SourceId {
             SourceId::Meteora => "meteora",
             SourceId::Orca => "orca",
             SourceId::Raydium => "raydium",
+            SourceId::RpcFast => "rpc_fast",
         }
     }
 

@@ -142,6 +142,65 @@ pub struct ThirdPartyCommitmentViolation {
     pub forbidden_type: String,
 }
 
+/// Phase 17 §2 hard rule: `read_hot` is single-source by design and
+/// must never appear inside a commitment-path crate. Stage 01
+/// ingestion / Phase 06 sandbox / Phase 12 verify / atlas-pipeline
+/// all need cross-validated quorum reads — silently substituting a
+/// hot read defeats the consistency guarantee.
+///
+/// The lint substring-scans for the symbols `read_hot(`,
+/// `ReadClass::Hot`, and `RpcRouter::read_hot` in the source of a
+/// crate the caller declares as commitment-path. Real CI runs
+/// against a syn-walker; the rule body is identical.
+pub fn lint_no_read_hot_in_commitment_path(
+    crate_name: &str,
+    is_commitment_path: bool,
+    source: &str,
+) -> Vec<ReadHotMisuseViolation> {
+    let mut out = Vec::new();
+    if !is_commitment_path {
+        return out;
+    }
+    const NEEDLES: &[&str] = &[
+        "read_hot(",
+        "ReadClass::Hot",
+        "RpcRouter::read_hot",
+        "router.read_hot",
+    ];
+    for n in NEEDLES {
+        if source.contains(n) {
+            out.push(ReadHotMisuseViolation {
+                crate_name: crate_name.to_string(),
+                symbol: (*n).to_string(),
+            });
+        }
+    }
+    out
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct ReadHotMisuseViolation {
+    pub crate_name: String,
+    pub symbol: String,
+}
+
+/// Crates whose source is on the commitment path. The lint is
+/// applied only to these. Adding a crate here is a deliberate
+/// architectural decision; removing one is even more so.
+pub const COMMITMENT_PATH_CRATES: &[&str] = &[
+    "atlas-pipeline",
+    "atlas-public-input",
+    "atlas-bus",
+    "atlas-replay",
+    "atlas-warehouse",
+    "atlas-sandbox",
+    "atlas-verifier",
+];
+
+pub fn is_commitment_path_crate(crate_name: &str) -> bool {
+    COMMITMENT_PATH_CRATES.iter().any(|n| *n == crate_name)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -246,5 +305,47 @@ mod tests {
         let src = "fn foo(x: CustomBadType) {}";
         let v = forbid_third_party_in_commitment(src, &["CustomBadType"]);
         assert_eq!(v.len(), 1);
+    }
+
+    #[test]
+    fn read_hot_in_pipeline_crate_flagged() {
+        let src = r#"fn ingest_state(router: &dyn RpcRouter) {
+            let r = router.read_hot(req).unwrap();
+        }"#;
+        let v = lint_no_read_hot_in_commitment_path("atlas-pipeline", true, src);
+        assert!(v.iter().any(|x| x.symbol == "read_hot(" || x.symbol == "router.read_hot"));
+    }
+
+    #[test]
+    fn read_hot_outside_commitment_path_passes() {
+        let src = r#"fn pre_warm(router: &dyn RpcRouter) {
+            let r = router.read_hot(req).unwrap();
+        }"#;
+        // atlas-payments is not a commitment-path crate.
+        let v = lint_no_read_hot_in_commitment_path("atlas-payments", false, src);
+        assert!(v.is_empty());
+    }
+
+    #[test]
+    fn read_class_hot_constant_flagged_in_commitment_crate() {
+        let src = r#"const CLASS: ReadClass = ReadClass::Hot;"#;
+        let v = lint_no_read_hot_in_commitment_path("atlas-pipeline", true, src);
+        assert!(v.iter().any(|x| x.symbol == "ReadClass::Hot"));
+    }
+
+    #[test]
+    fn quorum_read_in_commitment_crate_passes() {
+        let src = r#"let r = router.read_quorum(req).unwrap();"#;
+        let v = lint_no_read_hot_in_commitment_path("atlas-pipeline", true, src);
+        assert!(v.is_empty());
+    }
+
+    #[test]
+    fn commitment_path_crate_set_includes_canonical_crates() {
+        assert!(is_commitment_path_crate("atlas-pipeline"));
+        assert!(is_commitment_path_crate("atlas-public-input"));
+        assert!(is_commitment_path_crate("atlas-bus"));
+        assert!(!is_commitment_path_crate("atlas-payments"));
+        assert!(!is_commitment_path_crate("atlas-rs"));
     }
 }

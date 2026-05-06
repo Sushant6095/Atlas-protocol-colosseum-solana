@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>@atlas/widgets — sample integration</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; padding: 24px; background: #0b0d11; color: #e7eaf0; }
+    h1 { font-size: 18px; margin: 0 0 6px; }
+    .grid { display: grid; grid-template-columns: 280px 280px 280px; gap: 16px; margin-top: 18px; }
+    .grid > div { min-height: 110px; }
+    label { font-size: 11px; color: #8893a8; }
+    input { padding: 6px 8px; background: #0e121a; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 280px; margin: 4px 0 12px; display: block; }
+  </style>
+</head>
+<body>
+  <h1>@atlas/widgets — sample integration</h1>
+  <p style="color:#8893a8;font-size:12px">Partner status pages embed these directly. No build step.</p>
+
+  <label>Atlas API base URL</label>
+  <input id="base" value="https://atlas.example">
+  <label>Vault id (hex32)</label>
+  <input id="vault" placeholder="ab12...cd34">
+
+  <div class="grid">
+    <div id="w-freshness"></div>
+    <div id="w-rpc"></div>
+    <div id="w-proof"></div>
+  </div>
+
+  <script type="module">
+    // Production: `import { renderFreshnessWidget, ... } from "@atlas/widgets"`.
+    // Demo (no build): the widgets package exports map maps to ./dist/*.js
+    // after `pnpm --filter @atlas/widgets build`. For this static example we
+    // inline the same surface so the page works without a build step.
+    import { renderFreshnessWidget } from "./dist/freshness.js";
+    import { renderRpcLatencyWidget } from "./dist/rpc-latency.js";
+    import { renderProofGenWidget } from "./dist/proof-gen.js";
+
+    const baseEl = document.getElementById("base");
+    const vaultEl = document.getElementById("vault");
+
+    let handles = [];
+    function rebuild() {
+      handles.forEach(h => h.destroy());
+      handles = [];
+      const baseUrl = baseEl.value;
+      handles.push(renderFreshnessWidget(document.getElementById("w-freshness"), {
+        baseUrl, vaultId: vaultEl.value || "0".repeat(64), refreshIntervalMs: 5000,
+      }));
+      handles.push(renderRpcLatencyWidget(document.getElementById("w-rpc"), { baseUrl, refreshIntervalMs: 5000 }));
+      handles.push(renderProofGenWidget(document.getElementById("w-proof"), { baseUrl, refreshIntervalMs: 10000 }));
+    }
+    baseEl.addEventListener("change", rebuild);
+    vaultEl.addEventListener("change", rebuild);
+    rebuild();
+  </script>
+</body>
+</html>

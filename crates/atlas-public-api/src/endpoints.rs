@@ -84,6 +84,11 @@ pub const fn rest_endpoints() -> &'static [RestEndpoint] {
         RestEndpoint { method: Method::Get, path: "/api/v1/agents", description: "four-persona agent dashboard (Risk / Yield / Compliance / Execution)", rate_limit_per_minute: 600 },
         RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/keepers", description: "active keeper mandates + ratcheted usage counters", rate_limit_per_minute: 300 },
         RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/pending", description: "pending-approval queue (mandate renewals, scope expansions, above-auto-threshold)", rate_limit_per_minute: 300 },
+        // Phase 17 — RPC Router + /infra Public Observatory.
+        RestEndpoint { method: Method::Get, path: "/api/v1/infra", description: "public observatory: RPC latency, slot drift attribution, TPS, validator health, proof gen, freshness", rate_limit_per_minute: 1_200 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/infra/attribution", description: "slot-drift attribution heatmap (per-source outlier share over rolling window)", rate_limit_per_minute: 600 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/freshness", description: "per-vault freshness budget (slot drift + verification window remaining)", rate_limit_per_minute: 600 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/freshness/{vault_id}", description: "single-vault freshness budget + proof-pipeline timeline drilldown", rate_limit_per_minute: 600 },
     ]
 }
 
@@ -108,8 +113,10 @@ mod tests {
         // the Cloak confidential layer (viewing key issue/revoke,
         // disclosure log, confidential payroll batch). Phase 15 adds
         // 3 for the operator-agent surface (agents dashboard, keeper
-        // mandates, pending-approval queue).
-        assert_eq!(rest_endpoints().len(), 34);
+        // mandates, pending-approval queue). Phase 17 adds 4 for the
+        // RPC Router + /infra observatory (infra page, attribution
+        // heatmap, freshness list, single-vault freshness drilldown).
+        assert_eq!(rest_endpoints().len(), 38);
     }
 
     #[test]

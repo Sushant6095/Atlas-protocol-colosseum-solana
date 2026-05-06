@@ -49,6 +49,7 @@ members = [
     "crates/atlas-payments",
     "crates/atlas-confidential",
     "crates/atlas-operator-agent",
+    "crates/atlas-rpc-router",
     "tests/invariants",
     "tests/adversarial",
     "tests/warehouse",

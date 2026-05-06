@@ -288,6 +288,54 @@ impl AtlasClient {
             .await?;
         serde_json::from_slice(&bytes).map_err(ClientError::Decode)
     }
+
+    /// Phase 17 §4 — fetch the public infrastructure observatory
+    /// snapshot (RPC latency p50/p99 per source per role, quorum
+    /// match rate, slot lag, attribution heatmap, TPS, proof-gen +
+    /// rebalance e2e p99, validator health). Same data the public
+    /// `/infra` page renders.
+    pub async fn get_infra_snapshot(&self) -> Result<serde_json::Value, ClientError> {
+        let bytes = self.transport.get("/api/v1/infra").await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 17 §3 — fetch the slot-drift attribution heatmap. Each
+    /// row is `(source, consistent, slot_skew, content_divergence,
+    /// outlier_share_bps)`.
+    pub async fn get_attribution_heatmap(
+        &self,
+    ) -> Result<Vec<atlas_rpc_router::AttributionEntry>, ClientError> {
+        let bytes = self.transport.get("/api/v1/infra/attribution").await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 17 §5 — fetch the freshness budget for every active
+    /// vault.
+    pub async fn get_freshness_all(
+        &self,
+    ) -> Result<Vec<atlas_rpc_router::FreshnessBudget>, ClientError> {
+        let bytes = self.transport.get("/api/v1/freshness").await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 17 §5.3 — fetch a single vault's freshness budget +
+    /// proof-pipeline timeline.
+    pub async fn get_freshness_for_vault(
+        &self,
+        vault_id: &Pubkey,
+    ) -> Result<
+        (
+            atlas_rpc_router::FreshnessBudget,
+            atlas_rpc_router::ProofPipelineTimeline,
+        ),
+        ClientError,
+    > {
+        let bytes = self
+            .transport
+            .get(&format!("/api/v1/freshness/{}", hex32(vault_id)))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
 }
 
 fn hex32(b: &[u8; 32]) -> String {

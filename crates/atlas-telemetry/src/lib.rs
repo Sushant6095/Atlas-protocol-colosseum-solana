@@ -1302,6 +1302,96 @@ pub static MANDATE_SCOPE_EXPANSION_ATTEMPTS_TOTAL: Lazy<CounterVec> = Lazy::new(
     v
 });
 
+// ─── Phase 17 — RPC Router / /infra Observatory SLOs (directive 17 §8) ──
+
+pub static RPC_TIER_A_READ_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_rpc_tier_a_read_ms",
+        "Hot-path single-source read latency. p99 SLO ≤ 250 ms.",
+        vec![5.0, 15.0, 30.0, 60.0, 120.0, 250.0, 500.0]
+    );
+    let h = HistogramVec::new(opts, &["source", "region"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static RPC_TIER_B_READ_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_rpc_tier_b_read_ms",
+        "Commitment-bound quorum read latency. p99 SLO ≤ 800 ms.",
+        vec![25.0, 75.0, 150.0, 300.0, 500.0, 800.0, 1_500.0]
+    );
+    let h = HistogramVec::new(opts, &["source", "region"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static RPC_QUORUM_ATTRIBUTION_OUTLIER_SHARE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_rpc_quorum_attribution_outlier_share_bps",
+        "Per-source outlier share (bps). Tracked per directive §3.3; alert on cliff toward OUTLIER_QUARANTINE_BPS.",
+        &["source"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static INFRA_DASHBOARD_RENDER_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_infra_dashboard_render_ms",
+        "/infra page render wall time. p99 SLO ≤ 1500 ms cold, ≤ 600 ms warm.",
+        vec![50.0, 150.0, 300.0, 600.0, 1_000.0, 1_500.0, 3_000.0]
+    );
+    let h = HistogramVec::new(opts, &["panel", "cache"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static FRESHNESS_WINDOW_REMAINING_PCT: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_freshness_window_remaining_pct",
+        "Per-vault freshness budget remaining as % (0..=100). p10 SLO ≥ 30 (proof keeper falls behind otherwise).",
+        &["vault_id"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static READ_HOT_COMMITMENT_PATH_MISUSE_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_read_hot_commitment_path_misuse_total",
+        "Hot-path read attempts from inside a commitment-path crate. Hard alert on any (lint should already block).",
+        &["crate"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static RPC_QUORUM_DISAGREEMENT_KIND_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_rpc_quorum_disagreement_kind_total",
+        "Quorum disagreements bucketed by kind (soft / hard / total).",
+        &["kind"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static RPC_TIER_A_HOT_READ_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_rpc_tier_a_hot_read_total",
+        "Hot-path reads served by tier-A sources, bucketed by source. Used to size the latency win on /infra.",
+        &["source"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

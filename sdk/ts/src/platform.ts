@@ -114,6 +114,77 @@ export interface PendingBundleView {
   decision_squads_tx: string | null;
 }
 
+// ─── Phase 17 — RPC Router + /infra Observatory ────────────────────────
+
+export type RpcRole = "tier_a_latency" | "tier_b_quorum" | "tier_c_archive";
+
+export type FreshnessBand = "green" | "amber" | "red";
+
+export interface FreshnessBudgetView {
+  vault_id: string;
+  current_slot: number;
+  last_proof_slot: number;
+  slot_drift: number;
+  freshness_remaining_slots: number;
+  verification_window_seconds_remaining: number;
+  band: FreshnessBand;
+}
+
+export type ProofPipelineStage =
+  | "ingest"
+  | "infer"
+  | "consensus"
+  | "prove"
+  | "submit";
+
+export interface ProofPipelineTimelineView {
+  vault_id: string;
+  bundle_id: string;
+  stage_durations_ms: [ProofPipelineStage, number][];
+}
+
+export type AttributionVerdict =
+  | "consistent"
+  | "slot_skew"
+  | "content_divergence";
+
+export interface AttributionEntryView {
+  source: string;
+  verdict: AttributionVerdict;
+  observed_slot: number;
+  observed_data_hash: string;
+  canonical_slot: number;
+  canonical_data_hash: string;
+}
+
+export interface RpcLatencySample {
+  source: string;
+  role: RpcRole;
+  region: string;
+  p50_ms: number;
+  p99_ms: number;
+}
+
+export interface InfraSnapshot {
+  generated_at_slot: number;
+  rpc_latency: RpcLatencySample[];
+  quorum_match_rate_bps_1h: number;
+  slot_lag_per_source: { source: string; lag_slots: number }[];
+  attribution_heatmap: { source: string; consistent: number; slot_skew: number; content_divergence: number; outlier_share_bps: number }[];
+  network_tps_p50: number;
+  network_tps_p99: number;
+  jito_landed_rate_bps_1m: number;
+  validator_latency_by_region: { region: string; p99_ms: number }[];
+  cu_p50_per_rebalance: number;
+  cu_p99_per_rebalance: number;
+  proof_gen_p50_ms: number;
+  proof_gen_p99_ms: number;
+  rebalance_e2e_p50_ms: number;
+  rebalance_e2e_p99_ms: number;
+  pyth_post_latency_p99_ms: number;
+  freshness_budgets: FreshnessBudgetView[];
+}
+
 export interface PreSignPayload {
   schema: string;
   instruction: "deposit" | "withdraw" | "vault_creation" | "sandbox_approval";
@@ -185,6 +256,30 @@ export class AtlasPlatform {
   /** Phase 15 — fetch the pending-approval queue for a treasury. */
   async getPending(treasuryId: string): Promise<PendingBundleView[]> {
     return this.getJson<PendingBundleView[]>(`/api/v1/treasury/${treasuryId}/pending`);
+  }
+
+  /** Phase 17 — fetch the /infra public observatory snapshot. */
+  async getInfraSnapshot(): Promise<InfraSnapshot> {
+    return this.getJson<InfraSnapshot>("/api/v1/infra");
+  }
+
+  /** Phase 17 — fetch the slot-drift attribution heatmap. */
+  async getAttributionHeatmap(): Promise<AttributionEntryView[]> {
+    return this.getJson<AttributionEntryView[]>("/api/v1/infra/attribution");
+  }
+
+  /** Phase 17 — fetch the freshness budget for every active vault. */
+  async getFreshnessAll(): Promise<FreshnessBudgetView[]> {
+    return this.getJson<FreshnessBudgetView[]>("/api/v1/freshness");
+  }
+
+  /** Phase 17 — fetch one vault's freshness budget + proof timeline. */
+  async getFreshnessForVault(
+    vaultId: string,
+  ): Promise<{ budget: FreshnessBudgetView; timeline: ProofPipelineTimelineView }> {
+    return this.getJson<{ budget: FreshnessBudgetView; timeline: ProofPipelineTimelineView }>(
+      `/api/v1/freshness/${vaultId}`,
+    );
   }
 
   /** Sanity-check that a `ProofResponse` carries every field the

@@ -185,6 +185,16 @@ adapter_stub!(
     "Raydium CLMM — tick map + fee accumulator."
 );
 
+// Phase 17 — RPC Fast registered as a tier-A latency source. The
+// adapter wraps the same Yellowstone + JSON-RPC transport that
+// other Geyser providers expose, but the source carries the
+// `tier_a_latency` role tag (see `atlas_rpc_router::role`).
+adapter_stub!(
+    RpcFastAdapter,
+    SourceId::RpcFast,
+    "RPC Fast — latency-tier-A Geyser + JSON-RPC + WSS transport on the nearest validator-cluster region."
+);
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -205,6 +215,7 @@ mod tests {
             MeteoraAdapter::default().id(),
             OrcaAdapter::default().id(),
             RaydiumAdapter::default().id(),
+            RpcFastAdapter::default().id(),
         ];
         let mut ids = adapters.clone();
         ids.sort_by_key(|s| *s as u8);

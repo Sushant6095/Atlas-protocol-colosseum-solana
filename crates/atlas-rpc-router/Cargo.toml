@@ -1,0 +1,18 @@
+[package]
+name = "atlas-rpc-router"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas RPC Router — latency-tier-A vs commitment-bound vs archive read-path split, slot-drift attribution, slot-freshness budget. Implements directive 17."
+
+[lib]
+
+[dependencies]
+atlas-bus = { path = "../atlas-bus" }
+atlas-runtime = { path = "../atlas-runtime" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

@@ -1,5 +1,80 @@
 # Atlas Changelog
 
+## Unreleased — Phase 17.0 (2026-05-07) — Directive 17 (Latency-Tier-A RPC + /infra Public Observatory — RPC Fast)
+
+One new crate (`atlas-rpc-router`, 4 modules) and one new npm
+package (`@atlas/widgets`). Phase 02 already ships multi-RPC quorum
+and failover; Phase 17 layers the surgical new scope only:
+
+- `atlas-bus::SourceId::RpcFast = 0x0F` + `RpcFastAdapter` registered
+  in `crates/atlas-bus/src/adapters.rs`.
+- `atlas-rpc-router::role` (§1.1) — `RpcRole` (TierALatency /
+  TierBQuorum / TierCArchive); `RpcRoleSet` enforces directive
+  anti-pattern §9 #1 (counting tier-A toward quorum without
+  geographic-diversity attestation); `canonical_role_for` ships the
+  default mapping (RPC Fast → tier-A only; Yellowstone partners →
+  tier-B; oracles → tier-B; ranking/overlay sources → tier-C).
+  `SourceManifest::quorum_eligible()` returns only quorum-counting
+  sources.
+- `atlas-rpc-router::router` (§2) — `RpcRouter` trait with
+  `read_hot` / `read_quorum` / `read_archive`; `StaticRouter`
+  reference impl for tests and the playground; `RouteDecision`
+  shape for /infra dry-run; `HotReadError::CommitmentPathMisuse` +
+  `OverBudget`. Calling code declares its read class.
+- `atlas-rpc-router::attribution` (§3) — `AttributionEngine`
+  classifies per-source samples as `Consistent` / `SlotSkew` /
+  `ContentDivergence`; rolling per-source counters; `outlier_share_bps`
+  feeds the Phase 02 reliability EMA; `OUTLIER_QUARANTINE_BPS = 4_000`
+  triggers `quarantine_candidates()`. `DisagreementKind` =
+  Hard / Total / Soft / InsufficientQuorum.
+- `atlas-rpc-router::freshness` (§5) — `FreshnessBudget::compute`
+  returns drift, remaining slots, verification-window seconds, and
+  the band (Green / Amber / Red) per directive §5.1;
+  `MAX_STALE_SLOTS = 150` (Phase 01 I-3); `ProofPipelineTimeline`
+  with `total_ms`, `dominant_stage`, `fraction_bps` for the
+  drilldown.
+- `atlas-runtime::lints::lint_no_read_hot_in_commitment_path` (§9
+  anti-pattern) — substring scans for `read_hot(`, `ReadClass::Hot`,
+  `RpcRouter::read_hot`, `router.read_hot` in
+  `COMMITMENT_PATH_CRATES` (atlas-pipeline / atlas-public-input /
+  atlas-bus / atlas-replay / atlas-warehouse / atlas-sandbox /
+  atlas-verifier).
+- `atlas-public-api::endpoints` adds 4 REST endpoints (`/infra`,
+  `/infra/attribution`, `/freshness`, `/freshness/{vault_id}`) —
+  count 34 → 38.
+- `atlas-rs::client` adds `get_infra_snapshot` /
+  `get_attribution_heatmap` / `get_freshness_all` /
+  `get_freshness_for_vault`; pulls `atlas-rpc-router` dep.
+- `@atlas/sdk::AtlasPlatform` adds `getInfraSnapshot` /
+  `getAttributionHeatmap` / `getFreshnessAll` /
+  `getFreshnessForVault` plus 8 TS types (RpcRole, FreshnessBand,
+  FreshnessBudgetView, ProofPipelineStage,
+  ProofPipelineTimelineView, AttributionVerdict,
+  AttributionEntryView, RpcLatencySample, InfraSnapshot).
+- `atlas-telemetry` adds 8 Phase 17 metrics:
+  `atlas_rpc_tier_a_read_ms`, `atlas_rpc_tier_b_read_ms`,
+  `atlas_rpc_quorum_attribution_outlier_share_bps`,
+  `atlas_infra_dashboard_render_ms`,
+  `atlas_freshness_window_remaining_pct`,
+  `atlas_read_hot_commitment_path_misuse_total`,
+  `atlas_rpc_quorum_disagreement_kind_total`,
+  `atlas_rpc_tier_a_hot_read_total`.
+- `sdk/playground/infra.html` — public observatory: 12 panels
+  (RPC latency, slot lag, attribution heatmap, TPS, Jito landed,
+  validator latency, CU, proof gen, rebalance e2e, Pyth post,
+  freshness budget). Auto-refresh toggle.
+- `sdk/playground/freshness.html` — Slot Freshness Monitor with
+  per-vault drilldown timeline (ingest → infer → consensus →
+  prove → submit).
+- `sdk/widgets/` (`@atlas/widgets@0.1.0`) — 3 embeddable widgets
+  (renderFreshnessWidget / renderRpcLatencyWidget /
+  renderProofGenWidget) + iframe URL helper. Vanilla TS, no
+  framework dependency.
+- `INFRA.md` — one-pager: hard rules, the five-item delta vs
+  Phase 02, telemetry, acceptance bar.
+- 36 unit tests across `atlas-rpc-router`; 5 lint tests in
+  `atlas-runtime`; full workspace passes.
+
 ## Unreleased — Phase 15.0 (2026-05-06) — Directive 15 (Atlas Operator Agent — Zerion-Style Policy-Constrained Treasury Agents)
 
 One new crate (`atlas-operator-agent`, 6 modules) and one new

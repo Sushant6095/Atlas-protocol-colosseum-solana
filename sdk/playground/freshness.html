@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas Slot Freshness Monitor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; }
+    header small { color: #8893a8; }
+    main { padding: 24px; max-width: 1100px; margin: 0 auto; display: grid; gap: 18px; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 18px; }
+    h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    .vault-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 90px; gap: 10px; padding: 10px 0; border-bottom: 1px solid #16192a; cursor: pointer; align-items: center; }
+    .vault-row:hover { background: #11151f; }
+    .vault-row .id { font: 12px ui-monospace, Menlo, monospace; color: #c5cad6; }
+    .vault-row .stat { font: 600 16px/1 ui-monospace, Menlo, monospace; color: #e7eaf0; }
+    .vault-row .label { font-size: 10px; color: #8893a8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .band { display: inline-block; font-size: 11px; padding: 4px 10px; border-radius: 3px; font-weight: 600; text-align: center; }
+    .band.green { background: #1f3d2e; color: #5be1a0; }
+    .band.amber { background: #4d3d1f; color: #f1d878; }
+    .band.red { background: #4d1f1f; color: #ff8b8b; }
+    .gauge { height: 8px; background: #16192a; border-radius: 4px; overflow: hidden; margin-top: 6px; }
+    .gauge .fill { height: 100%; transition: width 0.5s ease; }
+    .gauge .fill.green { background: #5be1a0; }
+    .gauge .fill.amber { background: #f1d878; }
+    .gauge .fill.red { background: #ff8b8b; }
+    .timeline { display: none; padding: 10px 0 0; border-top: 1px dashed #1d2230; margin-top: 10px; }
+    .timeline.open { display: block; }
+    .stage { display: grid; grid-template-columns: 110px 1fr 80px; gap: 10px; align-items: center; padding: 4px 0; }
+    .stage .name { font: 11px ui-monospace, Menlo, monospace; color: #8893a8; text-transform: uppercase; }
+    .stage .bar { height: 6px; background: #16192a; border-radius: 2px; }
+    .stage .bar .fill { height: 100%; background: #6aa6ff; border-radius: 2px; }
+    .stage .ms { font: 11px ui-monospace, Menlo, monospace; color: #c5cad6; text-align: right; }
+    .controls { display: flex; gap: 8px; align-items: baseline; }
+    .controls input { padding: 6px 8px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 320px; }
+    .controls button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font: inherit; }
+    .footer { font-size: 11px; color: #5b6479; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas Slot Freshness <small>— /freshness</small></h1>
+  </header>
+  <main>
+    <section>
+      <h2>Connection</h2>
+      <div class="controls">
+        <input id="base" value="https://atlas.example" autocomplete="off">
+        <button id="refresh">Refresh</button>
+      </div>
+      <p class="footer">Each vault carries a freshness window (Phase 01 I-3 · MAX_STALE_SLOTS = 150). When the proof keeper falls behind, this surface lights up red before the on-chain verifier rejects.</p>
+    </section>
+
+    <section>
+      <h2>Active vault freshness</h2>
+      <div id="vaults"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    function client(baseUrl) {
+      const base = baseUrl.replace(/\/$/, "");
+      return {
+        async getAll() {
+          const r = await fetch(base + "/api/v1/freshness");
+          if (!r.ok) throw new Error(`GET /api/v1/freshness → ${r.status}`);
+          return r.json();
+        },
+        async getOne(vaultId) {
+          const r = await fetch(base + `/api/v1/freshness/${vaultId}`);
+          if (!r.ok) throw new Error(`GET /api/v1/freshness/${vaultId} → ${r.status}`);
+          return r.json();
+        },
+      };
+    }
+
+    const MAX_STALE_SLOTS = 150;
+
+    document.getElementById("refresh").onclick = render;
+
+    async function render() {
+      const base = document.getElementById("base").value;
+      const c = client(base);
+      const root = document.getElementById("vaults");
+      root.innerHTML = "";
+      try {
+        const list = await c.getAll();
+        if (!list.length) {
+          root.innerHTML = `<p style="color:#5b6479">no active vaults</p>`;
+          return;
+        }
+        for (const b of list) {
+          const pct = Math.max(0, Math.min(100, Math.round((b.freshness_remaining_slots / MAX_STALE_SLOTS) * 100)));
+          const row = document.createElement("div");
+          row.className = "vault-row";
+          row.innerHTML = `
+            <div>
+              <div class="label">vault</div>
+              <div class="id">${escapeHtml(short(b.vault_id))}</div>
+            </div>
+            <div>
+              <div class="label">drift</div>
+              <div class="stat">${b.slot_drift} slots</div>
+            </div>
+            <div>
+              <div class="label">remaining</div>
+              <div class="stat">${b.freshness_remaining_slots} (${pct}%)</div>
+              <div class="gauge"><div class="fill ${b.band}" style="width:${pct}%"></div></div>
+            </div>
+            <div>
+              <div class="label">window</div>
+              <div class="stat">${b.verification_window_seconds_remaining}s</div>
+            </div>
+            <div><span class="band ${b.band}">${b.band}</span></div>
+          `;
+          const timeline = document.createElement("div");
+          timeline.className = "timeline";
+          row.appendChild(timeline);
+          row.onclick = async () => {
+            if (timeline.classList.contains("open")) {
+              timeline.classList.remove("open");
+              return;
+            }
+            timeline.innerHTML = `<p style="color:#5b6479;font-size:12px">loading timeline…</p>`;
+            timeline.classList.add("open");
+            try {
+              const v = await c.getOne(b.vault_id);
+              const t = v.timeline ?? v;
+              renderTimeline(timeline, t);
+            } catch (e) {
+              timeline.innerHTML = `<p style="color:#ff8b8b">${escapeHtml(String(e))}</p>`;
+            }
+          };
+          root.appendChild(row);
+        }
+      } catch (err) {
+        root.innerHTML = `<p style="color:#ff8b8b">${escapeHtml(String(err))}</p>`;
+      }
+    }
+
+    function renderTimeline(el, t) {
+      const stages = t.stage_durations_ms ?? [];
+      const total = stages.reduce((a, [, ms]) => a + ms, 0) || 1;
+      el.innerHTML = `<div class="footer">bundle ${escapeHtml(short(t.bundle_id ?? ""))} · total ${total} ms</div>` + stages.map(([name, ms]) => `
+        <div class="stage">
+          <div class="name">${escapeHtml(name)}</div>
+          <div class="bar"><div class="fill" style="width:${Math.round((ms / total) * 100)}%"></div></div>
+          <div class="ms">${ms} ms</div>
+        </div>`).join("");
+    }
+
+    function short(s) { if (!s) return ""; return s.length > 12 ? `${s.slice(0,6)}…${s.slice(-4)}` : s; }
+    function escapeHtml(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]); }
+
+    render();
+  </script>
+</body>
+</html>

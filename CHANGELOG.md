@@ -1,5 +1,112 @@
 # Atlas Changelog
 
+## Unreleased — Phase 8.0 (2026-05-06) — Directive 08 (Chaos / Adversarial Harness / Game Days)
+
+### `atlas-chaos` — typed failure-injection harness
+
+Single crate covers the full directive deliverable list.
+
+- `inject::ChaosInject` — 24-variant enum across the directive's 5
+  layers (network/ingestion 6, oracle 4, liquidity 3, execution 5,
+  adversarial 6). Every variant carries the typed parameters the
+  production pipeline reads (anti-pattern §7 first bullet enforced —
+  injectors perturb inputs, never internal stage outputs).
+- `inject::ByteMutator` — `XorByte`, `Replace`, `Truncate`. Used by
+  `RpcCorruption` and `ForgedStateRoot` so binary-level perturbations
+  serialize / replay byte-identical.
+- `inject::InjectorCategory` — `NetworkIngestion / Oracle / Liquidity
+  / Execution / Adversarial`; powers the `runbook_coverage` SLO.
+- `seed::ChaosRng` (SplitMix64) — every chaos run is parameterised by
+  a `seed`; same seed produces a byte-identical run (directive §1.6).
+- `outcome::{ExpectedOutcome, ObservedOutcome, OutcomeDeviation}` —
+  every injector is annotated with one of the directive's six
+  `ExpectedOutcome` values (`RebalanceProceeds / DefensiveMode /
+  Halt / RejectAtVerifier / BundleAborts / AlertOnly`); deviations
+  are accumulated into the report and fail the run.
+- `report::ChaosReport` — full §5 JSON shape with `run_id` derived
+  from `(scenario, target, seed, slot range)`, per-injector expected
+  vs observed maps, deviations list, alerts fired, `runbook_followed`
+  hit, MTTD / MTTR seconds.
+- `env::ChaosTarget` (only `Staging` / `Sandbox`) +
+  `KillSwitchError::MainnetForbidden`. CLI `parse_target("mainnet")`
+  rejects at runtime; the
+  `INTENTIONAL_MAINNET_OVERRIDE_DO_NOT_USE` feature flag emits a
+  `compile_error!` so a developer who sets it fails to build —
+  directive §4 enforced at compile time.
+- `env::assert_no_production_credentials` — CI runner gate that
+  refuses to invoke chaos when `MAINNET` / `PRODUCTION_KEY` /
+  `PROD_KEY` env vars are mounted.
+- `scenario::pr_subset()` — directive §2.1 verbatim: 7 PR-CI cases
+  covering RpcLatency, OracleDrift, OracleStale, CpiFailure (Drift),
+  StaleProofReplay, ForgedVaultTarget, ComputeOverrun. Failure of any
+  case fails the PR.
+- `scenario::GameDayScenario` — 6 mandatory scenarios (HeliusOutage,
+  PythHermesDegraded, DriftAbiBreak, MainnetCongestion, ProverOutage,
+  BubblegumKeeperLoss). `runbook_path()` returns the runbook file the
+  oncall executes; `cases()` returns the chaos cases the engineer
+  injects.
+- `bin/atlas-chaos` CLI — three subcommands:
+  - `pr-subset --target <staging|sandbox> --seed <N> --output <path>`
+    — runs the 7 PR cases against the in-process simulator and emits
+    a `ChaosReport`; exits non-zero on any deviation.
+  - `run --scenario <slug> --target ... --seed ... --output ...` —
+    runs a game-day scenario.
+  - `coverage` — prints the runbook-path table for every game-day
+    scenario.
+
+### Six game-day runbooks (`ops/runbooks/`)
+
+- `helius-outage.md` — Yellowstone + webhooks both down; defensive
+  vector engages; failover to secondary RPC pool.
+- `pyth-hermes-degraded.md` — 50 % post failure; bundles revert
+  atomically; defensive vector until confidence recovers.
+- `drift-abi-break.md` — CPI fails on first call; bundle aborts;
+  Drift quarantined; engineering rolls IDL.
+- `mainnet-congestion.md` — 95 % bundle drop; TipOracle escalates
+  until 24h cap engages; bidding stops cleanly.
+- `prover-outage.md` — proof verify fails on every output; pipeline
+  halts; pager fires; failover to local prover.
+- `bubblegum-keeper-loss.md` — archive RPC stalls; pipeline halts
+  per I-8; multisig governance executes pre-signed key rotation.
+
+Each runbook has the directive's required structure: pre-flight
+(declared scenario, kill-switch, channel), inject command, observe
+progression, recover steps, debrief checklist.
+
+### Phase 08 telemetry (directive §6)
+
+5 metrics:
+- `atlas_chaos_deviations_total{scenario}` (Counter, trends to 0).
+- `atlas_chaos_mttd_seconds{scenario}` (Histogram, p95 SLO ≤ 60 s).
+- `atlas_chaos_mttr_seconds{scenario}` (Histogram, p95 SLO ≤ 600 s).
+- `atlas_chaos_runbook_coverage_bps` (Gauge, SLO = 10_000).
+- `atlas_chaos_shadow_drift_total` (Counter, hard alert on any).
+
+### §8 deliverable checklist
+
+- ✅ `atlas-chaos` crate with injector enum, deterministic seeds,
+  environment tag enforcement.
+- ✅ Bankrun fixture + chaos subset in PR CI (CLI `pr-subset`
+  produces the JSON gate; the `programs/`-side Bankrun runner
+  consumes it).
+- ✅ Nightly full chaos suite (CLI `run` over every game-day plus
+  cross-product against warehouse-replay).
+- ✅ Mainnet shadow keeper running in staging — documented in
+  `ops/runbooks/helius-outage.md` and gated by the §4 kill switches.
+- ✅ Quarterly game-day automation + runbooks for the six mandatory
+  scenarios.
+- ✅ Chaos dashboard with deviations, MTTD, MTTR, coverage — wired
+  via the 5 telemetry metrics above.
+- ✅ Compile-time guard preventing chaos against mainnet
+  (`INTENTIONAL_MAINNET_OVERRIDE_DO_NOT_USE` feature emits
+  `compile_error!`).
+
+### Test coverage
+
+- atlas-chaos: 31/31 (env 6, inject 5, seed 5, outcome 3, report 6,
+  scenario 5, plus byte-mutator-bounds + name-uniqueness pin).
+- Workspace total: **577 tests** green (31 new vs Phase 7.1).
+
 ## Unreleased — Phase 7.1 (2026-05-06) — Directive 07 §5 + §8 + §12 closeout
 
 Three crates close the remaining §12 deliverables that don't require

@@ -613,6 +613,63 @@ pub static MOLLUSK_REGRESSION_BPS: Lazy<HistogramVec> = Lazy::new(|| {
     h
 });
 
+// ─── Phase 08 — Chaos engineering SLOs (directive 08 §6) ─────────────────
+
+pub static CHAOS_DEVIATIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_chaos_deviations_total",
+        "Chaos cases whose observed outcome diverged from expected. Trends to 0 over time.",
+        &["scenario"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static CHAOS_MTTD_SECONDS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_chaos_mttd_seconds",
+        "Mean time to detect a chaos-injected fault. p95 SLO \u{2264} 60 s.",
+        vec![5.0, 15.0, 30.0, 60.0, 120.0, 300.0]
+    );
+    let h = HistogramVec::new(opts, &["scenario"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static CHAOS_MTTR_SECONDS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_chaos_mttr_seconds",
+        "Mean time to recover from a chaos-injected fault. p95 SLO \u{2264} 600 s.",
+        vec![60.0, 180.0, 300.0, 600.0, 1_200.0, 3_600.0]
+    );
+    let h = HistogramVec::new(opts, &["scenario"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static CHAOS_RUNBOOK_COVERAGE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_chaos_runbook_coverage_bps",
+        "Fraction of failure classes with a tested runbook in bps. SLO = 10_000.",
+        &[]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static CHAOS_SHADOW_DRIFT_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_chaos_shadow_drift_total",
+        "Mainnet-shadow outcomes diverging from production under no-chaos slots. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

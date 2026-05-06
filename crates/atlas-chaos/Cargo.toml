@@ -1,0 +1,34 @@
+[package]
+name = "atlas-chaos"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas chaos engineering harness — typed injectors, deterministic seeds, expected-outcome contract, scenario suites. Implements directive 08."
+
+[lib]
+
+[[bin]]
+name = "atlas-chaos"
+path = "src/bin/chaos.rs"
+
+[features]
+default = []
+# Enabling this feature is forbidden by directive 08 §4. The lib emits a
+# compile_error when it's set so a developer who tries to point chaos at
+# mainnet fails to build.
+INTENTIONAL_MAINNET_OVERRIDE_DO_NOT_USE = []
+
+[dependencies]
+atlas-failure = { path = "../atlas-failure" }
+atlas-runtime = { path = "../atlas-runtime" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+clap.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

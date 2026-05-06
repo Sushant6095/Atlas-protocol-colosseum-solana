@@ -32,6 +32,7 @@ members = [
     "crates/atlas-receipt-tree",
     "crates/atlas-pyth-post",
     "crates/atlas-mollusk-bench",
+    "crates/atlas-chaos",
     "tests/invariants",
     "tests/adversarial",
     "tests/warehouse",

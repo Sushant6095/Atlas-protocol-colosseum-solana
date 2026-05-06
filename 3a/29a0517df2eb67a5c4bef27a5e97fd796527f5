@@ -1,0 +1,54 @@
+crates/atlas-mollusk-bench/src/bin/bench_check.rs
+  s_c3576656714da0::t_2338419b74aa5e 1-46
+crates/atlas-pyth-post/src/bundle.rs
+  s_c3576656714da0::t_fb3ebe696ab802 1-125
+CHANGELOG.md
+  s_c3576656714da0::t_ced44437662e9d 3-92
+crates/atlas-pyth-post/Cargo.toml
+  s_c3576656714da0::t_f631634f20571b 1-18
+Cargo.toml
+  s_c3576656714da0::t_8f4cdcdfed7cee 32-34
+crates/atlas-mollusk-bench/src/lib.rs
+  s_c3576656714da0::t_4f05ed67d30b49 1-28
+crates/atlas-mollusk-bench/src/report.rs
+  s_c3576656714da0::t_a50a71f50d4a8e 1-155
+crates/atlas-receipt-tree/src/lib.rs
+  s_c3576656714da0::t_a72ca2d9cbb988 1-32
+crates/atlas-receipt-tree/Cargo.toml
+  s_c3576656714da0::t_b827ded249dd79 1-18
+crates/atlas-receipt-tree/src/proof.rs
+  s_c3576656714da0::t_f09782c96bc487 1-98
+crates/atlas-pyth-post/src/freshness.rs
+  s_c3576656714da0::t_fc48a3054ff0d1 1-83
+crates/atlas-pyth-post/src/schedule.rs
+  s_c3576656714da0::t_02ffeef21f97e0 1-88
+crates/atlas-mollusk-bench/Cargo.toml
+  s_c3576656714da0::t_695edcb8b0aeb6 1-24
+crates/atlas-mollusk-bench/src/baseline.rs
+  s_c3576656714da0::t_29fa3ce7e485d6 23-25,32,38-39,44
+  s_c3576656714da0::t_81ebf0dfdd8e34 1-22,26-31,33-37,40-43,45-87
+programs/MIGRATION.md
+  s_c3576656714da0::t_659dbb288c8ab8 1-105
+crates/atlas-telemetry/src/lib.rs
+  s_c3576656714da0::t_33ab59467175b4 581-615
+crates/atlas-receipt-tree/src/tree.rs
+  s_c3576656714da0::t_7be8885ad43e3c 1-262
+crates/atlas-pyth-post/src/lib.rs
+  s_c3576656714da0::t_8f3ff9119c0758 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "3a29a0517df2eb67a5c4bef27a5e97fd796527f5",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

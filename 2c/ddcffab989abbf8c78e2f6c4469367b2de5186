@@ -1,0 +1,205 @@
+web/lib/sdk/client.ts
+  s_c3576656714da0::t_e61ed8ca75ed22 1-152
+web/components/shells/MarketingShell.tsx
+  s_c3576656714da0::t_e906545bc769a7 1-42
+web/app/(account)/layout.tsx
+  s_c3576656714da0::t_e004e9c578a742 1-7
+web/app/not-found.tsx
+  s_c3576656714da0::t_9b892172b141ba 1-29
+web/components/system/LiveStatusPill.tsx
+  s_c3576656714da0::t_7b3a4c5b3baa6c 1-48
+web/app/(docs)/playground/page.tsx
+  s_c3576656714da0::t_9707b32df01a5b 1-12
+web/components/system/Skeleton.tsx
+  s_c3576656714da0::t_ce02318724cc05 1-91
+web/app/(intel)/intelligence/page.tsx
+  s_c3576656714da0::t_234a3c7e60acd9 1-22
+web/components/shells/types.ts
+  s_c3576656714da0::t_c97eb6edb36fe6 1-14
+web/app/(marketing)/architecture/page.tsx
+  s_c3576656714da0::t_133cb1f986e6da 1-30
+web/app/(operator)/vault/[id]/rebalances/[hash]/page.tsx
+  s_c3576656714da0::t_50340156d3e0d5 1-22
+web/lib/auth/session-store.ts
+  s_c3576656714da0::t_1d6ce240eac6e6 1-41
+web/components/system/index.ts
+  s_c3576656714da0::t_b2d1d7069f1b66 1-6
+web/app/(operator)/vault/[id]/page.tsx
+  s_c3576656714da0::t_6e94a8e60ebc69 1-33
+web/app/(operator)/vault/[id]/rebalances/page.tsx
+  s_c3576656714da0::t_6ea8a0a89214b6 1-13
+web/components/shells/PublicShell.tsx
+  s_c3576656714da0::t_8b139b68875ee6 1-16
+web/lib/auth/index.ts
+  s_c3576656714da0::t_d09151d76904d5 1-16
+web/app/globals.css
+  s_c3576656714da0::t_5dbb540462a0fe 136-143
+web/components/system/AlertCenter.tsx
+  s_c3576656714da0::t_564a34243d8137 1-115
+web/app/(intel)/risk/page.tsx
+  s_c3576656714da0::t_dbaeca8e196e54 1-20
+web/app/(public)/layout.tsx
+  s_c3576656714da0::t_60292774d97cb1 1-6
+web/components/shells/DocsShell.tsx
+  s_c3576656714da0::t_864009f78be4b9 1-59
+web/app/error.tsx
+  s_c3576656714da0::t_ce6edc9ffa2582 1-10
+web/components/command-palette/commands.ts
+  s_c3576656714da0::t_ee9a3234660719 1-90
+web/app/(account)/account/preferences/page.tsx
+  s_c3576656714da0::t_b5e642dd256d1b 1-13
+web/eslint.config.mjs
+  s_c3576656714da0::t_84976980e525f2 86-116
+web/app/(treasury)/treasury/[id]/runway/page.tsx
+  s_c3576656714da0::t_479edd88d8919f 1-13
+web/components/system/EmptyState.tsx
+  s_c3576656714da0::t_90df3758bc9318 1-75
+CHANGELOG.md
+  s_c3576656714da0::t_c19d61d1b306d4 3-64
+web/app/(public)/infra/page.tsx
+  s_c3576656714da0::t_8770a3b2143442 1-31
+web/app/(treasury)/treasury/[id]/ledger/page.tsx
+  s_c3576656714da0::t_5591d8bd559010 1-13
+web/components/shells/index.ts
+  s_c3576656714da0::t_61e61430224670 1-7
+web/app/(account)/account/devices/page.tsx
+  s_c3576656714da0::t_72c92763953842 1-12
+web/app/(operator)/recurring/new/page.tsx
+  s_c3576656714da0::t_01836dc48f8da8 1-12
+web/app/(operator)/vault/[id]/agents/page.tsx
+  s_c3576656714da0::t_4144e14dfe3064 1-14
+web/lib/sdk/index.ts
+  s_c3576656714da0::t_2955c7fdaae3c9 1-3
+web/lib/auth/scopes.ts
+  s_c3576656714da0::t_ae5489c2d99ef5 1-90
+web/app/api/v1/auth/signout/route.ts
+  s_c3576656714da0::t_48870fbc197a92 1-11
+web/app/(account)/account/page.tsx
+  s_c3576656714da0::t_9c0c18a64369df 1-12
+web/app/(treasury)/layout.tsx
+  s_c3576656714da0::t_d151e6ca1bfeb2 1-6
+web/app/(treasury)/treasury/[id]/payments/page.tsx
+  s_c3576656714da0::t_55a29c40b7bfc7 1-13
+web/app/(governance)/layout.tsx
+  s_c3576656714da0::t_b9cfd21c59acc3 1-6
+web/app/(operator)/vault/[id]/proofs/page.tsx
+  s_c3576656714da0::t_0d9bd426815bb5 1-13
+web/components/shells/TerminalShell.tsx
+  s_c3576656714da0::t_84e07bc81333b6 1-78
+FRONTEND.md
+  s_c3576656714da0::t_1629af546c6a7b 157,165-252
+web/app/(governance)/governance/models/[id]/page.tsx
+  s_c3576656714da0::t_eb0719446b981c 1-15
+web/app/api/v1/auth/session/route.ts
+  s_c3576656714da0::t_f8650da50a9648 1-57
+web/components/shells/HeaderBar.tsx
+  s_c3576656714da0::t_773ce058a28ff5 1-102
+web/lib/ui-store.ts
+  s_c3576656714da0::t_cc795b79ec233e 1-33
+web/app/(intel)/wallet-intelligence/page.tsx
+  s_c3576656714da0::t_2782a0d30c0daa 1-23
+web/app/(treasury)/treasury/[id]/proofs/page.tsx
+  s_c3576656714da0::t_a3376891c442a7 1-13
+web/lib/viewing-keys/vault.ts
+  s_c3576656714da0::t_13fb9a6ead7aa6 1-273
+web/components/command-palette/CommandPalette.tsx
+  s_c3576656714da0::t_1cf194853b5a01 1-278
+web/app/(public)/decision-engine/page.tsx
+  s_c3576656714da0::t_7109a2d41dfb4c 1-24
+web/app/(operator)/triggers/page.tsx
+  s_c3576656714da0::t_a4f4670feb88d2 1-13
+web/app/api/v1/auth/refresh/route.ts
+  s_c3576656714da0::t_9caecc154dc744 1-54
+web/app/(treasury)/treasury/new/page.tsx
+  s_c3576656714da0::t_83d21fdac8927f 1-12
+web/app/(treasury)/treasury/page.tsx
+  s_c3576656714da0::t_c712c8a9b72b1f 1-12
+web/app/(operator)/rebalance/live/page.tsx
+  s_c3576656714da0::t_39a09989108a70 1-17
+web/components/command-palette/KeyboardShortcuts.tsx
+  s_c3576656714da0::t_cf392722dc9b4c 1-78
+web/lib/auth/useSession.ts
+  s_c3576656714da0::t_56d0337fa5241b 1-53
+web/app/(operator)/layout.tsx
+  s_c3576656714da0::t_9fe17f6da974e5 1-6
+web/app/(operator)/recurring/page.tsx
+  s_c3576656714da0::t_b62a270ae7abbe 1-12
+web/app/(docs)/webhooks/page.tsx
+  s_c3576656714da0::t_86b3a0184a4f82 1-11
+web/app/(treasury)/treasury/[id]/confidential/page.tsx
+  s_c3576656714da0::t_f63b65a8bf52c7 1-14
+web/app/(governance)/governance/page.tsx
+  s_c3576656714da0::t_0e11b59ae3a470 1-12
+web/lib/sdk/useAtlas.ts
+  s_c3576656714da0::t_832e5cc0e24732 1-22
+web/app/(public)/proofs/live/page.tsx
+  s_c3576656714da0::t_5375f427151b9a 1-25
+web/app/providers.tsx
+  s_c3576656714da0::t_ef477094d040fb 3-4,14-18,21,28-54,56-72,78,84-86,92-109
+web/app/(marketing)/security/page.tsx
+  s_c3576656714da0::t_f59e6cd629726d 1-29
+web/lib/auth/siws.ts
+  s_c3576656714da0::t_84e390628ea937 1-102
+web/app/(account)/account/viewing-keys/page.tsx
+  s_c3576656714da0::t_31f91dc44720a3 1-13
+web/app/(treasury)/treasury/[id]/page.tsx
+  s_c3576656714da0::t_757a46fb73edeb 1-15
+web/app/(governance)/governance/agents/page.tsx
+  s_c3576656714da0::t_5b4ba81c2220b0 1-12
+web/app/api/v1/auth/verify/route.ts
+  s_c3576656714da0::t_39e23c83768e67 1-145
+web/app/(operator)/hedging/page.tsx
+  s_c3576656714da0::t_7e9e4a718e843a 1-12
+web/components/system/InlineErrorPill.tsx
+  s_c3576656714da0::t_9bb948fb724127 1-48
+web/components/shells/IntelligenceShell.tsx
+  s_c3576656714da0::t_70f21eea828e17 1-57
+web/app/(treasury)/treasury/[id]/invoices/page.tsx
+  s_c3576656714da0::t_36cfad6ca5e7a9 1-13
+web/app/(intel)/layout.tsx
+  s_c3576656714da0::t_e31b42eaa68135 1-6
+web/app/(treasury)/treasury/[id]/pending/page.tsx
+  s_c3576656714da0::t_e986e9521eb4db 1-13
+web/app/(docs)/layout.tsx
+  s_c3576656714da0::t_0b2ba964a10644 1-6
+web/app/(operator)/triggers/new/page.tsx
+  s_c3576656714da0::t_0b11cba7e7c0b6 1-12
+web/lib/sdk/queryKeys.ts
+  s_c3576656714da0::t_602f81e7879440 1-108
+web/components/command-palette/index.ts
+  s_c3576656714da0::t_8b51f89645a9a0 1-8
+web/lib/viewing-keys/index.ts
+  s_c3576656714da0::t_b82451ecdc701c 1-46
+web/app/api/v1/auth/challenge/route.ts
+  s_c3576656714da0::t_6c24d950b970c1 1-43
+web/components/system/RouteErrorBoundary.tsx
+  s_c3576656714da0::t_d36fe7ddc33208 1-64
+web/app/layout.tsx
+  s_c3576656714da0::t_862569d3f445f1 8,10,14-23,26-27
+web/app/(marketing)/layout.tsx
+  s_c3576656714da0::t_4eb8dfd360793c 1-6
+web/app/(operator)/vault/[id]/private/[session]/page.tsx
+  s_c3576656714da0::t_d1ed11ccb12bdf 1-27
+web/app/(marketing)/legal/page.tsx
+  s_c3576656714da0::t_d32a5c6a85487a 1-51
+web/app/(intel)/market/page.tsx
+  s_c3576656714da0::t_16e6efdcd9bab8 1-23
+web/app/(governance)/governance/models/page.tsx
+  s_c3576656714da0::t_14150d40f489af 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "2cddcffab989abbf8c78e2f6c4469367b2de5186",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

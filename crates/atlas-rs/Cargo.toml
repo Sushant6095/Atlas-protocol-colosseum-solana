@@ -20,6 +20,7 @@ atlas-confidential = { path = "../atlas-confidential" }
 atlas-operator-agent = { path = "../atlas-operator-agent" }
 atlas-rpc-router = { path = "../atlas-rpc-router" }
 atlas-per = { path = "../atlas-per" }
+atlas-qvac = { path = "../atlas-qvac" }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror.workspace = true

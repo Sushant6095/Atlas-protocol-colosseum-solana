@@ -94,6 +94,13 @@ pub const fn rest_endpoints() -> &'static [RestEndpoint] {
         RestEndpoint { method: Method::Get, path: "/api/v1/per/sessions/{session_id}", description: "single PER session — status, opened slot, deadline, pre-state commitment", rate_limit_per_minute: 600 },
         RestEndpoint { method: Method::Get, path: "/api/v1/per/events", description: "Bubblegum-anchored PER events (SessionOpened / SessionSettled / SessionExpired / SessionDisputed)", rate_limit_per_minute: 600 },
         RestEndpoint { method: Method::Get, path: "/api/v1/vaults/{id}/execution_privacy", description: "per-vault execution privacy declaration (Mainnet | PrivateER) + commitment hash", rate_limit_per_minute: 600 },
+        // Phase 19 — Tether QVAC local-AI surfaces. Most of the
+        // workload runs on-device; these endpoints expose only the
+        // privacy notice + the canonical alert templates so the
+        // local NMT can translate against a stable corpus.
+        RestEndpoint { method: Method::Get, path: "/api/v1/legal/qvac", description: "privacy notice — what runs locally vs server (Phase 19 §9)", rate_limit_per_minute: 600 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/qvac/alert-templates", description: "canonical English alert templates for local NMT translation (Phase 19 §4)", rate_limit_per_minute: 600 },
+        RestEndpoint { method: Method::Post, path: "/api/v1/treasury/{entity_id}/invoices/draft", description: "submit operator-confirmed OCR draft (fields only, image stays local) — Phase 19 §3", rate_limit_per_minute: 120 },
     ]
 }
 
@@ -123,8 +130,10 @@ mod tests {
         // heatmap, freshness list, single-vault freshness drilldown).
         // Phase 18 adds 4 for the Private Execution Layer (sessions
         // list, single session, event log, per-vault execution
-        // privacy declaration).
-        assert_eq!(rest_endpoints().len(), 42);
+        // privacy declaration). Phase 19 adds 3 for the QVAC
+        // local-AI surfaces (privacy notice, alert templates corpus,
+        // invoice OCR draft submit).
+        assert_eq!(rest_endpoints().len(), 45);
     }
 
     #[test]
@@ -151,7 +160,10 @@ mod tests {
         // on-chain ix must still be user-signed.
         let posts: Vec<_> = rest_endpoints().iter().filter(|r| r.method == Method::Post).collect();
         let post_paths: Vec<&str> = posts.iter().map(|r| r.path).collect();
-        assert_eq!(posts.len(), 8);
+        // Phase 19 adds the OCR-draft authoring surface (operator
+        // confirms structured fields locally, then submits).
+        assert_eq!(posts.len(), 9);
+        assert!(post_paths.contains(&"/api/v1/treasury/{entity_id}/invoices/draft"));
         assert!(post_paths.contains(&"/api/v1/simulate/{ix}"));
         assert!(post_paths.contains(&"/api/v1/triggers"));
         assert!(post_paths.contains(&"/api/v1/recurring"));

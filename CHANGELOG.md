@@ -1,5 +1,78 @@
 # Atlas Changelog
 
+## Unreleased — Phase 19.0 (2026-05-07) — Directive 19 (Atlas Local-AI Layer — Tether QVAC)
+
+One new crate (`atlas-qvac`, 5 modules) and one new npm package
+(`@atlas/qvac`). Tier 3 — supporting integration; scoped surgically
+to four user-facing surfaces. QVAC output is advisory UX only and
+never enters the commitment path.
+
+- `atlas-qvac::explainer` (§2) — `PreSignExplanation` mirror of the
+  `/api/v1/simulate/{ix}` payload; `verify_numeric_tokens` rejects
+  invented numbers / empty / over-300-token outputs;
+  `render_template_fallback` is the deterministic fallback;
+  `explain_or_fallback` is the atomic "try LLM, verify, fall back".
+  Outcome surfaced as `local_llm` / `template_fallback`.
+- `atlas-qvac::ocr` (§3) — `DraftInvoiceState` with per-field
+  `(value, confidence, source)`; `is_confirmed()` requires every
+  required field to be `(High, Operator)` (one-tap accept or
+  hand-edit); `validate_for_submission()` returns the first
+  missing-field error in deterministic order. Atlas refuses any
+  unconfirmed draft.
+- `atlas-qvac::translation` (§4) — `TranslationCache` keyed by
+  blake3-domain-tagged `(canonical, locale)`; `render_translated_alert`
+  enforces identifier preservation byte-for-byte; rejects empty
+  output; `hit_rate_bps` for the 80% steady-state SLO.
+- `atlas-qvac::analyst` (§5) — `AnalystAssessment` shape;
+  `summarise()` matches concerns against `FAILURE_CLASS_CATALOG`
+  (28 classes, includes Phase 18 PER); `clears_for_signing` only
+  when recommendation is `Approve` AND every concern is recognised;
+  `validate_assessment()` rejects confidence > 10_000 bps and
+  inconsistent `Approve + concerns > 0`.
+- `atlas-qvac::surface` (§9) — `QvacSurface` registry +
+  `cold_load_p95_seconds` budgets per directive §11.
+- `atlas-runtime::lints::lint_no_qvac_in_commitment_path` (§1) —
+  substring-scans for `atlas_qvac::`, `use atlas_qvac`,
+  `@qvac/llm`, `@qvac/embed`, `@qvac/ocr`, `@qvac/translation`,
+  `QvacSurface::`, `PreSignExplanation`, `AnalystAssessment`,
+  `DraftInvoiceState` inside `COMMITMENT_PATH_CRATES`.
+- `atlas-public-api::endpoints` adds `GET /api/v1/legal/qvac`,
+  `GET /api/v1/qvac/alert-templates`,
+  `POST /api/v1/treasury/{entity_id}/invoices/draft` (count 42 → 45;
+  POST surfaces 8 → 9).
+- `atlas-rs::client` adds `get_qvac_privacy_notice` /
+  `get_qvac_alert_templates` / `submit_invoice_draft`; pulls
+  `atlas-qvac` dep.
+- `@atlas/sdk::AtlasPlatform` adds `getQvacPrivacyNotice` /
+  `getQvacAlertTemplates` / `submitInvoiceDraft` plus 8 TS types
+  (QvacSurfaceId, QvacPrivacyNoticeView, QvacAlertTemplateView,
+  OcrConfidenceView, OcrSourceView, OcrField, DraftInvoiceStateView,
+  AnalystRecommendationView, AnalystAssessmentView,
+  AnalystSummaryView).
+- `@atlas/qvac@0.1.0` (`sdk/qvac/`) — TS package mirroring the
+  Rust crate: `explainer.ts` (numeric-token verification +
+  template fallback), `ocr.ts` (draft + confirmation contract),
+  `translation.ts` (cache + identifier guard), `analyst.ts`
+  (catalog match + summary). Peer-deps `@qvac/llm-llamacpp`,
+  `@qvac/embed-llamacpp`, `@qvac/ocr-onnx`,
+  `@qvac/translation-nmtcpp` (all optional).
+- `atlas-telemetry` adds 7 QVAC metrics:
+  `atlas_qvac_presign_explainer_render_ms`,
+  `atlas_qvac_numeric_verification_failure_total`,
+  `atlas_qvac_ocr_field_extraction_accuracy_bps`,
+  `atlas_qvac_translation_cache_hit_rate_bps`,
+  `atlas_qvac_cold_load_seconds`,
+  `atlas_qvac_commitment_path_imports_total`,
+  `atlas_qvac_analyst_unrecognised_concern_total`.
+- `sdk/playground/qvac.html` — interactive demo of all four Tier-A
+  surfaces with the "try invented number" fallback test, OCR
+  validate-for-submission, translation cache hit/miss accounting,
+  and analyst clears/escalate badges.
+- `QVAC.md` — one-pager: hard rule, four surfaces, out-of-scope
+  rationale, telemetry, distribution matrix, acceptance bar.
+- 40 unit tests in `atlas-qvac`; 5 lint tests in `atlas-runtime`
+  for the QVAC commitment-path guard; full workspace passes.
+
 ## Unreleased — Phase 18.0 (2026-05-07) — Directive 18 (Atlas Private Execution Layer — MagicBlock PER)
 
 One new crate (`atlas-per`, 5 modules) implements the Private

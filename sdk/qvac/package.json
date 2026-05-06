@@ -1,0 +1,33 @@
+{
+  "name": "@atlas/qvac",
+  "version": "0.1.0",
+  "description": "Atlas Local-AI Layer — typed adapters over Tether QVAC for the four Tier-A surfaces (pre-sign explainer, invoice OCR, alert translation, second-opinion analyst). Phase 19.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./explainer": "./dist/explainer.js",
+    "./ocr": "./dist/ocr.js",
+    "./translation": "./dist/translation.js",
+    "./analyst": "./dist/analyst.js"
+  },
+  "scripts": {
+    "build": "tsc -p ."
+  },
+  "peerDependencies": {
+    "@qvac/llm-llamacpp": ">=0.1.0",
+    "@qvac/embed-llamacpp": ">=0.1.0",
+    "@qvac/ocr-onnx": ">=0.1.0",
+    "@qvac/translation-nmtcpp": ">=0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@qvac/llm-llamacpp": { "optional": true },
+    "@qvac/embed-llamacpp": { "optional": true },
+    "@qvac/ocr-onnx": { "optional": true },
+    "@qvac/translation-nmtcpp": { "optional": true }
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

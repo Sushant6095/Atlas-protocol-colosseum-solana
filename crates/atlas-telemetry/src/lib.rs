@@ -1471,6 +1471,89 @@ pub static PER_OPERATOR_CENSORSHIP_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
     v
 });
 
+// ─── Phase 19 — Tether QVAC Local-AI Surfaces SLOs (directive 19 §11) ───
+//
+// All QVAC inference content stays on the user's device. Atlas
+// observes only aggregate counters via opt-in client telemetry —
+// the metrics below are the contract for what is allowed.
+
+pub static QVAC_PRESIGN_EXPLAINER_RENDER_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_qvac_presign_explainer_render_ms",
+        "Wall time of the local LLM render for the pre-sign explainer. p99 SLO ≤ 1500 ms on supported hardware.",
+        vec![50.0, 150.0, 300.0, 600.0, 1_000.0, 1_500.0, 3_000.0]
+    );
+    let h = HistogramVec::new(opts, &["transport"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static QVAC_NUMERIC_VERIFICATION_FAILURE_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_qvac_numeric_verification_failure_total",
+        "Pre-sign LLM outputs that failed numeric-token verification (template fallback used). SLO < 1% of valid payloads.",
+        &["transport"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static QVAC_OCR_FIELD_EXTRACTION_ACCURACY_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_qvac_ocr_field_extraction_accuracy_bps",
+        "OCR field-extraction accuracy on Atlas's curated invoice fixtures (bps). SLO ≥ 9_500.",
+        &["fixture_set"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static QVAC_TRANSLATION_CACHE_HIT_RATE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_qvac_translation_cache_hit_rate_bps",
+        "Rolling 24h translation cache hit rate (bps). SLO ≥ 8_000 steady state.",
+        &["locale"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static QVAC_COLD_LOAD_SECONDS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_qvac_cold_load_seconds",
+        "Cold-load wall time per QVAC surface. p95 SLO ≤ 6s (LLM), ≤ 3s (OCR), ≤ 3s (NMT).",
+        vec![0.5, 1.0, 2.0, 3.0, 4.0, 6.0, 10.0]
+    );
+    let h = HistogramVec::new(opts, &["surface"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static QVAC_COMMITMENT_PATH_IMPORTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_qvac_commitment_path_imports_total",
+        "QVAC SDK imports detected inside a commitment-path crate. Hard alert on any (CI lint should already block).",
+        &["crate_name"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static QVAC_ANALYST_UNRECOGNISED_CONCERN_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_qvac_analyst_unrecognised_concern_total",
+        "Second-opinion analyst raised a concern outside the failure-class catalog. UI escalates; dashboarded for prompt-tuning.",
+        &[]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

@@ -224,6 +224,71 @@ export type ExecutionPrivacyView =
       max_session_slots: number;
     };
 
+// ─── Phase 19 — Tether QVAC local-AI surfaces ──────────────────────────
+
+export type QvacSurfaceId =
+  | "pre_sign_explainer"
+  | "invoice_ocr"
+  | "treasury_translation"
+  | "second_opinion_analyst";
+
+export interface QvacPrivacyNoticeEntry {
+  surface: QvacSurfaceId;
+  runs_locally: string[];
+  comes_from_atlas: string[];
+}
+
+export interface QvacPrivacyNoticeView {
+  schema: "atlas.qvac.privacy.v1";
+  entries: QvacPrivacyNoticeEntry[];
+  /** Last-modified slot — UI shows this so the user can verify the
+   *  notice is current. */
+  updated_at_slot: number;
+}
+
+export interface QvacAlertTemplateView {
+  template_id: string;
+  canonical_english: string;
+  identifiers_to_preserve: string[];
+}
+
+export type OcrConfidenceView = "high" | "medium" | "low";
+export type OcrSourceView = "local_ocr" | "operator";
+
+export interface OcrField<T> {
+  value: T | null;
+  confidence: OcrConfidenceView;
+  source: OcrSourceView;
+}
+
+export interface DraftInvoiceStateView {
+  vendor_name: OcrField<string>;
+  amount_q64: OcrField<string>;
+  mint: OcrField<string>;
+  due_at_unix: OcrField<number>;
+  vendor_reference: OcrField<string>;
+  source: OcrSourceView;
+  /** blake3 over the local image bytes; the image stays on the
+   *  operator's device. */
+  local_image_digest: string;
+}
+
+export type AnalystRecommendationView = "approve" | "reject" | "escalate";
+
+export interface AnalystAssessmentView {
+  recommendation: AnalystRecommendationView;
+  confidence_bps: number;
+  concerns: string[];
+  comparison_to_last_30d: string;
+  fields_to_double_check: string[];
+}
+
+export interface AnalystSummaryView {
+  assessment: AnalystAssessmentView;
+  unrecognised_concerns: { raw_text: string }[];
+  clears_for_signing: boolean;
+}
+
 export interface PreSignPayload {
   schema: string;
   instruction: "deposit" | "withdraw" | "vault_creation" | "sandbox_approval";
@@ -340,6 +405,26 @@ export class AtlasPlatform {
   async getExecutionPrivacy(vaultId: string): Promise<ExecutionPrivacyView> {
     return this.getJson<ExecutionPrivacyView>(
       `/api/v1/vaults/${vaultId}/execution_privacy`,
+    );
+  }
+
+  /** Phase 19 — privacy notice for the local-AI surfaces. */
+  async getQvacPrivacyNotice(): Promise<QvacPrivacyNoticeView> {
+    return this.getJson<QvacPrivacyNoticeView>("/api/v1/legal/qvac");
+  }
+
+  /** Phase 19 — canonical English alert-template corpus the local
+   *  NMT translates against. */
+  async getQvacAlertTemplates(): Promise<QvacAlertTemplateView[]> {
+    return this.getJson<QvacAlertTemplateView[]>("/api/v1/qvac/alert-templates");
+  }
+
+  /** Phase 19 — submit an operator-confirmed OCR draft. The image
+   *  stays on the operator's device; only structured fields go up. */
+  async submitInvoiceDraft(treasuryId: string, draft: DraftInvoiceStateView): Promise<void> {
+    await this.postJson(
+      `/api/v1/treasury/${treasuryId}/invoices/draft`,
+      draft,
     );
   }
 

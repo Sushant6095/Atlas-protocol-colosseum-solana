@@ -381,6 +381,44 @@ impl AtlasClient {
             .await?;
         serde_json::from_slice(&bytes).map_err(ClientError::Decode)
     }
+
+    /// Phase 19 §9 — privacy notice listing what runs on-device vs
+    /// server. Bound by the four Tier-A surfaces. Updated only via
+    /// repo + redeploy; cannot be silently changed.
+    pub async fn get_qvac_privacy_notice(&self) -> Result<serde_json::Value, ClientError> {
+        let bytes = self.transport.get("/api/v1/legal/qvac").await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 19 §4 — fetch the canonical English alert templates
+    /// corpus. The local NMT translates against this stable list;
+    /// keys are stable so cache hits persist across releases.
+    pub async fn get_qvac_alert_templates(
+        &self,
+    ) -> Result<Vec<serde_json::Value>, ClientError> {
+        let bytes = self.transport.get("/api/v1/qvac/alert-templates").await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 19 §3 — submit an operator-confirmed OCR draft (fields
+    /// only, image stays on the operator's device). Atlas refuses
+    /// any draft whose `is_confirmed()` returns false; the local
+    /// validation in `atlas_qvac::DraftInvoiceState::validate_for_submission`
+    /// is canonical.
+    pub async fn submit_invoice_draft(
+        &self,
+        treasury_id: &Pubkey,
+        draft: &atlas_qvac::DraftInvoiceState,
+    ) -> Result<(), ClientError> {
+        let body = serde_json::to_vec(draft).map_err(ClientError::Decode)?;
+        self.transport
+            .post_json(
+                &format!("/api/v1/treasury/{}/invoices/draft", hex32(treasury_id)),
+                &body,
+            )
+            .await?;
+        Ok(())
+    }
 }
 
 fn hex32(b: &[u8; 32]) -> String {

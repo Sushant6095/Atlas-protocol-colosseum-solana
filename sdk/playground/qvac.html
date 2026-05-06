@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas Local-AI Layer — QVAC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; letter-spacing: 0.02em; }
+    header small { color: #8893a8; }
+    main { padding: 18px 24px; display: grid; gap: 16px; max-width: 1200px; margin: 0 auto; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 16px 18px; }
+    h2 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    h2 .meta { font-weight: normal; text-transform: none; letter-spacing: 0; color: #5b6479; margin-left: 8px; }
+    h3 { font-size: 13px; margin: 0 0 6px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .pill { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; }
+    .local { background: #1f3d2e; color: #5be1a0; }
+    .server { background: #1f2d4d; color: #6aa6ff; }
+    .escalate { background: #4d3d1f; color: #f1d878; }
+    .reject { background: #4d1f1f; color: #ff8b8b; }
+    .surface { padding: 12px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 6px; }
+    pre { margin: 0; padding: 10px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; overflow: auto; font: 11px/1.4 ui-monospace, Menlo, monospace; color: #c5cad6; }
+    label { font-size: 11px; color: #8893a8; display: block; margin: 8px 0 2px; }
+    input, textarea, select { padding: 6px 8px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; width: 100%; box-sizing: border-box; }
+    textarea { font-family: ui-monospace, Menlo, monospace; min-height: 70px; resize: vertical; }
+    button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font: inherit; }
+    button.ghost { background: transparent; border: 1px solid #2a3142; color: #c5cad6; }
+    .tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; margin-right: 4px; background: #1d2230; color: #c5cad6; }
+    .badge.fallback { color: #f1d878; }
+    .badge.llm { color: #5be1a0; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .footer { font-size: 11px; color: #5b6479; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas <span style="color:#5be1a0">/qvac</span> <small>— local-AI surfaces (Tether QVAC)</small></h1>
+    <p style="font-size:12px;color:#8893a8;margin:6px 0 0">
+      Four user-facing surfaces. The structured payload comes from Atlas. The
+      plain-language explanation, the invoice OCR, the alert translation, and
+      the second-opinion review run on your device. None of them touch the
+      commitment path.
+    </p>
+  </header>
+  <main>
+
+    <section>
+      <h2>Privacy contract <span class="meta">what runs locally vs server</span></h2>
+      <div class="grid">
+        <div class="surface">
+          <h3><span class="pill local">local</span> on your device</h3>
+          <ul style="font-size:12px;color:#c5cad6;margin:6px 0;padding-left:18px">
+            <li>LLM that explains the pre-sign payload</li>
+            <li>OCR that extracts invoice fields</li>
+            <li>NMT that translates alerts and ledger rows</li>
+            <li>LLM + RAG that gives a second opinion on a pending bundle</li>
+          </ul>
+        </div>
+        <div class="surface">
+          <h3><span class="pill server">from atlas</span> structured data only</h3>
+          <ul style="font-size:12px;color:#c5cad6;margin:6px 0;padding-left:18px">
+            <li>Pre-sign payload (projected balance, APY, fees, CU)</li>
+            <li>Pending bundle metadata + black-box record</li>
+            <li>Canonical English alert templates</li>
+            <li>Operator-confirmed invoice fields (image stays local)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Surface 1 — Pre-Sign Explainer <span class="meta">numeric verification + template fallback</span></h2>
+      <div class="grid">
+        <div>
+          <label>Pre-sign payload (JSON)</label>
+          <textarea id="presign-payload">{
+  "schema": "atlas.presign.v1",
+  "instruction": "deposit",
+  "vault_id_hex": "ab12cdef000000000000000000000000",
+  "user_locale": "en-US",
+  "projected_share_balance": "1000000",
+  "projected_apy_bps": 850,
+  "risk_delta_bps": -120,
+  "fees_total_lamports": 5000,
+  "compute_units_estimated": 240000,
+  "warnings": ["depositing during defensive mode"]
+}</textarea>
+          <label>Simulated LLM output</label>
+          <textarea id="presign-llm">Deposit on vault ab12cdef000000000000000000000000. Projected share balance 1000000 (APY 850 bps, risk delta -120 bps). Fees 5000 lamports.</textarea>
+          <div class="row" style="margin-top:8px">
+            <button id="presign-run">Render</button>
+            <button class="ghost" id="presign-bad">Try invented number</button>
+            <span class="badge" id="presign-outcome"></span>
+          </div>
+        </div>
+        <div>
+          <label>Final rendered explanation (what the user sees)</label>
+          <pre id="presign-output"><code>// click Render</code></pre>
+          <p class="footer">If the LLM mentions any number not in the structured payload, the explainer falls back to a deterministic template. The signing flow is never blocked.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Surface 2 — Invoice OCR draft <span class="meta">image stays on device</span></h2>
+      <div class="grid">
+        <div>
+          <label>Vendor (operator-confirmed)</label>
+          <input id="ocr-vendor" value="ACME GmbH">
+          <label>Amount (Q64)</label>
+          <input id="ocr-amount" value="1000000">
+          <label>Mint</label>
+          <input id="ocr-mint" value="USDC">
+          <label>Due (unix)</label>
+          <input id="ocr-due" value="1735689600">
+          <label>Confirmed?</label>
+          <select id="ocr-confirmed"><option value="true">yes (operator-source High)</option><option value="false">no (still LocalOcr)</option></select>
+          <div class="row" style="margin-top:8px">
+            <button id="ocr-validate">Validate for submission</button>
+          </div>
+        </div>
+        <div>
+          <label>DraftInvoiceState (what would submit to Atlas)</label>
+          <pre id="ocr-output"><code>// click Validate</code></pre>
+          <p class="footer">Atlas refuses any draft where any required field is unconfirmed. The image hash is a local-side id; the image bytes never leave the device.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Surface 3 — Treasury Translation <span class="meta">cache by (template_hash, locale)</span></h2>
+      <div class="grid">
+        <div>
+          <label>Canonical English alert</label>
+          <textarea id="trans-canonical">Vault ab12 paused due to defensive mode triggered by oracle deviation 320 bps.</textarea>
+          <label>Identifiers to preserve (comma-separated)</label>
+          <input id="trans-ids" value="ab12,320">
+          <label>Target locale</label>
+          <select id="trans-locale">
+            <option value="ja-JP">ja-JP</option>
+            <option value="ko-KR">ko-KR</option>
+            <option value="es-ES">es-ES</option>
+            <option value="de-DE">de-DE</option>
+          </select>
+          <label>Simulated NMT output</label>
+          <textarea id="trans-output-fake">ボールト ab12 は防御モードのため停止しました (oracle deviation 320 bps)。</textarea>
+          <div class="row" style="margin-top:8px">
+            <button id="trans-render">Render</button>
+            <button class="ghost" id="trans-clear">Clear cache</button>
+            <span class="badge" id="trans-cache"></span>
+          </div>
+        </div>
+        <div>
+          <label>Translation</label>
+          <pre id="trans-rendered"><code>// click Render</code></pre>
+          <p class="footer">The NMT runs only on cache miss. Identifiers (vault ids, hashes, addresses, numbers) must survive translation byte-for-byte; otherwise the output is rejected.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Surface 4 — Second-Opinion Analyst <span class="meta">independent, on-device</span></h2>
+      <div class="grid">
+        <div>
+          <label>Analyst recommendation</label>
+          <select id="analyst-rec"><option>approve</option><option>reject</option><option>escalate</option></select>
+          <label>Confidence (bps)</label>
+          <input id="analyst-conf" value="9200">
+          <label>Concerns (one per line; recognised classes from the failure catalog clear; novel concerns escalate)</label>
+          <textarea id="analyst-concerns"></textarea>
+          <label>Comparison to last 30d</label>
+          <input id="analyst-compare" value="consistent with last 30d allocation">
+          <label>Fields to double-check (comma-separated)</label>
+          <input id="analyst-fields" value="projected_share_balance,fees_total_lamports">
+          <div class="row" style="margin-top:8px">
+            <button id="analyst-run">Summarise</button>
+          </div>
+        </div>
+        <div>
+          <label>Summary (signing-flow output)</label>
+          <pre id="analyst-output"><code>// click Summarise</code></pre>
+          <p class="footer">Approve + zero unrecognised concerns = "analyst clears" badge in the Squads queue. Anything else surfaces as escalate; the approver still signs (or doesn't) on their own judgment.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Out of scope <span class="meta">deliberate non-uses</span></h2>
+      <p style="font-size:12px;color:#c5cad6;margin:0 0 6px">Picking integrations deliberately is a signal:</p>
+      <ul style="font-size:12px;color:#c5cad6;margin:6px 0;padding-left:18px">
+        <li>Replacing the deterministic MLP committed at vault creation (I-1) — the commitment-hash invariant rules this out.</li>
+        <li>Replacing the 7-agent ensemble — same reason.</li>
+        <li>SP1 proof generation on-device — devices lack the resources, prover registry slashing posture would be void.</li>
+        <li>Tether WDK custom wallets — Atlas is non-custodial; users connect existing wallets via wallet-standard.</li>
+        <li>STT voice commands for treasury operations — accidental-execution risk too high.</li>
+        <li>TTS for alerts — push notifications cover the audience.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <script type="module">
+    // Mini-bundle of @atlas/qvac for the playground (no build step).
+    function explainPreSign(payload, runner) {
+      const MAX = 300;
+      let text;
+      try { text = runner(payload); } catch { return { text: tmpl(payload), outcome: "template_fallback" }; }
+      if (!text || !text.trim()) return { text: tmpl(payload), outcome: "template_fallback" };
+      if (text.split(/\s+/).filter(Boolean).length > MAX) return { text: tmpl(payload), outcome: "template_fallback" };
+      const allowed = new Set([
+        String(payload.projected_apy_bps),
+        String(Math.abs(payload.risk_delta_bps)),
+        String(payload.fees_total_lamports),
+        String(payload.compute_units_estimated),
+        ...numTokens(payload.projected_share_balance),
+        ...numTokens(payload.vault_id_hex),
+      ]);
+      for (const t of numTokens(text)) {
+        if (!allowed.has(t)) return { text: tmpl(payload), outcome: "template_fallback" };
+      }
+      return { text, outcome: "local_llm" };
+    }
+    function tmpl(p) {
+      const w = p.warnings.length ? ` Warnings: ${p.warnings.join("; ")}.` : "";
+      const r = (p.risk_delta_bps >= 0 ? "+" : "") + p.risk_delta_bps;
+      return `${p.instruction} on vault ${shortHex(p.vault_id_hex)}. Projected share balance ${p.projected_share_balance} (APY ${p.projected_apy_bps} bps, risk delta ${r} bps). Fees ${p.fees_total_lamports} lamports; estimated CU ${p.compute_units_estimated}.${w}`;
+    }
+    function shortHex(s) { return s.length > 12 ? `${s.slice(0,6)}…${s.slice(-4)}` : s; }
+    function numTokens(s) {
+      const out = []; let cur = "";
+      for (const c of s) { if (c >= "0" && c <= "9") cur += c; else if (c === "," || c === "_") {} else if (cur) { out.push(cur); cur = ""; } }
+      if (cur) out.push(cur);
+      return out;
+    }
+    const FAILURE_CATALOG = [
+      "quorum_disagreement","source_quarantined","rpc_timeout","stale_account",
+      "oracle_stale","oracle_deviation","pyth_pull_post_failed","agent_timeout",
+      "hard_veto","disagreement_over_threshold","proof_gen_timeout","proof_verify_failed",
+      "proof_public_input_mismatch","compute_exhaustion","cpi_failure","slippage_violation",
+      "post_condition_violation","bundle_not_landed","alt_missing_account","archival_write_failed",
+      "bubblegum_anchor_lag","stale_proof_replay_detected","forged_vault_target","manipulated_state_root",
+      "per_session_expired","settlement_verifier_reject","per_operator_censorship","per_settlement_replay",
+    ];
+    function isRecognised(s) { const l = s.toLowerCase(); return FAILURE_CATALOG.some(k => l.includes(k)); }
+
+    // ── Surface 1
+    function readPresign() { return JSON.parse(document.getElementById("presign-payload").value); }
+    document.getElementById("presign-run").onclick = () => {
+      const r = explainPreSign(readPresign(), () => document.getElementById("presign-llm").value);
+      const out = document.getElementById("presign-output");
+      out.innerHTML = `<code>${escapeHtml(r.text)}</code>`;
+      const b = document.getElementById("presign-outcome");
+      b.textContent = r.outcome === "local_llm" ? "local LLM" : "template fallback";
+      b.className = "badge " + (r.outcome === "local_llm" ? "llm" : "fallback");
+    };
+    document.getElementById("presign-bad").onclick = () => {
+      document.getElementById("presign-llm").value = "Deposit. Projected APY is 9999 bps with fees 8888 lamports.";
+      document.getElementById("presign-run").click();
+    };
+
+    // ── Surface 2
+    document.getElementById("ocr-validate").onclick = () => {
+      const confirmed = document.getElementById("ocr-confirmed").value === "true";
+      const cf = (val) => ({ value: val, confidence: "high", source: confirmed ? "operator" : "local_ocr" });
+      const draft = {
+        vendor_name: cf(document.getElementById("ocr-vendor").value),
+        amount_q64: cf(document.getElementById("ocr-amount").value),
+        mint: cf(document.getElementById("ocr-mint").value),
+        due_at_unix: cf(parseInt(document.getElementById("ocr-due").value, 10)),
+        vendor_reference: cf(""),
+        source: confirmed ? "operator" : "local_ocr",
+        local_image_digest: "0".repeat(64),
+      };
+      let err = null;
+      const cfChk = f => f.value !== null && f.confidence === "high" && f.source === "operator";
+      if (!cfChk(draft.vendor_name) || !cfChk(draft.amount_q64) || !cfChk(draft.mint) || !cfChk(draft.due_at_unix)) err = "unconfirmed_fields";
+      const out = document.getElementById("ocr-output");
+      const annot = err ? `// VALIDATE → reject (${err})` : `// VALIDATE → accept`;
+      out.innerHTML = `<code>${escapeHtml(annot + "\n" + JSON.stringify(draft, null, 2))}</code>`;
+    };
+
+    // ── Surface 3
+    let cache = new Map(); let hits = 0, misses = 0;
+    function fnv(s) { let h = 0xcbf29ce4n, p = 0x1000193n; for (const c of s) { h ^= BigInt(c.charCodeAt(0)); h = (h*p) & 0xffffffffn; } return h.toString(16); }
+    document.getElementById("trans-render").onclick = () => {
+      const canonical = document.getElementById("trans-canonical").value;
+      const locale = document.getElementById("trans-locale").value;
+      const ids = document.getElementById("trans-ids").value.split(",").map(s => s.trim()).filter(Boolean);
+      const key = `${fnv(canonical)}|${locale}`;
+      const out = document.getElementById("trans-rendered");
+      if (cache.has(key)) {
+        hits++;
+        out.innerHTML = `<code>${escapeHtml(cache.get(key))}\n// cache HIT</code>`;
+      } else {
+        const rendered = document.getElementById("trans-output-fake").value;
+        for (const id of ids) {
+          if (id && !rendered.includes(id)) { out.innerHTML = `<code style="color:#ff8b8b">// rejected: identifier '${escapeHtml(id)}' dropped in translation</code>`; return; }
+        }
+        cache.set(key, rendered); misses++;
+        out.innerHTML = `<code>${escapeHtml(rendered)}\n// cache MISS — model invoked</code>`;
+      }
+      const total = hits + misses;
+      document.getElementById("trans-cache").textContent = `cache: ${hits}/${total} hits (${total > 0 ? Math.floor((hits*10000)/total) : 0} bps)`;
+    };
+    document.getElementById("trans-clear").onclick = () => { cache.clear(); hits = 0; misses = 0; document.getElementById("trans-cache").textContent = "cache cleared"; };
+
+    // ── Surface 4
+    document.getElementById("analyst-run").onclick = () => {
+      const rec = document.getElementById("analyst-rec").value;
+      const conf = parseInt(document.getElementById("analyst-conf").value, 10);
+      const concerns = document.getElementById("analyst-concerns").value.split("\n").map(s => s.trim()).filter(Boolean);
+      const out = document.getElementById("analyst-output");
+      if (conf > 10000) { out.innerHTML = `<code style="color:#ff8b8b">confidence_bps ${conf} > 10000</code>`; return; }
+      if (rec === "approve" && concerns.length) { out.innerHTML = `<code style="color:#f1d878">recommendation=approve but ${concerns.length} concerns flagged → escalate in UI</code>`; return; }
+      const unrec = concerns.filter(c => !isRecognised(c)).map(raw_text => ({ raw_text }));
+      const clears = rec === "approve" && unrec.length === 0;
+      const summary = {
+        assessment: {
+          recommendation: rec,
+          confidence_bps: conf,
+          concerns,
+          comparison_to_last_30d: document.getElementById("analyst-compare").value,
+          fields_to_double_check: document.getElementById("analyst-fields").value.split(",").map(s => s.trim()).filter(Boolean),
+        },
+        unrecognised_concerns: unrec,
+        clears_for_signing: clears,
+      };
+      const badge = clears ? `<span class="pill local">analyst clears</span>` : (unrec.length ? `<span class="pill escalate">unrecognised concern → escalate</span>` : `<span class="pill ${rec === "reject" ? "reject" : "escalate"}">${rec}</span>`);
+      out.innerHTML = `<code>${badge}\n\n${escapeHtml(JSON.stringify(summary, null, 2))}</code>`;
+    };
+
+    function escapeHtml(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]); }
+  </script>
+</body>
+</html>

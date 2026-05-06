@@ -201,6 +201,54 @@ pub fn is_commitment_path_crate(crate_name: &str) -> bool {
     COMMITMENT_PATH_CRATES.iter().any(|n| *n == crate_name)
 }
 
+/// Phase 19 §1 hard rule: QVAC output never enters a Poseidon
+/// commitment path. The deterministic MLP committed at vault
+/// creation (Phase 01 I-1) and the 7-agent ensemble are the only
+/// inputs to allocation proofs. QVAC is advisory UX only.
+///
+/// Mirrors `lint_no_read_hot_in_commitment_path`: substring-scans
+/// for QVAC SDK / atlas-qvac symbols in commitment-path crates and
+/// flags any hit. Real CI runs against a syn-walker; the rule body
+/// is identical.
+pub fn lint_no_qvac_in_commitment_path(
+    crate_name: &str,
+    is_commitment_path: bool,
+    source: &str,
+) -> Vec<QvacMisuseViolation> {
+    let mut out = Vec::new();
+    if !is_commitment_path {
+        return out;
+    }
+    const NEEDLES: &[&str] = &[
+        "atlas_qvac::",
+        "use atlas_qvac",
+        "@qvac/llm",
+        "@qvac/embed",
+        "@qvac/ocr",
+        "@qvac/translation",
+        "@qvac/sdk",
+        "QvacSurface::",
+        "PreSignExplanation",
+        "AnalystAssessment",
+        "DraftInvoiceState",
+    ];
+    for n in NEEDLES {
+        if source.contains(n) {
+            out.push(QvacMisuseViolation {
+                crate_name: crate_name.to_string(),
+                symbol: (*n).to_string(),
+            });
+        }
+    }
+    out
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct QvacMisuseViolation {
+    pub crate_name: String,
+    pub symbol: String,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -347,5 +395,50 @@ mod tests {
         assert!(is_commitment_path_crate("atlas-bus"));
         assert!(!is_commitment_path_crate("atlas-payments"));
         assert!(!is_commitment_path_crate("atlas-rs"));
+    }
+
+    #[test]
+    fn qvac_use_in_pipeline_flagged() {
+        let src = r#"
+            use atlas_qvac::PreSignExplanation;
+            fn build_public_input() {}
+        "#;
+        let v = lint_no_qvac_in_commitment_path("atlas-pipeline", true, src);
+        assert!(v.iter().any(|x| x.symbol == "use atlas_qvac"));
+    }
+
+    #[test]
+    fn qvac_outside_commitment_path_passes() {
+        let src = r#"use atlas_qvac::PreSignExplanation;"#;
+        // atlas-rs is the SDK; QVAC types are fine there.
+        let v = lint_no_qvac_in_commitment_path("atlas-rs", false, src);
+        assert!(v.is_empty());
+    }
+
+    #[test]
+    fn qvac_npm_package_imports_flagged() {
+        let src = r#"import { llm } from "@qvac/llm-llamacpp";"#;
+        let v = lint_no_qvac_in_commitment_path("atlas-pipeline", true, src);
+        assert!(v.iter().any(|x| x.symbol == "@qvac/llm"));
+    }
+
+    #[test]
+    fn analyst_type_in_commitment_path_flagged() {
+        let src = r#"
+            fn maybe_apply(a: &AnalystAssessment) {
+                let _ = a.recommendation;
+            }
+        "#;
+        let v = lint_no_qvac_in_commitment_path("atlas-public-input", true, src);
+        assert!(v.iter().any(|x| x.symbol == "AnalystAssessment"));
+    }
+
+    #[test]
+    fn clean_commitment_path_passes_qvac_lint() {
+        let src = r#"fn build_public_input(state: &VaultState) -> PublicInput {
+            PublicInput::new(state.commitment_root)
+        }"#;
+        let v = lint_no_qvac_in_commitment_path("atlas-pipeline", true, src);
+        assert!(v.is_empty());
     }
 }

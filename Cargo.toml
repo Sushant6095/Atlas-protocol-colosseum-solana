@@ -51,6 +51,7 @@ members = [
     "crates/atlas-operator-agent",
     "crates/atlas-rpc-router",
     "crates/atlas-per",
+    "crates/atlas-qvac",
     "tests/invariants",
     "tests/adversarial",
     "tests/warehouse",

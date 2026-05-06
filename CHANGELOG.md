@@ -1,5 +1,83 @@
 # Atlas Changelog
 
+## Unreleased — Phase 20.0 (2026-05-07) — Directive 20 (Frontend Part 1 — Design Language, Motion, Performance Architecture)
+
+The frontend pack starts here. Phase 20 is the spine — every surface
+in Phases 21–24 reuses these tokens, budgets, and contracts without
+exception.
+
+- `web/lib/tokens.ts` (§1) — single source of truth: 6 accent colors
+  (electric / zk / proof / execute / warn / danger), 3 font families
+  (display / body / mono), perfect-fourth type ramp, 4px space grid,
+  3 density presets, 5 radii, 4 easings (glide / precise /
+  expressive / inertial), 5 durations (instant 60ms / quick 140ms /
+  medium 220ms / slow 340ms / cinema 720ms), surface animation
+  budgets, perf budgets (LCP/INP/CLS per surface class, bundle
+  ≤220KB initial, runtime memory ≤220MB after 10min), realtime
+  budgets (4096 dedup LRU, 1024 backpressure, 32-deep reorder),
+  3D budgets (60fps target, 22ms throttle in / 18ms out, LOD tiers).
+- `web/app/globals.css` (§1, §3) — replaces the previous random
+  `pulse-glow / float-slow / shimmer` keyframes with the tokens
+  bridge: `@theme` exposes every token as a CSS variable;
+  `.surface-glass / .surface-raised / .surface-sunken / .surface-grid`
+  are the only remaining surface utilities; `prefers-reduced-motion`
+  collapses every transition above `quick` to `instant`.
+- `web/lib/motion.ts` (§2) — Framer Motion variants
+  (`fadeIn / liftIn / heroLift / scaleIn / disclosureCollapse /
+  pressTap / hoverGlow / listStagger / routeTransition`) that
+  reference `transitions.{instantGlide, quickPress, mediumReveal,
+  slowPanel, cinemaHero, expressive, inertial}`. `reducedMotionAware`
+  collapses any variant; `enterAnimationSlot / exitAnimationSlot`
+  feed the per-surface concurrent-animation budget.
+- `web/lib/realtime/` (§4) — `RealtimeTransport` opens one
+  WebSocket per session, multiplexed by topic; `BoundedLru` dedups
+  on `event_id`; `useRealtimeStore` (Zustand) RAF-flushes a 200-tick
+  burst to one render; `topicPriority` marks alerts / rebalance /
+  PER as `critical` (never dropped under backpressure); reconnect
+  is exponential with jitter, surfaces `degraded` after 3 fails.
+  Hooks `useRealtimeSnapshot / useRealtimeStream / useRealtimeStatus
+  / useRealtimeLagMs / useRealtimeDroppedTotal`.
+- `web/lib/three/supervisor.ts` (§5) — `useSceneSupervisor` mounts
+  scenes only on viewport intersection (rootMargin 200px); adaptive
+  FPS supervisor halves update frequency when frame time > 22ms for
+  >1s, restores when <18ms for >1s; LOD tiers selected by canvas
+  pixel count; reduced-motion + low-end (<4 cores or <4 GB) freeze
+  to first frame. Operator surfaces forced to `mounted=false`.
+- `web/lib/perf/` (§10) — `initVitals` ships LCP/INP/CLS/FCP/TTFB
+  via dynamic `web-vitals` import; `useLongTaskWatcher` reports
+  PerformanceObserver longtasks > 50ms;
+  `useMemoryInspector` (dev) polls `usedJSHeapSize` every minute and
+  warns on monotonic growth or 220MB breach; `useRenderCounter`
+  (dev) catches state-subscription bugs. `PerfBoundary` wraps a
+  route with all four.
+- `web/lib/state/` (§6) — `createQueryClient` with live (5s) /
+  archival (60s) staleTime defaults; `vaultKey / infraKey / intelKey
+  / perKey` enforce vault-scoped query keys; `REGISTERED_UI_STORES`
+  documents the per-feature Zustand slice ids; `BANNED_STORE_LIBS`
+  documents the import block.
+- `web/components/primitives/` — five memoised primitives:
+  `Panel` (raised / sunken / glass × dense / default / cinematic ×
+  6 accent variants), `Button` (primary / secondary / ghost /
+  destructive × sm / md / lg with `whileTap` press feedback via
+  `transitions.quickPress`), `IdentifierMono` (head…tail truncation
+  + click-to-copy), `AlertPill` (8 severity tokens), `Tile`
+  (KPI label + mono value + accent). Every component
+  `displayName` set; default exports are `React.memo` values.
+- `web/eslint.config.mjs` (§11) — blocks raw hex literals outside
+  `lib/tokens.ts` (regex on `Literal` + `TemplateElement`); blocks
+  Redux / Recoil / Jotai imports with hint pointers to the registry;
+  blocks Google Fonts CDN imports (self-host only); blocks
+  `framer-motion/dist` sub-paths.
+- `web/package.json` adds `web-vitals@^4.2.4` for the perf
+  telemetry pipeline.
+- `FRONTEND.md` — one-pager: design system rules, performance
+  architecture, realtime contract, scene supervisor API,
+  state store rules, anti-patterns, what's-next for Phases 21–24.
+
+No raw hex strings outside `tokens.ts`. No new accent colors. No
+new font families. The five accents and three families are the
+entire visual vocabulary.
+
 ## Unreleased — Phase 19.0 (2026-05-07) — Directive 19 (Atlas Local-AI Layer — Tether QVAC)
 
 One new crate (`atlas-qvac`, 5 modules) and one new npm package

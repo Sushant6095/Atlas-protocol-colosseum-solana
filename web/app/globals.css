@@ -1,110 +1,145 @@
 @import "tailwindcss";
 
+/*
+ * Atlas global stylesheet (Phase 20 §1, §3).
+ *
+ * Token bridge: every variable below MUST mirror `web/lib/tokens.ts`.
+ * Storybook + ESLint enforce the no-raw-hex rule across the rest of
+ * the app. If you find yourself wanting a new color or font here,
+ * stop — open `tokens.ts` instead.
+ */
+
 @theme {
-  --color-bg: #06060a;
-  --color-bg-2: #0c0c14;
-  --color-fg: #f5f5f7;
-  --color-accent: #7c5cff;
-  --color-accent-2: #29d3ff;
-  --color-accent-3: #ff5cf0;
-  --color-success: #29d391;
-  --color-warn: #f7c948;
-  --color-muted: #6b7280;
-  --color-card: rgba(20, 20, 26, 0.65);
-  --color-border: rgba(124, 92, 255, 0.15);
+  /* ── Surface ─────────────────────────────────────────────── */
+  --color-surface-base:    #06070A;
+  --color-surface-raised:  #0B0D12;
+  --color-surface-sunken:  #04050A;
+  --color-surface-inset:   #03040A;
+  --color-surface-glass:   rgba(11,13,18,0.55);
+  --color-surface-glass-t: rgba(11,13,18,0.30);
+
+  /* ── Ink ─────────────────────────────────────────────────── */
+  --color-ink-primary:   #E6EAF2;
+  --color-ink-secondary: #9AA3B5;
+  --color-ink-tertiary:  #5D6577;
+  --color-ink-inverted:  #06070A;
+  --color-ink-accent:    #7DB7FF;
+
+  /* ── Lines ───────────────────────────────────────────────── */
+  --color-line-soft:   rgba(255,255,255,0.04);
+  --color-line-medium: rgba(255,255,255,0.08);
+  --color-line-strong: rgba(255,255,255,0.16);
+  --color-line-grid:   rgba(110,140,200,0.08);
+
+  /* ── Accents (the entire palette) ────────────────────────── */
+  --color-accent-electric: #3F8CFF;
+  --color-accent-zk:       #A682FF;
+  --color-accent-proof:    #F478C6;
+  --color-accent-execute:  #3CE39A;
+  --color-accent-warn:     #F7B955;
+  --color-accent-danger:   #FF6166;
+
+  /* ── Glows ───────────────────────────────────────────────── */
+  --shadow-glow-electric: 0 0 24px rgba(63,140,255,0.35);
+  --shadow-glow-zk:       0 0 24px rgba(166,130,255,0.35);
+  --shadow-glow-proof:    0 0 24px rgba(244,120,198,0.30);
+  --shadow-glow-execute:  0 0 24px rgba(60,227,154,0.30);
+
+  /* ── Radius ──────────────────────────────────────────────── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+
+  /* ── Easing ──────────────────────────────────────────────── */
+  --ease-glide:      cubic-bezier(0.20, 0.80, 0.20, 1.00);
+  --ease-precise:    cubic-bezier(0.40, 0.00, 0.20, 1.00);
+  --ease-expressive: cubic-bezier(0.34, 1.56, 0.64, 1.00);
+  --ease-inertial:   cubic-bezier(0.10, 0.00, 0.00, 1.00);
+
+  /* ── Duration ────────────────────────────────────────────── */
+  --duration-instant: 60ms;
+  --duration-quick:   140ms;
+  --duration-medium:  220ms;
+  --duration-slow:    340ms;
+  --duration-cinema:  720ms;
+
+  /* ── Type families ───────────────────────────────────────── */
+  --font-display: "Cabinet Grotesk", "General Sans", "Neue Montreal", system-ui, sans-serif;
+  --font-body:    "Geist", "Satoshi", "Inter Tight", system-ui, sans-serif;
+  --font-mono:    "IBM Plex Mono", "Geist Mono", ui-monospace, monospace;
 }
 
-* {
-  font-family: ui-sans-serif, system-ui, -apple-system, "Inter", sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
+/* ── Element resets ───────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
 
 html, body {
-  background: var(--color-bg);
-  color: var(--color-fg);
+  background: var(--color-surface-base);
+  color: var(--color-ink-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
 }
 
-/* glass + glow utilities */
-.glass {
-  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+::selection {
+  background: var(--color-accent-electric);
+  color: var(--color-ink-inverted);
+}
+
+/* Scrollbar — only visible on overflow surfaces with .scroll-area */
+.scroll-area::-webkit-scrollbar { width: 8px; height: 8px; }
+.scroll-area::-webkit-scrollbar-track { background: transparent; }
+.scroll-area::-webkit-scrollbar-thumb {
+  background: var(--color-line-medium);
+  border-radius: var(--radius-sm);
+}
+.scroll-area::-webkit-scrollbar-thumb:hover { background: var(--color-line-strong); }
+
+/* ── Reserved utilities ──────────────────────────────────────
+   All animation / motion utilities live in `lib/motion.ts` and
+   are applied via Framer Motion variants. The only CSS-only
+   classes here are static surface treatments. */
+
+.surface-glass {
+  background: var(--color-surface-glass);
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-line-medium);
 }
 
-.glow-accent {
-  box-shadow: 0 0 60px -20px rgba(124, 92, 255, 0.6),
-              0 0 120px -40px rgba(41, 211, 255, 0.3);
+.surface-raised {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-line-medium);
 }
 
-.text-gradient {
-  background: linear-gradient(135deg, #7c5cff 0%, #29d3ff 50%, #ff5cf0 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+.surface-sunken {
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-line-soft);
 }
 
-.text-gradient-subtle {
-  background: linear-gradient(180deg, #f5f5f7 0%, #9ca3af 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+.text-mono { font-family: var(--font-mono); font-feature-settings: "ss01", "tnum"; }
+.text-display { font-family: var(--font-display); letter-spacing: -0.02em; }
 
-/* Birdeye-style full-coverage grid */
-.grid-bg {
+/* Subtle grid background for terminal / intelligence pages.
+   Cinematic surfaces use the canvas-driven equivalent (Part 5). */
+.surface-grid {
   background-image:
-    linear-gradient(rgba(150, 130, 255, 0.18) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(150, 130, 255, 0.18) 1px, transparent 1px);
+    linear-gradient(var(--color-line-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line-grid) 1px, transparent 1px);
   background-size: 48px 48px;
 }
 
-.grid-bg-fine {
-  background-image:
-    linear-gradient(rgba(120, 220, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 220, 255, 0.06) 1px, transparent 1px);
-  background-size: 12px 12px;
-}
+/* ── Reduced-motion contract (Phase 20 §2.4) ───────────────── */
 
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.05); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: var(--duration-instant) !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: var(--duration-instant) !important;
+    scroll-behavior: auto !important;
+  }
 }
-.animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }
-
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0) rotate(0); }
-  50% { transform: translateY(-20px) rotate(2deg); }
-}
-.animate-float-slow { animation: float-slow 8s ease-in-out infinite; }
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-.shimmer-text {
-  background: linear-gradient(90deg, #f5f5f7 0%, #7c5cff 50%, #f5f5f7 100%);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 6s linear infinite;
-}
-
-@keyframes flow {
-  0% { stroke-dashoffset: 100; }
-  100% { stroke-dashoffset: 0; }
-}
-.flow-line { stroke-dasharray: 8 6; animation: flow 1.2s linear infinite; }
-
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: var(--color-bg); }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 6px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-slide-up { animation: slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }

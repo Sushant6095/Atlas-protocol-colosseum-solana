@@ -1,0 +1,37 @@
+crates/atlas-rs/src/client.rs
+  s_c3576656714da0::t_70054261590531 1-245
+Cargo.toml
+  s_c3576656714da0::t_cf4ff44f0c344e 42
+sdk/ts/package.json
+  s_c3576656714da0::t_a480e282c835c0 14-15
+crates/atlas-rs/src/lib.rs
+  s_c3576656714da0::t_b3071cb715033f 1-28
+crates/atlas-rs/src/transport.rs
+  s_c3576656714da0::t_0a81678db8ea80 1-60
+crates/atlas-rs/Cargo.toml
+  s_c3576656714da0::t_bfd8a004b6b8cb 1-22
+sdk/ts/src/index.ts
+  s_c3576656714da0::t_19ca3d4cca3d35 4
+CHANGELOG.md
+  s_c3576656714da0::t_65ffba8a1c6a2c 3-24
+sdk/ts/src/platform.ts
+  s_c3576656714da0::t_214ed140d6b56e 1-141
+sdk/playground/index.html
+  s_c3576656714da0::t_3e79761c10be17 1-175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "e8ab40a4f53d295011ad3791ba603dc90ecb20e4",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

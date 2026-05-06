@@ -295,6 +295,85 @@ pub static WAREHOUSE_FEATURE_STORE_LEAKAGE_TOTAL: Lazy<CounterVec> = Lazy::new(|
     v
 });
 
+// ─── Phase 04 — LIE + OVL SLOs (directive §1.6, §2.6) ───────────────────
+
+pub static LIE_SNAPSHOT_LAG_SLOTS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_lie_snapshot_lag_slots",
+        "Slots between leader inclusion and LiquidityMetrics emission. p99 SLO ≤ 4.",
+        vec![0.0, 1.0, 2.0, 4.0, 8.0, 16.0]
+    );
+    let h = HistogramVec::new(opts, &["pool"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static LIE_TOXICITY_HIGH_POOL_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_lie_toxicity_high_pool_total",
+        "Pools observed above T_TOXIC (6_500 bps) over rolling 1h. Alert on cliff.",
+        &["pool"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static LIE_FRAGMENTATION_INDEX_BPS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_lie_fragmentation_index_bps",
+        "Per-pair fragmentation index distribution (0..=10_000 bps). Dashboarded p95.",
+        vec![0.0, 1_000.0, 2_500.0, 5_000.0, 7_500.0, 9_000.0, 10_000.0]
+    );
+    let h = HistogramVec::new(opts, &["pair"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static OVL_DEVIATION_BPS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_ovl_deviation_bps",
+        "Per-asset max-pairwise oracle deviation in bps. Dashboarded p99.",
+        vec![5.0, 10.0, 30.0, 80.0, 200.0, 500.0]
+    );
+    let h = HistogramVec::new(opts, &["asset"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static OVL_STALE_PYTH_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_ovl_stale_pyth_total",
+        "Pyth feeds observed stale (current_slot - publish_slot > 25). Alert on rate.",
+        &["asset"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static OVL_DEFENSIVE_TRIGGER_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_ovl_defensive_trigger_total",
+        "Defensive-mode triggers caused by oracle validation. Alert on rate.",
+        &["asset", "reason"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static OVL_CONSENSUS_CONFIDENCE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_ovl_consensus_confidence_bps",
+        "Per-asset consensus confidence (0..=10_000 bps). p10 SLO ≥ 7_000.",
+        &["asset"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

@@ -1,0 +1,21 @@
+[package]
+name = "atlas-lie"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Liquidity Intelligence Engine — depth, slippage, fragmentation, and toxicity per pool/route per slot. Implements directive 04 §1."
+
+[lib]
+
+[dependencies]
+atlas-bus = { path = "../atlas-bus" }
+atlas-telemetry = { path = "../atlas-telemetry" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full", "macros"] }
+proptest = "1.5"

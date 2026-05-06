@@ -1,0 +1,16 @@
+[package]
+name = "atlas-exposure"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Cross-Protocol Exposure Engine — dependency graph + effective-exposure metric + correlated-liquidation simulator. Implements directive 04 §3."
+
+[lib]
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+thiserror.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

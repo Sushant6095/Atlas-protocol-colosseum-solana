@@ -1,5 +1,118 @@
 # Atlas Changelog
 
+## Unreleased — Phase 4 (2026-05-06) — Liquidity Microstructure + Oracle Validation + Exposure (directive 04)
+
+### atlas-lie crate (§1 Liquidity Intelligence Engine)
+
+- `metrics::LiquidityMetrics` — typed per-pool, per-slot output: depth at
+  ±1% / ±5% in Q64.64, 9-point slippage curve, fragmentation index in bps,
+  velocity in Q64.64-per-slot, toxicity score in bps, snapshot hash.
+- `quantize_q64` / `quantize_q64_signed` — deterministic round-half-up to
+  the 1/2^32 grid before commitment hashing (§1.5).
+- `snapshot_hash` — domain-tagged blake3 over the canonical layout.
+- `fragmentation::fragmentation_index_bps` — `10_000 - HHI` in pure
+  integer-bps math. Empty / monolithic / split-N families covered.
+- `toxicity::ToxicityScorer` — weighted combination of reversal rate,
+  inventory skew, LP-withdrawal velocity, and sandwich-pair count over a
+  256-slot rolling window. Returns `ToxicityClass` (Clean / Warn /
+  Excluded). Thresholds match directive: `T_TOXIC_BPS = 6_500`,
+  `T_TOXIC_WARN_BPS = 4_000`.
+- `depth::SlippageCurveBuilder` — builds the fixed 9-point ladder
+  `[-5%, -2%, -1%, -0.5%, 0, +0.5%, +1%, +2%, +5%]` from a caller-provided
+  warehouse-pinned depth lookup. Quantizes outputs.
+
+### atlas-ovl crate (§2 Oracle Validation Layer)
+
+- `consensus::derive_consensus(input) -> OracleConsensus` — pure, replayable
+  implementation of the §2.2 selection algorithm:
+  - ≤30 bps and not stale → median, confidence 9_500
+  - 30–80 bps → median, confidence linear-degraded to 7_000
+  - 80–200 bps → fall back to Pyth iff conf < 50 bps; otherwise defensive
+  - >200 bps OR any feed stale OR low-TWAP-confidence → defensive
+- `OracleFlags` bitset (`STALE_PYTH | STALE_SB | TWAP_DIVERGE | CEX_DIVERGE
+  | LOW_CONFIDENCE | DEFENSIVE_TRIGGER`).
+- `freshness::is_stale_pyth` (>25 slots) / `is_stale_switchboard` (>30 slots).
+- `keeper::PullOracleKeeper` + `validate_posted_update` — implements §2.4:
+  posted price-update slot must be `≥ bundle_target_slot − 4`. Replay
+  attack (re-using an old update) is explicitly rejected by
+  `validate_for_bundle`. Tests pin every adversarial case from §2.5.
+
+### atlas-exposure crate (§3 Cross-Protocol Exposure Engine)
+
+- `ProtocolDependencyGraph` — typed nodes (`Protocol`, `Asset`, `Oracle`,
+  `Liquidator`) + 4 edge kinds (`ProtocolUsesAsset`, `ProtocolUsesOracle`,
+  `ProtocolSharesLiquidator`, `AssetCorrelated`).
+- `effective_exposures(allocation_bps)` — BFS with `PATH_DECAY_BPS = 7_000`
+  per hop and edge weight, computing the directive's
+  `eff_exposure(e) = Σ a_i × path_weight(protocol_i → e)`.
+- `flags(allocation)` surfaces three §3.3 adversarial patterns:
+  `EffectiveOracleConcentration`, `SharedCollateralRisk`,
+  `SharedLiquidatorRisk`, plus `AssetCorrelationCluster` for ≥7_000 bps
+  correlation edges.
+- `topology_hash` — domain-tagged blake3 over sorted+deduped edges; lands
+  in `public_input.risk_state_hash` (Phase 01 §8 contract).
+- `scenarios::simulate_correlated_liquidation` — applies a `-X%` shock to
+  an asset and propagates loss through the graph. Tests confirm shock
+  scaling and unrelated-shock-yields-zero invariants.
+
+### atlas-telemetry — Phase 04 SLOs (directive §1.6, §2.6)
+
+- `lie_snapshot_lag_slots` (histogram, label `pool`) — p99 SLO ≤ 4.
+- `lie_toxicity_high_pool_total` (counter, label `pool`) — alert on cliff.
+- `lie_fragmentation_index_bps` (histogram, label `pair`) — dashboard p95.
+- `ovl_deviation_bps` (histogram, label `asset`) — dashboard p99.
+- `ovl_stale_pyth_total` (counter, label `asset`) — alert on rate.
+- `ovl_defensive_trigger_total` (counter, labels `asset`, `reason`) — alert on rate.
+- `ovl_consensus_confidence_bps` (gauge, label `asset`) — p10 SLO ≥ 7_000.
+
+### Tests added (45)
+
+| Module | Tests |
+|---|---|
+| atlas-lie::metrics | 5 |
+| atlas-lie::fragmentation | 5 |
+| atlas-lie::toxicity | 5 |
+| atlas-lie::depth | 2 |
+| atlas-ovl::freshness | 2 |
+| atlas-ovl::consensus | 9 (incl. all §2.5 adversarial cases) |
+| atlas-ovl::keeper | 7 |
+| atlas-exposure::graph | 7 |
+| atlas-exposure::scenarios | 3 |
+
+### Test counts
+
+| Crate | Tests |
+|---|---|
+| atlas-public-input | 5 |
+| atlas-pipeline | 82 |
+| atlas-telemetry | 3 |
+| atlas-replay | 20 |
+| atlas-bus | 59 |
+| atlas-warehouse | 36 |
+| atlas-warehouse-tests | 6 |
+| atlas-invariants-tests | 6 |
+| atlas-adversarial-tests | 10 |
+| **atlas-lie** | **17** |
+| **atlas-ovl** | **18** |
+| **atlas-exposure** | **10** |
+| **Total** | **275** (was 230) |
+
+### Directive 04 §5 deliverable checklist
+
+| Item | Status |
+|---|---|
+| `atlas-lie` crate w/ typed `LiquidityMetrics`, deterministic | ✅ |
+| Toxicity scorer w/ documented heuristics + unit tests | ✅ |
+| `atlas-ovl` crate w/ `OracleConsensus`, pull-oracle keeper, freshness gate | ✅ |
+| Pyth pull-oracle integration: posting + verifier read pattern | ✅ off-chain side; on-chain read CPI Phase 5 |
+| Cross-protocol dependency graph builder w/ `risk_state_hash` derivation | ✅ |
+| Adversarial test fixtures (stale-Pyth, synchronized-push, replayed-price-update) | ✅ |
+| Dashboards for deviation distribution, toxicity, fragmentation per asset/pool | ✅ metrics registered; Grafana JSON Phase 5 |
+
+**Directive 04 closed.**
+
+---
+
 ## Unreleased — Phase 3.2 (2026-05-06) — Directive 03 closeout (§5–§10)
 
 ### Bubblegum: real Merkle proofs

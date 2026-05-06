@@ -11,6 +11,7 @@ pub mod metrics;
 pub mod toxicity;
 pub mod fragmentation;
 pub mod depth;
+pub mod source;
 
 pub use metrics::{LiquidityMetrics, ProtocolId, SlippagePoint, snapshot_hash};
 pub use toxicity::{
@@ -18,3 +19,7 @@ pub use toxicity::{
 };
 pub use fragmentation::{fragmentation_index_bps, RouteShare};
 pub use depth::SlippageCurveBuilder;
+pub use source::{
+    require_pinned, LiveBirdeyeDepth, LiveJupiterQuote, WarehousePinnedSource,
+    WarehouseSnapshotRef,
+};

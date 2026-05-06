@@ -1,5 +1,104 @@
 # Atlas Changelog
 
+## Unreleased — Phase 4.1 (2026-05-06) — Directive 04 closeout (§3.4–§5)
+
+### Bridge: exposure topology hash → public input
+
+- `atlas_exposure::combined_risk_state_hash(pipeline_hash, exposure_hash)` —
+  domain-tagged blake3 helper that lands in `public_input.risk_state_hash`.
+  Tests pin: changing either component changes the combined hash;
+  deterministic across runs.
+
+### Anti-pattern enforcement (directive §4)
+
+- **`atlas_lie::source` module** — type-level barrier against live quotes
+  in the commitment path. `WarehousePinnedSource` marker trait is required
+  by `require_pinned`. `LiveJupiterQuote` and `LiveBirdeyeDepth` exist for
+  monitoring/dashboards but explicitly do **not** implement the marker.
+  Documented compile-time enforcement.
+- **`atlas_ovl::cex_guard::CexReference`** — Birdeye CEX price wrapper.
+  No `Serialize`, no commitment-hash method. Only operation:
+  `agrees_with(consensus, band)` for sanity guarding (sets the
+  `CEX_DIVERGE` flag without altering `consensus_price_q64`).
+- **`atlas_ovl::verifier::verify_posted_update`** — pure off-chain mirror
+  of the Phase 5 on-chain Pyth read CPI. Reaffirms freshness gate
+  (posted_slot ≥ bundle_target_slot − 4) and returns `VerifiedPrice`. Same
+  function called both in the commitment path and on-chain — replay parity.
+- **`GraphRevision` + `assert_current`** in `atlas_exposure` — refuses to
+  consume a stale graph in the commitment path. Three failure modes pinned:
+  unstamped graph, drifted protocol set, age exceeded.
+
+### Adversarial test fixtures (`tests/oracles/`)
+
+- New integration crate `atlas-oracle-tests` with all directive §2.5
+  scenarios as named fixtures:
+  - `single_source_manipulation_rejects` — only Pyth pumps; consensus rejects.
+  - `synchronized_push_degrades_confidence` — Pyth + SB move, TWAP doesn't;
+    `TWAP_DIVERGE` flag, confidence falls to 5_000.
+  - `replayed_price_update_rejected` — keeper + verifier both reject an
+    update at slot 100 against bundle slot 1_000.
+  - `stale_pyth_with_perfect_agreement_still_defensive` — agreement is
+    not freshness; defensive triggers anyway.
+  - `pull_oracle_boundary_4_slot_lag_verifies` — boundary verifies; 5-slot
+    lag rejects.
+
+### Grafana dashboard (`ops/grafana/atlas-phase04.json`)
+
+- Phase 04 dashboard wired to all 7 metrics with directive thresholds:
+  - OVL consensus confidence (red < 6_500, yellow < 7_000, green ≥ 7_000)
+  - OVL deviation p99 (red ≥ 200, yellow ≥ 80)
+  - LIE snapshot lag p99 (red ≥ 4)
+  - LIE fragmentation p95 per pair
+  - Per-asset oracle deviation timeseries
+  - Toxicity high-pool count rolling 1h
+  - Stale Pyth + defensive trigger timeseries
+
+### Tests added (20)
+
+| Module | Tests |
+|---|---|
+| atlas-exposure::graph (revision/staleness) | 4 |
+| atlas-exposure (combined_risk_state_hash) | 2 |
+| atlas-lie::source | 2 |
+| atlas-ovl::cex_guard | 3 |
+| atlas-ovl::verifier | 4 |
+| tests/oracles | 5 |
+
+### Test counts
+
+| Crate | Tests |
+|---|---|
+| atlas-public-input | 5 |
+| atlas-pipeline | 82 |
+| atlas-telemetry | 3 |
+| atlas-replay | 20 |
+| atlas-bus | 59 |
+| atlas-warehouse | 36 |
+| atlas-warehouse-tests | 6 |
+| atlas-invariants-tests | 6 |
+| atlas-adversarial-tests | 10 |
+| atlas-lie | 19 (was 17) |
+| atlas-ovl | 25 (was 18) |
+| atlas-exposure | 16 (was 10) |
+| **atlas-oracle-tests** | **5** (new) |
+| **Total** | **295** (was 275) |
+
+### Directive 04 §5 deliverable checklist — final closeout
+
+| Item | Status |
+|---|---|
+| `atlas-lie` crate w/ typed `LiquidityMetrics`, deterministic | ✅ |
+| Toxicity scorer w/ documented heuristics + unit tests | ✅ |
+| `atlas-ovl` crate w/ `OracleConsensus`, pull-oracle keeper, freshness gate | ✅ |
+| Pyth pull-oracle integration: posting + verifier read pattern | ✅ off-chain mirror via `verify_posted_update` |
+| Cross-protocol dependency graph builder w/ `risk_state_hash` derivation | ✅ + `combined_risk_state_hash` bridge |
+| Adversarial test fixtures (stale-Pyth, synchronized-push, replayed-price-update) | ✅ `tests/oracles/` integration crate |
+| Dashboards for deviation distribution, toxicity, fragmentation | ✅ `ops/grafana/atlas-phase04.json` |
+
+**Directive 04 closed.**
+
+---
+
 ## Unreleased — Phase 4 (2026-05-06) — Liquidity Microstructure + Oracle Validation + Exposure (directive 04)
 
 ### atlas-lie crate (§1 Liquidity Intelligence Engine)

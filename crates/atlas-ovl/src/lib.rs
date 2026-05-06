@@ -11,6 +11,8 @@
 pub mod consensus;
 pub mod freshness;
 pub mod keeper;
+pub mod cex_guard;
+pub mod verifier;
 
 pub use consensus::{
     derive_consensus, ConsensusInput, OracleConsensus, OracleFlags,
@@ -19,3 +21,5 @@ pub use consensus::{
 };
 pub use freshness::{is_stale_pyth, is_stale_switchboard, MAX_PYTH_LAG_SLOTS, MAX_SB_LAG_SLOTS};
 pub use keeper::{PostedPriceUpdate, PullOracleKeeper, PullOraclePostError, MAX_PRICE_UPDATE_LAG};
+pub use cex_guard::{CexDivergence, CexReference};
+pub use verifier::{verify_posted_update, VerifiedPrice};

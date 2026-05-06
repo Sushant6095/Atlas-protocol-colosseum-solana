@@ -1,0 +1,12 @@
+[package]
+name = "atlas-oracle-tests"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+atlas-ovl = { path = "../../crates/atlas-ovl" }
+
+[dev-dependencies]
+proptest = "1.5"

@@ -1,0 +1,153 @@
+{
+  "title": "Atlas — Phase 04 (Liquidity + Oracle)",
+  "uid": "atlas-phase04",
+  "schemaVersion": 39,
+  "version": 1,
+  "timezone": "",
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "asset",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(atlas_ovl_consensus_confidence_bps, asset)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2
+      },
+      {
+        "name": "pool",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(atlas_lie_snapshot_lag_slots_count, pool)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "OVL consensus confidence p10 (bps)",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "min by () (atlas_ovl_consensus_confidence_bps{asset=~\"$asset\"})"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 6500 },
+              { "color": "green", "value": 7000 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "OVL deviation p99 (bps)",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(atlas_ovl_deviation_bps_bucket{asset=~\"$asset\"}[5m])) by (le, asset))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 80 },
+              { "color": "red", "value": 200 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "LIE snapshot lag p99 (slots)",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(atlas_lie_snapshot_lag_slots_bucket{pool=~\"$pool\"}[5m])) by (le, pool))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 2 },
+              { "color": "red", "value": 4 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "LIE fragmentation p95 (bps)",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(atlas_lie_fragmentation_index_bps_bucket[5m])) by (le, pair))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Oracle deviation distribution per asset",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "legendFormat": "{{asset}}",
+          "expr": "histogram_quantile(0.99, sum(rate(atlas_ovl_deviation_bps_bucket{asset=~\"$asset\"}[5m])) by (le, asset))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Toxicity high-pool count (rolling 1h)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "legendFormat": "{{pool}}",
+          "expr": "sum(increase(atlas_lie_toxicity_high_pool_total[1h])) by (pool)"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "OVL stale Pyth + defensive triggers",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "legendFormat": "stale_pyth {{asset}}",
+          "expr": "sum(rate(atlas_ovl_stale_pyth_total[5m])) by (asset)"
+        },
+        {
+          "legendFormat": "defensive {{asset}}/{{reason}}",
+          "expr": "sum(rate(atlas_ovl_defensive_trigger_total[5m])) by (asset, reason)"
+        }
+      ]
+    }
+  ]
+}

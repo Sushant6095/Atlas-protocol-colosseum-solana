@@ -57,11 +57,31 @@ pub struct EffectiveExposure {
     pub flags: Vec<ExposureFlag>,
 }
 
+/// Revision marker — directive §4 anti-pattern enforcement: *"Computing the
+/// dependency graph offline and forgetting to re-run after adding a new
+/// protocol."* The orchestrator records the protocol-set hash + slot here;
+/// before consuming the graph in a commitment path, it re-asserts equality
+/// against the current allocation universe.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GraphRevision {
+    pub protocol_set_hash: [u8; 32],
+    pub last_recomputed_slot: u64,
+}
+
+#[derive(Debug, thiserror::Error, PartialEq, Eq)]
+pub enum GraphStaleError {
+    #[error("graph protocol-set hash drifted")]
+    ProtocolSetDrifted,
+    #[error("graph not recomputed since slot {graph_slot}, current {current_slot}, max age {max_age}")]
+    AgeExceeded { graph_slot: u64, current_slot: u64, max_age: u64 },
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct ProtocolDependencyGraph {
     edges: Vec<DependencyEdge>,
     /// Adjacency keyed by `from` → `(to, kind, weight)`.
     adj: BTreeMap<NodeId, Vec<(NodeId, EdgeKind, u32)>>,
+    revision: Option<GraphRevision>,
 }
 
 impl ProtocolDependencyGraph {
@@ -168,6 +188,64 @@ impl ProtocolDependencyGraph {
             flags.push(ExposureFlag::AssetCorrelationCluster);
         }
         flags
+    }
+
+    pub fn revision(&self) -> Option<GraphRevision> {
+        self.revision
+    }
+
+    /// Stamp the graph's revision after recomputing for the given protocol
+    /// set + slot. Use after add_edge churn whenever the allocation universe
+    /// changes.
+    pub fn stamp_revision(&mut self, protocol_ids: &[u32], current_slot: u64) {
+        let mut sorted: Vec<u32> = protocol_ids.to_vec();
+        sorted.sort();
+        sorted.dedup();
+        let mut h = blake3::Hasher::new();
+        h.update(b"atlas.exposure.protocols.v1\x00");
+        for id in &sorted {
+            h.update(&id.to_le_bytes());
+        }
+        self.revision = Some(GraphRevision {
+            protocol_set_hash: h.finalize().into(),
+            last_recomputed_slot: current_slot,
+        });
+    }
+
+    /// Refuse stale graphs in the commitment path. Caller passes the current
+    /// allocation universe + slot. Returns `Err` if the protocol set has
+    /// drifted or the graph was not recomputed within `max_age_slots`.
+    pub fn assert_current(
+        &self,
+        current_protocol_ids: &[u32],
+        current_slot: u64,
+        max_age_slots: u64,
+    ) -> Result<(), GraphStaleError> {
+        let mut sorted: Vec<u32> = current_protocol_ids.to_vec();
+        sorted.sort();
+        sorted.dedup();
+        let mut h = blake3::Hasher::new();
+        h.update(b"atlas.exposure.protocols.v1\x00");
+        for id in &sorted {
+            h.update(&id.to_le_bytes());
+        }
+        let current_hash: [u8; 32] = h.finalize().into();
+        let revision = self.revision.unwrap_or(GraphRevision {
+            protocol_set_hash: [0u8; 32],
+            last_recomputed_slot: 0,
+        });
+        if revision.protocol_set_hash != current_hash {
+            return Err(GraphStaleError::ProtocolSetDrifted);
+        }
+        let age = current_slot.saturating_sub(revision.last_recomputed_slot);
+        if age > max_age_slots {
+            return Err(GraphStaleError::AgeExceeded {
+                graph_slot: revision.last_recomputed_slot,
+                current_slot,
+                max_age: max_age_slots,
+            });
+        }
+        Ok(())
     }
 
     /// Domain-tagged hash over sorted edges. Deterministic and feeds
@@ -331,6 +409,36 @@ mod tests {
         assert_eq!(direct, 7_000);
         // 7_000 * 10_000 * 7_000 / 10_000² = 4_900
         assert_eq!(two_hop, 4_900);
+    }
+
+    #[test]
+    fn assert_current_passes_when_protocol_set_matches_and_fresh() {
+        let mut g = ProtocolDependencyGraph::new();
+        g.stamp_revision(&[1, 2, 3], 100);
+        g.assert_current(&[3, 2, 1], 110, 1000).unwrap();
+    }
+
+    #[test]
+    fn assert_current_fails_when_protocol_set_drifted() {
+        let mut g = ProtocolDependencyGraph::new();
+        g.stamp_revision(&[1, 2, 3], 100);
+        let err = g.assert_current(&[1, 2, 4], 110, 1000).unwrap_err();
+        assert!(matches!(err, GraphStaleError::ProtocolSetDrifted));
+    }
+
+    #[test]
+    fn assert_current_fails_when_too_old() {
+        let mut g = ProtocolDependencyGraph::new();
+        g.stamp_revision(&[1, 2, 3], 100);
+        let err = g.assert_current(&[1, 2, 3], 1500, 1000).unwrap_err();
+        assert!(matches!(err, GraphStaleError::AgeExceeded { .. }));
+    }
+
+    #[test]
+    fn unstamped_graph_is_treated_as_drifted() {
+        let g = ProtocolDependencyGraph::new();
+        let err = g.assert_current(&[1, 2, 3], 100, 1000).unwrap_err();
+        assert!(matches!(err, GraphStaleError::ProtocolSetDrifted));
     }
 
     #[test]

@@ -324,3 +324,51 @@ public surface reaches for:
 
 The legacy root-level `<Navbar />` retired in Phase 22 — every new
 surface routes through one of the five Phase 21 shells.
+
+---
+
+# Frontend Part 4 — Operator Surfaces, Treasury OS, Confidential, Execution (Phase 23)
+
+Phase 22 wins the first 30 seconds. Phase 23 wins the next 30 minutes.
+Density discipline is the principle — every pixel earns its place.
+
+## Owned routes
+
+| Surface | Highlights |
+|---|---|
+| `/vaults` | Index of vaults the user has membership in + public vaults. Per-row band, TVL, APY, defensive/confidential/PER flags. |
+| `/vault/[id]` | Vault Intelligence Terminal — `VaultStatusBar`, three-column allocation/performance/risk, last-rebalance card, agents sidecar, `BottomStrip` with `r p a ⌘.` shortcuts. |
+| `/vault/[id]/rebalances` | Filterable rebalance list (regime / route / status / defensive). |
+| `/vault/[id]/rebalances/[hash]` | Black-box record — outcome, decision, state diff, agent ensemble, CPI trace, timings funnel, **Verify in browser**. |
+| `/vault/[id]/proofs` | Vault-scoped proof index with per-row Verify-in-browser. |
+| `/vault/[id]/agents` | 7-card grid + drawer (mandate, features, training metadata, recent proposals). |
+| `/vault/[id]/private/[session]` | PER session viewer — gated by viewing-key scope (none / agent-trace / post-hoc / realtime). |
+| `/rebalance/live` | Four-quadrant Live Command Center: active rebalances · bundle status · latency timeline · network conditions. |
+| `/triggers` + `/triggers/new` | Phase 12 proof-gated triggers; live `conditions_hash` in the wizard. |
+| `/recurring` + `/recurring/new` | Adaptive DCA plans with cadence-history (each change a proof). |
+| `/hedging` | Optional Perps hedge UI (open / close / resize all proof-gated). |
+| `/treasury` | Treasury index cards. |
+| `/treasury/new` | 11-step wizard — kind · multisig · KYB · template · band · risk policy · signers · confidential · private exec · review · sign. Live `strategy_commitment` hash. |
+| `/treasury/[id]` | Treasury overview — KPIs, allocation across vaults, cashflow, upcoming payouts, recent ledger. |
+| `/treasury/[id]/ledger` | Unified ledger with type filter and per-row Verify-in-browser. |
+| `/treasury/[id]/runway` | Runway p10/p50, p10–p90 fan chart, signed drivers with provenance, "what if" sliders. |
+| `/treasury/[id]/invoices` | Invoice intelligence + QVAC OCR overlay; image stays on device, only operator-confirmed fields submit. |
+| `/treasury/[id]/payments` | Scheduled / pre-warming / settling / settled / failed states. |
+| `/treasury/[id]/proofs` | Public-trust proof-of-reserve view with Verify-in-browser. |
+| `/treasury/[id]/pending` | Squads queue + QVAC second-opinion analyst (recommendation, confidence, concerns matched against the failure-class catalog, fields-to-double-check). |
+| `/treasury/[id]/confidential` | Disclosure-tier-aware view (PublicAuditor / Operator / FinanceAdmin / Recipient). Each unblind writes a Phase 14 I-17 audit row. |
+
+## Operator primitives
+
+`web/components/operator/`:
+- `VaultStatusBar` — 40 px top strip: vault + treasury chips, slot, defensive / confidential / PER flags, alert count, connection status.
+- `BottomStrip` — 32 px footer: pending count, last rebalance age, runway p10, keyboard hint cluster.
+- `AllocationBar` — horizontal stacked bar with strategy-universe ghost segments; confidential-mode hides notionals.
+- `Sparkline` — minimal SVG line for allocation history, performance windows, attribution.
+- `RiskRadarMini` — 6-axis radar reused across vault and treasury surfaces.
+- `AgentSidecar` — 7-agent confidence + veto rail.
+
+Phase 23 retired the legacy flat routes (`vaults/`, `markets/`,
+`proofs/`, `how-it-works/`); every operator surface now routes
+through `(operator) / (treasury) / (governance)` route groups + the
+Phase 21 `TerminalShell`.

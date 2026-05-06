@@ -1,5 +1,83 @@
 # Atlas Changelog
 
+## Unreleased — Phase 23.0 (2026-05-07) — Directive 23 (Frontend Part 4 — Operator Surfaces, Treasury OS, Confidential, Execution)
+
+Phase 22 wins the first 30 seconds; Phase 23 wins the next 30
+minutes. Density discipline — these are operator surfaces, not
+consumer dashboards.
+
+Operator primitives (`web/components/operator/`):
+- `VaultStatusBar` (40 px top strip with vault/treasury chips,
+  slot, defensive/confidential/PER flags, alert count, connection
+  status)
+- `BottomStrip` (32 px footer: pending count, last rebalance age,
+  runway p10, keyboard-hint cluster)
+- `AllocationBar` (horizontal stacked bar with strategy-universe
+  ghost segments; confidential-mode hides notionals)
+- `Sparkline`, `RiskRadarMini`, `AgentSidecar`
+
+Vault surfaces:
+- `/vaults` index
+- `/vault/[id]` Vault Intelligence Terminal (three-column
+  allocation/performance/risk + last-rebalance card + agents sidecar)
+- `/vault/[id]/rebalances` filterable list (regime / route / status /
+  defensive)
+- `/vault/[id]/rebalances/[hash]` black-box record (outcome,
+  decision, state diff, agent ensemble, CPI trace, timings funnel,
+  Verify-in-browser)
+- `/vault/[id]/proofs` per-row Verify-in-browser
+- `/vault/[id]/agents` 7-card grid + drawer
+- `/vault/[id]/private/[session]` PER viewer with viewing-key scope
+  toggle (none / agent-trace / post-hoc / realtime)
+
+Live operations:
+- `/rebalance/live` four-quadrant Live Command Center (active
+  rebalances + bundle status + latency timeline + network
+  conditions)
+
+Execution UIs:
+- `/triggers` + `/triggers/new` Phase 12 proof-gated triggers; live
+  `conditions_hash` in the wizard
+- `/recurring` + `/recurring/new` adaptive DCA plans with cadence
+  history (each change is a proof)
+- `/hedging` opt-in Perps hedge with proof-gated open/close/resize
+
+Treasury OS:
+- `/treasury` index cards
+- `/treasury/new` 11-step linear wizard (kind · multisig · KYB ·
+  template · band · risk policy · signers · confidential · private
+  exec · review · sign) with live `strategy_commitment` hash
+- `/treasury/[id]` overview — KPIs, allocation across vaults,
+  cashflow, upcoming payouts, recent ledger
+- `/treasury/[id]/ledger` unified ledger with type filter and
+  per-row Verify-in-browser
+- `/treasury/[id]/runway` p10/p50, p10–p90 fan chart, signed
+  drivers with provenance, "what if" sliders
+- `/treasury/[id]/invoices` invoice intelligence + Phase 19 QVAC
+  OCR overlay (image stays on device, only operator-confirmed
+  fields submit)
+- `/treasury/[id]/payments` scheduled / pre-warming / settling /
+  settled / failed states
+- `/treasury/[id]/proofs` public-trust proof-of-reserve view
+- `/treasury/[id]/pending` Squads queue + QVAC second-opinion
+  analyst (recommendation, confidence, concerns matched against
+  the failure-class catalog, fields-to-double-check)
+- `/treasury/[id]/confidential` disclosure-tier-aware view
+  (PublicAuditor / Operator / FinanceAdmin / Recipient); each
+  unblind writes a Phase 14 I-17 audit row
+
+TerminalShell upgrades:
+- Optional `statusBar` and `bottomStrip` slots
+- Max-width lifted to 1440 px to fit the 240 px left rail + 320 px
+  right rail + center column
+
+Cleanup:
+- Legacy flat routes retired (`vaults/`, `markets/`, `proofs/`,
+  `how-it-works/`); every operator surface routes through the
+  Phase 21 route groups + `TerminalShell`
+
+FRONTEND.md extended with the Phase 23 section.
+
 ## Unreleased — Phase 22.0 (2026-05-07) — Directive 22 (Frontend Part 3 — Marketing, Public Observability, Intelligence)
 
 Phase 21 wired the spine. Phase 22 populates the surfaces a

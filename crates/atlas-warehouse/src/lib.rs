@@ -23,6 +23,7 @@ pub mod migrations;
 pub mod write_path;
 pub mod flusher;
 pub mod forensic;
+pub mod retention;
 
 pub use schema::{
     AccountStateRow, AgentProposalRow, EventRow, FailureClassificationRow, OracleTickRow,
@@ -30,7 +31,7 @@ pub use schema::{
 };
 pub use client::{WarehouseClient, WarehouseError, WriteReceipt};
 pub use mock::MockWarehouse;
-pub use bubblegum::{BubblegumAnchorKeeper, BubblegumAnchorReceipt, MerkleProof};
+pub use bubblegum::{AnchoredBatch, BubblegumAnchorKeeper, BubblegumAnchorReceipt, MerkleProof};
 pub use feature_store::{FeatureStoreClient, FeatureStoreError, PointInTimeQuery};
 pub use replay::{ReplayQuery, ReplayResponse};
 pub use write_path::{archive_then_submit, ArchivedSubmitReceipt, SubmitOutcome, WritePathError};
@@ -39,3 +40,4 @@ pub use forensic::{
     AgentDisagreementBucket, FailureClassRateRow, ForensicQuery, InMemoryForensic,
     ProtocolExposureRow, RebalanceSummaryDailyRow, SlotRange,
 };
+pub use retention::{directive_baseline, validate as validate_retention, RetentionPolicy, RetentionViolation, Tier};

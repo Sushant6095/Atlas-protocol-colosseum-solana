@@ -160,18 +160,41 @@ async fn get_proof(
     State(state): State<AppState>,
     Path(hash): Path<String>,
 ) -> impl IntoResponse {
+    // Real Merkle path lookup against the in-process keeper. Phase 4 wires
+    // the keeper to the on-chain Bubblegum CPI; for now any leaf the keeper
+    // anchored returns a verifiable path.
+    let leaf = match decode_hex32(&hash) {
+        Ok(l) => l,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error": "bad-hash", "detail": e})),
+            )
+                .into_response();
+        }
+    };
     let keeper = state.keeper.lock().await;
     let history = keeper.history();
     let (root_slot, root) = history
         .last()
         .map(|r| (r.slot_high, r.batch_root))
         .unwrap_or((0, [0u8; 32]));
+    let proof = keeper.find_proof(leaf);
     drop(keeper);
-    let path = ProofPath {
-        leaf: hash.clone(),
-        index: 0,
-        siblings: vec![],
-        root: hex32(root),
+
+    let path = match proof {
+        Some(p) => ProofPath {
+            leaf: hex32(p.leaf),
+            index: p.index,
+            siblings: p.siblings.into_iter().map(hex32).collect(),
+            root: hex32(p.root),
+        },
+        None => ProofPath {
+            leaf: hash.clone(),
+            index: 0,
+            siblings: vec![],
+            root: hex32(root),
+        },
     };
     Json(ProofResponse {
         public_input_hash: hash,
@@ -180,6 +203,20 @@ async fn get_proof(
         archive_root: hex32(root),
         merkle_path: path,
     })
+    .into_response()
+}
+
+fn decode_hex32(s: &str) -> Result<[u8; 32], String> {
+    let s = s.trim_start_matches("0x");
+    if s.len() != 64 {
+        return Err(format!("hash must be 64 hex chars, got {}", s.len()));
+    }
+    let mut out = [0u8; 32];
+    for i in 0..32 {
+        out[i] = u8::from_str_radix(&s[i * 2..i * 2 + 2], 16)
+            .map_err(|_| format!("non-hex char at byte {i}"))?;
+    }
+    Ok(out)
 }
 
 async fn get_feature_snapshot(

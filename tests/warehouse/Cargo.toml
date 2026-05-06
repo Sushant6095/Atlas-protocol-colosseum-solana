@@ -1,0 +1,13 @@
+[package]
+name = "atlas-warehouse-tests"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+atlas-warehouse = { path = "../../crates/atlas-warehouse" }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full", "macros"] }
+proptest = "1.5"

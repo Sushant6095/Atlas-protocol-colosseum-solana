@@ -1,5 +1,103 @@
 # Atlas Changelog
 
+## Unreleased — Phase 3.2 (2026-05-06) — Directive 03 closeout (§5–§10)
+
+### Bubblegum: real Merkle proofs
+
+- `BubblegumAnchorKeeper` now retains anchored leaves (not just receipts)
+  inside `AnchoredBatch { receipt, leaves }`. The previous design
+  discarded the leaves on flush, which made `find_proof` impossible.
+- New API:
+  - `BubblegumAnchorKeeper::find_proof(leaf) -> Option<MerkleProof>`
+  - `BubblegumAnchorKeeper::find_proof_for_receipt(bytes) -> Option<MerkleProof>`
+  - `BubblegumAnchorKeeper::batches() -> &[AnchoredBatch]`
+  - `BubblegumAnchorKeeper::history()` now derives from `batches`.
+- Tests cover both happy path (every committed leaf returns a verifying
+  proof) and miss path (unknown leaf returns `None`).
+
+### Forensic API: real proof responses
+
+- `GET /rebalance/:hash/proof` now decodes the requested hash and calls
+  `keeper.find_proof()`. When the leaf has been anchored, the response
+  carries the verifiable Merkle path (leaf, index, siblings, root). When
+  it has not, the response still carries `archive_root_slot` + `archive_root`
+  so auditors can distinguish "not yet anchored" from "wrong API".
+- `decode_hex32` rejects malformed hashes with HTTP 400.
+
+### Retention policy (directive §6)
+
+- New `retention` module: typed `Tier` (Hot / Warm / Cold) +
+  `RetentionPolicy` + `directive_baseline()` returning the §6 numbers.
+- `validate(policy)` returns `RetentionViolation` if a configured policy
+  exceeds Hot's 30-day, Warm's 18-month, or Cold's 60 GB/mo/vault limit.
+- Tests pin the directive numbers + reject overages.
+
+### `tests/warehouse/no_leakage.rs` (directive §5)
+
+- New integration test crate `atlas-warehouse-tests` implementing the
+  directive's exact mandate: "constructs a synthetic dataset and asserts
+  the feature store never returns a value with `observed_at_slot >
+  as_of_slot`."
+- 6 tests, including:
+  - `proptest`-driven leak rejection across 256 random
+    `(as_of_slot, offset)` pairs.
+  - `proptest`-driven non-leak acceptance across 256 random
+    `(as_of_slot, backshift)` pairs.
+  - Vector-level atomicity: a single leaked feature poisons the entire
+    `FeatureVector::validate` call.
+  - Full-day sweep at slot granularity asserting the gate agrees with
+    the inequality on every cell.
+  - Pin on `MissingAsOf` typed-error path.
+
+### Bubblegum keeper runbook (directive §10)
+
+- `ops/runbooks/bubblegum-keeper.md` documents the on-chain accounts
+  (`atlas_archive_tree`, `atlas_archive_authority`, `atlas_keeper`,
+  `atlas_keeper_bond`), the directive §9 anti-pattern compliance ("not
+  multisig"), the slashing matrix, the routine + emergency rotation
+  procedures, and the keeper-specific monitoring signals.
+
+### Tests added (12)
+
+| Module | Tests |
+|---|---|
+| bubblegum (extra) | 2 (find_proof committed leaf, find_proof unknown leaf) |
+| retention | 4 (baseline matches directive, validate accepts baseline, rejects hot retention overrun, rejects cold footprint overrun) |
+| atlas-warehouse-tests | 6 (proptest leak rejection, proptest non-leak acceptance, vector-atomicity rejection, full-day sweep, MissingAsOf pin, accepts clean vector) |
+
+### Test counts
+
+| Crate | Tests |
+|---|---|
+| atlas-public-input | 5 |
+| atlas-pipeline | 82 |
+| atlas-telemetry | 3 |
+| atlas-replay | 20 |
+| atlas-bus | 59 |
+| atlas-warehouse | 36 (was 30) |
+| atlas-invariants-tests | 6 |
+| atlas-adversarial-tests | 10 |
+| atlas-warehouse-tests | 6 (new) |
+| **Total** | **230** (was 218) |
+
+### Directive 03 §10 deliverable checklist — final closeout
+
+| Item | Status |
+|---|---|
+| ClickHouse schema migrations | ✅ `db/clickhouse/V001__base_schema.sql` |
+| Timescale hypertables | ✅ `db/timescale/V001__base_schema.sql` |
+| `WarehouseClient` Rust crate w/ typed inserts + idempotent writes | ✅ |
+| Bubblegum anchoring keeper, on-chain root account documented | ✅ off-chain side complete; `ops/runbooks/bubblegum-keeper.md` |
+| Forensic HTTP API w/ Merkle-proof responses | ✅ real `find_proof` wired |
+| Replay API + Phase 02 integration | ✅ `atlas-warehouse-replay` |
+| Point-in-time feature store + leakage tests | ✅ `tests/warehouse/no_leakage.rs` (proptest + sweep + atomicity) |
+| Materialized views for the 4 named analytical questions | ✅ |
+| Daily backup + monthly restore drill documented | ✅ `ops/runbooks/warehouse-restore.md` |
+
+**Directive 03 closed.**
+
+---
+
 ## Unreleased — Phase 3.1 (2026-05-06) — Write-path gate, Bubblegum flusher, forensic queries, replay bin
 
 ### atlas-warehouse — write path (directive §3)

@@ -121,6 +121,14 @@ pub fn verify_path(proof: &MerkleProof) -> bool {
     acc == proof.root
 }
 
+/// One historical batch — kept on the keeper so the forensic API can return
+/// a Merkle path for any leaf without recomputing from scratch.
+#[derive(Clone, Debug)]
+pub struct AnchoredBatch {
+    pub receipt: BubblegumAnchorReceipt,
+    pub leaves: Vec<[u8; 32]>,
+}
+
 /// Stateful keeper that batches accepted-rebalance leaves and emits anchor
 /// receipts ready for on-chain commitment.
 pub struct BubblegumAnchorKeeper {
@@ -128,7 +136,11 @@ pub struct BubblegumAnchorKeeper {
     pending: Vec<[u8; 32]>,
     pending_slot_low: u64,
     pending_slot_high: u64,
-    history: Vec<BubblegumAnchorReceipt>,
+    /// Historical batches w/ leaves preserved so `find_proof` can return a
+    /// Merkle path for any committed leaf. Bounded growth in production via
+    /// the retention policy on the cold tier; in-memory keeper for the
+    /// forensic API caches recent N batches.
+    batches: Vec<AnchoredBatch>,
 }
 
 impl BubblegumAnchorKeeper {
@@ -138,7 +150,7 @@ impl BubblegumAnchorKeeper {
             pending: Vec::new(),
             pending_slot_low: u64::MAX,
             pending_slot_high: 0,
-            history: Vec::new(),
+            batches: Vec::new(),
         }
     }
 
@@ -168,19 +180,45 @@ impl BubblegumAnchorKeeper {
             leaf_count: self.pending.len() as u32,
             batch_root: root,
         };
-        self.history.push(receipt);
-        self.pending.clear();
+        let leaves = std::mem::take(&mut self.pending);
+        self.batches.push(AnchoredBatch { receipt, leaves });
         self.pending_slot_low = u64::MAX;
         self.pending_slot_high = 0;
         receipt
     }
 
-    pub fn history(&self) -> &[BubblegumAnchorReceipt] {
-        &self.history
+    pub fn history(&self) -> Vec<BubblegumAnchorReceipt> {
+        self.batches.iter().map(|b| b.receipt).collect()
     }
 
     pub fn pending_len(&self) -> usize {
         self.pending.len()
+    }
+
+    pub fn batches(&self) -> &[AnchoredBatch] {
+        &self.batches
+    }
+
+    /// Find a Merkle proof for `leaf` among committed batches. Returns None
+    /// when the leaf has never been anchored (or has rolled out of the
+    /// in-memory window).
+    pub fn find_proof(&self, leaf: [u8; 32]) -> Option<MerkleProof> {
+        for batch in &self.batches {
+            if let Some(idx) = batch.leaves.iter().position(|l| *l == leaf) {
+                let mut proof = merkle_path(&batch.leaves, idx as u32)?;
+                proof.root = batch.receipt.batch_root;
+                return Some(proof);
+            }
+        }
+        None
+    }
+
+    /// Find a Merkle proof for the canonical-bytes form of a receipt. The
+    /// auditor-facing API typically has the original receipt bytes (or a
+    /// reproducible serialization), and this is the path we expect them to
+    /// take.
+    pub fn find_proof_for_receipt(&self, receipt_bytes: &[u8]) -> Option<MerkleProof> {
+        self.find_proof(hash_leaf(receipt_bytes))
     }
 }
 
@@ -251,5 +289,29 @@ mod tests {
             b.record(slot, &slot.to_le_bytes());
         }
         assert_eq!(a.flush(), b.flush());
+    }
+
+    #[test]
+    fn find_proof_returns_path_for_committed_leaf() {
+        let mut k = BubblegumAnchorKeeper::new(4);
+        let payloads = [b"alpha".as_slice(), b"beta", b"gamma", b"delta"];
+        for (i, p) in payloads.iter().enumerate() {
+            let _ = k.record(100 + i as u64, p);
+        }
+        // Batch flushed at 4 leaves.
+        for p in &payloads {
+            let proof = k.find_proof_for_receipt(p).expect("proof exists");
+            assert_eq!(proof.leaf, hash_leaf(p));
+            assert!(verify_path(&proof), "merkle proof verification failed");
+        }
+    }
+
+    #[test]
+    fn find_proof_returns_none_for_unknown_leaf() {
+        let mut k = BubblegumAnchorKeeper::new(2);
+        k.record(1, b"a");
+        k.record(2, b"b");
+        let _ = k.flush(); // no-op; already flushed at 2
+        assert!(k.find_proof([0xff; 32]).is_none());
     }
 }

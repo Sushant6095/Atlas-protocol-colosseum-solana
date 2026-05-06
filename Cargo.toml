@@ -14,6 +14,7 @@ members = [
     "crates/atlas-warehouse",
     "tests/invariants",
     "tests/adversarial",
+    "tests/warehouse",
 ]
 exclude = [
     "programs/atlas-verifier",

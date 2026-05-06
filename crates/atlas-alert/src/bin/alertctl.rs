@@ -90,6 +90,9 @@ fn parse_kind(s: &str) -> Result<AlertKind, String> {
         "OracleDeviation" => Ok(AlertKind::OracleDeviation),
         "ConsensusDisagreementSpike" => Ok(AlertKind::ConsensusDisagreementSpike),
         "SourceQuarantine" => Ok(AlertKind::SourceQuarantine),
+        "SmartCohortRotation" => Ok(AlertKind::SmartCohortRotation),
+        "ProtocolNetOutflowAnomaly" => Ok(AlertKind::ProtocolNetOutflowAnomaly),
+        "WalletConcentrationShift" => Ok(AlertKind::WalletConcentrationShift),
         "DigestDaily" => Ok(AlertKind::DigestDaily),
         other => Err(format!("unknown alert kind: {other}")),
     }

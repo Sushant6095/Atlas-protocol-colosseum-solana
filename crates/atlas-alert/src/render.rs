@@ -40,6 +40,12 @@ const TPL_CONSENSUS: &str =
     include_str!("../../../ops/alerts/templates/consensus_disagreement_spike.txt");
 const TPL_SOURCE_Q: &str =
     include_str!("../../../ops/alerts/templates/source_quarantine.txt");
+const TPL_DUNE_SMART_COHORT: &str =
+    include_str!("../../../ops/alerts/templates/dune_smart_cohort_rotation.txt");
+const TPL_DUNE_NET_OUTFLOW: &str =
+    include_str!("../../../ops/alerts/templates/dune_protocol_net_outflow_anomaly.txt");
+const TPL_DUNE_CONC_SHIFT: &str =
+    include_str!("../../../ops/alerts/templates/dune_wallet_concentration_shift.txt");
 const TPL_DIGEST: &str =
     include_str!("../../../ops/alerts/templates/digest_daily.txt");
 
@@ -55,6 +61,9 @@ pub fn template_body(kind: AlertKind) -> &'static str {
         AlertKind::OracleDeviation => TPL_ORACLE_DEV,
         AlertKind::ConsensusDisagreementSpike => TPL_CONSENSUS,
         AlertKind::SourceQuarantine => TPL_SOURCE_Q,
+        AlertKind::SmartCohortRotation => TPL_DUNE_SMART_COHORT,
+        AlertKind::ProtocolNetOutflowAnomaly => TPL_DUNE_NET_OUTFLOW,
+        AlertKind::WalletConcentrationShift => TPL_DUNE_CONC_SHIFT,
         AlertKind::DigestDaily => TPL_DIGEST,
     }
 }

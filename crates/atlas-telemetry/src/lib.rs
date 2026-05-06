@@ -817,6 +817,63 @@ pub static TREASURY_POLICY_VIOLATION_ATTEMPTS_TOTAL: Lazy<CounterVec> = Lazy::ne
     v
 });
 
+// ─── Phase 11 — Dune intelligence SLOs (directive 11 §12) ────────────────
+
+pub static INTEL_WALLET_REPORT_MS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_intel_wallet_report_ms",
+        "Wall-time of /wallet-intelligence report assembly. p99 SLO \u{2264} 2500.",
+        vec![100.0, 250.0, 500.0, 1_000.0, 2_500.0, 5_000.0]
+    );
+    let h = HistogramVec::new(opts, &[]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static INTEL_DUNE_QUERY_FAILURE_RATE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_intel_dune_query_failure_rate_bps",
+        "Rolling 5-minute Dune query failure rate in bps. SLO \u{2264} 100.",
+        &["query_id"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static INTEL_SNAPSHOT_PROVENANCE_MISSING_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_intel_snapshot_provenance_missing_total",
+        "Renders that displayed a number without a snapshot provenance tag. Hard alert on any.",
+        &["surface"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static INTEL_COMMITMENT_PATH_DUNE_IMPORTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_intel_commitment_path_dune_imports_total",
+        "Dune-source imports detected in commitment-path source files. Hard alert on any (CI should block; this is defense in depth).",
+        &["module"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static INTEL_CROSS_CHAIN_LAG_BLOCKS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_intel_cross_chain_lag_blocks",
+        "Cross-chain treasury mirror lag in source-chain blocks. Dashboarded per chain.",
+        vec![1.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0]
+    );
+    let h = HistogramVec::new(opts, &["chain"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

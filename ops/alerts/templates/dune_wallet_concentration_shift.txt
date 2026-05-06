@@ -1,0 +1,7 @@
+NOTIFY — WALLET CONCENTRATION SHIFT — slot {slot}
+Wallet: {wallet}
+Shift: {protocol_from} -> {protocol_to} ({shift_pct}% in 24h)
+Treasury entity: {treasury_entity_id}
+Snapshot: dune-sim:{dune_execution_id}
+Watched treasury wallet rotated protocol exposure beyond the
+configured policy band. Review in /wallet-intelligence.

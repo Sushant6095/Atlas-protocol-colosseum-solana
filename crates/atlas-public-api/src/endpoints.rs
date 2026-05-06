@@ -53,6 +53,13 @@ pub const fn rest_endpoints() -> &'static [RestEndpoint] {
         RestEndpoint { method: Method::Get, path: "/api/v1/opportunities", description: "Birdeye-overlaid opportunity scanner output", rate_limit_per_minute: 300 },
         RestEndpoint { method: Method::Get, path: "/api/v1/execution/analytics", description: "per-route landing + slippage stats", rate_limit_per_minute: 300 },
         RestEndpoint { method: Method::Post, path: "/api/v1/simulate/{ix}", description: "pre-sign simulation", rate_limit_per_minute: 600 },
+        // Phase 11 — intelligence + treasury cross-chain mirror.
+        RestEndpoint { method: Method::Get, path: "/api/v1/wallet-intel/{wallet}", description: "Phase 11 wallet intelligence report (Dune SIM + warehouse)", rate_limit_per_minute: 300 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/wallet-intel/{wallet}/snapshot/{snapshot_id}", description: "replayable snapshot of an intel report", rate_limit_per_minute: 300 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/intelligence/heatmap", description: "24h capital flow heatmap with per-cell source provenance", rate_limit_per_minute: 300 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/intelligence/exposure-graph/{wallet}", description: "wallet \u{2192} protocol \u{2192} asset exposure graph", rate_limit_per_minute: 300 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/intelligence", description: "multi-wallet intelligence aggregate for a treasury entity", rate_limit_per_minute: 300 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/intel/pusd", description: "stablecoin intelligence dashboard feed (peg / flow / depth)", rate_limit_per_minute: 600 },
     ]
 }
 
@@ -69,8 +76,9 @@ mod tests {
 
     #[test]
     fn rest_endpoints_count_matches_directive() {
-        // §7.1 enumerates 9 REST endpoints.
-        assert_eq!(rest_endpoints().len(), 9);
+        // §7.1 enumerates 9 REST endpoints. Phase 11 adds 6 more for
+        // wallet intelligence + treasury cross-chain.
+        assert_eq!(rest_endpoints().len(), 15);
     }
 
     #[test]

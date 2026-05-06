@@ -114,6 +114,35 @@ impl AtlasClient {
             .await?;
         serde_json::from_slice(&bytes).map_err(ClientError::Decode)
     }
+
+    /// Phase 11 §14: fetch the wallet intelligence report (Dune SIM
+    /// + warehouse joins, snapshot-tagged). Read-only. Never enters
+    /// a commitment path.
+    pub async fn get_wallet_intelligence(
+        &self,
+        wallet: &Pubkey,
+    ) -> Result<atlas_intelligence::WalletIntelligenceReport, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!("/api/v1/wallet-intel/{}", hex32(wallet)))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 11 §5.1: fetch the 24h capital flow heatmap.
+    pub async fn get_capital_flow_heatmap(
+        &self,
+        from_slot: u64,
+        to_slot: u64,
+    ) -> Result<atlas_intelligence::CapitalFlowHeatmap, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!(
+                "/api/v1/intelligence/heatmap?from={from_slot}&to={to_slot}"
+            ))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
 }
 
 fn hex32(b: &[u8; 32]) -> String {

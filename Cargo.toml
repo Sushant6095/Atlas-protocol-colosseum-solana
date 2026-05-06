@@ -42,6 +42,7 @@ members = [
     "crates/atlas-rs",
     "crates/atlas-assets",
     "crates/atlas-treasury",
+    "crates/atlas-intelligence",
     "tests/invariants",
     "tests/adversarial",
     "tests/warehouse",

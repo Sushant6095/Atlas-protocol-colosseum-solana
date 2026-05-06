@@ -30,6 +30,11 @@ pub enum AlertKind {
     ConsensusDisagreementSpike,
     SourceQuarantine,
 
+    // Phase 11 — Dune-sourced (Notify class).
+    SmartCohortRotation,
+    ProtocolNetOutflowAnomaly,
+    WalletConcentrationShift,
+
     // Digest (1)
     DigestDaily,
 }
@@ -46,7 +51,10 @@ impl AlertKind {
             | AlertKind::DefensiveModeEntered
             | AlertKind::OracleDeviation
             | AlertKind::ConsensusDisagreementSpike
-            | AlertKind::SourceQuarantine => AlertClass::Notify,
+            | AlertKind::SourceQuarantine
+            | AlertKind::SmartCohortRotation
+            | AlertKind::ProtocolNetOutflowAnomaly
+            | AlertKind::WalletConcentrationShift => AlertClass::Notify,
             AlertKind::DigestDaily => AlertClass::Digest,
         }
     }
@@ -70,6 +78,9 @@ impl AlertKind {
             AlertKind::OracleDeviation => "oracle_deviation.txt",
             AlertKind::ConsensusDisagreementSpike => "consensus_disagreement_spike.txt",
             AlertKind::SourceQuarantine => "source_quarantine.txt",
+            AlertKind::SmartCohortRotation => "dune_smart_cohort_rotation.txt",
+            AlertKind::ProtocolNetOutflowAnomaly => "dune_protocol_net_outflow_anomaly.txt",
+            AlertKind::WalletConcentrationShift => "dune_wallet_concentration_shift.txt",
             AlertKind::DigestDaily => "digest_daily.txt",
         }
     }
@@ -86,6 +97,9 @@ impl AlertKind {
             AlertKind::OracleDeviation,
             AlertKind::ConsensusDisagreementSpike,
             AlertKind::SourceQuarantine,
+            AlertKind::SmartCohortRotation,
+            AlertKind::ProtocolNetOutflowAnomaly,
+            AlertKind::WalletConcentrationShift,
             AlertKind::DigestDaily,
         ]
     }

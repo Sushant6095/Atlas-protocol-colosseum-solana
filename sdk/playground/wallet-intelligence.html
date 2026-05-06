@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas — /wallet-intelligence</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; }
+    header small { color: #8893a8; }
+    main { padding: 24px; display: grid; gap: 18px; max-width: 1100px; margin: 0 auto; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 18px; }
+    h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    label { font-size: 12px; color: #8893a8; display: block; margin: 4px 0 2px; }
+    input { padding: 8px 10px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 320px; }
+    button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font: inherit; }
+    button:hover { background: #1f57d6; }
+    .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .stat { background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; padding: 12px; }
+    .stat .k { font-size: 11px; color: #8893a8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat .v { font: 600 22px/1 ui-monospace, Menlo, monospace; color: #e7eaf0; margin-top: 4px; }
+    .stat.high .v { color: #ff8b8b; }
+    .stat.med .v { color: #ffc16a; }
+    .stat.low .v { color: #5be1a0; }
+    .rec { padding: 14px; background: #0b0d11; border: 1px solid #2a3142; border-radius: 4px; margin: 8px 0; }
+    .rec .head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+    .rec .kind { font-weight: 600; color: #6aa6ff; }
+    .rec .severity { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 6px; border-radius: 3px; background: #2a3142; color: #c5cad6; }
+    .rec .severity.warn { background: #4d3d1f; color: #ffc16a; }
+    .rec .severity.error { background: #4d1f1f; color: #ff8b8b; }
+    .rec .action { font-size: 12px; color: #8893a8; margin-top: 8px; }
+    .rec .action code { color: #b9d3ff; }
+    .rec a.cta { display: inline-block; margin-top: 10px; background: #2c6cff; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; }
+    pre { margin: 0; padding: 12px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; overflow: auto; font: 12px/1.5 ui-monospace, Menlo, monospace; color: #c5cad6; }
+    .provenance { font-size: 11px; color: #8893a8; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas — /wallet-intelligence <small>· public, no auth, no funds at risk</small></h1>
+  </header>
+  <main>
+    <section>
+      <h2>Inputs</h2>
+      <label>API base URL</label>
+      <input id="base" value="https://atlas.example" autocomplete="off">
+      <label>Wallet pubkey (Solana, hex32 or base58)</label>
+      <input id="wallet" placeholder="ab12...cd34" autocomplete="off">
+      <p style="margin-top:12px"><button id="load">Generate report</button></p>
+      <p class="provenance">Hard rule: this report is monitoring + pre-deposit UX. None of these numbers enter a Poseidon commitment path.</p>
+    </section>
+
+    <section>
+      <h2>Risk overview</h2>
+      <div class="row">
+        <div class="stat low"><div class="k">risk score (bps)</div><div class="v" id="risk">—</div></div>
+        <div class="stat low"><div class="k">stablecoin share (bps)</div><div class="v" id="stable">—</div></div>
+        <div class="stat low"><div class="k">leverage ratio (bps)</div><div class="v" id="leverage">—</div></div>
+        <div class="stat low"><div class="k">concentration (bps)</div><div class="v" id="concentration">—</div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recommendations <span style="font-size:11px;color:#8893a8">· at most 3, deterministic over the snapshot</span></h2>
+      <div id="recs"><p style="color:#8893a8">Generate a report to see recommendations.</p></div>
+    </section>
+
+    <section>
+      <h2>Provenance</h2>
+      <p class="provenance" id="sources">No snapshot loaded.</p>
+      <p class="provenance">This page is not financial advice, not auto-execution, not custody. The pre-sign simulation (Phase 09 §5.2) still runs before any user-signed instruction.</p>
+    </section>
+
+    <section>
+      <h2>Raw report</h2>
+      <pre id="raw"><code>// click "Generate report"</code></pre>
+    </section>
+  </main>
+
+  <script type="module">
+    function colour(id, value, thresholds) {
+      const el = document.getElementById(id).parentElement;
+      el.classList.remove("low", "med", "high");
+      if (Number.isFinite(value)) {
+        if (value >= thresholds.high) el.classList.add("high");
+        else if (value >= thresholds.med) el.classList.add("med");
+        else el.classList.add("low");
+      } else {
+        el.classList.add("low");
+      }
+    }
+
+    document.getElementById("load").onclick = async () => {
+      const base = document.getElementById("base").value.replace(/\/$/, "");
+      const wallet = document.getElementById("wallet").value.trim();
+      if (!wallet) return;
+      const raw = document.getElementById("raw");
+      try {
+        const r = await fetch(`${base}/api/v1/wallet-intel/${encodeURIComponent(wallet)}`);
+        if (!r.ok) throw new Error(`GET → ${r.status}`);
+        const report = await r.json();
+        renderReport(report);
+        raw.innerHTML = `<code>${escapeHtml(JSON.stringify(report, null, 2))}</code>`;
+      } catch (err) {
+        raw.innerHTML = `<code style="color:#ff8b8b">${escapeHtml(String(err))}</code>`;
+      }
+    };
+
+    function renderReport(r) {
+      set("risk", r.risk_score_bps);
+      set("stable", r.stablecoin_share_bps);
+      set("leverage", r.exposure?.leverage_ratio_bps);
+      set("concentration", r.exposure?.concentration_index_bps);
+      colour("risk", r.risk_score_bps, { med: 4_000, high: 7_000 });
+      colour("leverage", r.exposure?.leverage_ratio_bps, { med: 3_000, high: 6_000 });
+      colour("concentration", r.exposure?.concentration_index_bps, { med: 5_000, high: 7_500 });
+
+      const recs = document.getElementById("recs");
+      recs.innerHTML = "";
+      if (!r.recommendations || r.recommendations.length === 0) {
+        recs.innerHTML = `<p style="color:#8893a8">No recommendations — wallet is within healthy bands.</p>`;
+      } else {
+        for (const rec of r.recommendations) {
+          const div = document.createElement("div");
+          div.className = "rec";
+          const sev = rec.severity ?? "info";
+          div.innerHTML = `
+            <div class="head">
+              <span class="kind">${escapeHtml(rec.kind ?? "")}</span>
+              <span class="severity ${escapeHtml(sev)}">${escapeHtml(sev)}</span>
+            </div>
+            <p>${escapeHtml(rec.detail ?? "")}</p>
+            <div class="action">
+              vault template: <code>${escapeHtml(formatTemplate(rec.atlas_action?.vault_template))}</code> ·
+              projected APY: <code>${escapeHtml(String(rec.atlas_action?.projected_apy_bps ?? "—"))} bps</code> ·
+              risk delta: <code>${escapeHtml(String(rec.atlas_action?.projected_risk_delta_bps ?? "—"))} bps</code>
+            </div>
+            <a class="cta" href="/treasury?template=${encodeURIComponent(formatTemplate(rec.atlas_action?.vault_template))}&amount_q64=${encodeURIComponent(rec.atlas_action?.amount_q64 ?? '')}">Open in Atlas Treasury</a>`;
+          recs.appendChild(div);
+        }
+      }
+      const sources = document.getElementById("sources");
+      sources.textContent = "Sources: " + (r.intelligence_sources ?? []).join(", ");
+    }
+
+    function formatTemplate(t) {
+      if (!t) return "—";
+      // Normalise both serde rename_all="snake_case" and PascalCase outputs.
+      return typeof t === "string" ? t : Object.keys(t)[0] ?? "—";
+    }
+
+    function set(id, v) { document.getElementById(id).textContent = v ?? "—"; }
+    function escapeHtml(s) { return String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+  </script>
+</body>
+</html>

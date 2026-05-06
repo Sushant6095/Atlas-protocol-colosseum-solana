@@ -1,5 +1,54 @@
 # Atlas Changelog
 
+## Unreleased — Phase 11.0 (2026-05-06) — Directive 11 (Dune onchain intelligence)
+
+Onchain intelligence engine. Dune SIM extends Atlas outward (wallets and chains
+Atlas does not index) and backward (history older than the warehouse). The
+hard rule from §0 holds: no Dune output enters a Poseidon commitment path —
+the Phase 09 lint's default forbidden list now includes `DuneSimSource`,
+`DuneQueryId`, `WalletIntelligenceReport`, `CapitalFlowHeatmap`,
+`SmartCohort`, `QuerySnapshot`.
+
+- `atlas-intelligence` (8 modules):
+  - `source::IntelligenceSource` trait + `DuneSimSource` (deterministic
+    stub) + `AtlasWarehouseSource` (declines Dune queries). Snapshot-
+    tagged `QuerySnapshot { snapshot_id, dune_execution_id,
+    fetched_at_slot, params_hash, result }` with `SnapshotStore` for
+    replay.
+  - `wallet_report::score_wallet` — deterministic scorer, max 3
+    recommendations. `compute_risk_score_bps` weighted 40 % leverage /
+    30 % concentration / 20 % rotation / 10 % burst.
+  - `cohort::cohort_registry` — 4 named cohorts (TopStablecoinHolders,
+    YieldRotators90d, DaoTreasuries, CrossChainStableMovers) — pinned
+    by test.
+  - `cross_chain::aggregate_cross_chain_nav` — `CombinedNav` with
+    `NavProvenance` per leg; Solana legs MUST be `AtlasProofAnchored`
+    (anti-pattern §13 enforced at construction).
+  - `heatmap::build_capital_flow_heatmap` — 24h matrix with per-cell
+    `HeatmapSourceTag` for click-through routing.
+  - `exposure_graph::build_exposure_graph` — wallet → protocol → asset
+    nodes + edges weighted by path-decayed effective exposure.
+  - `multi_wallet::aggregate_multi_wallet` — treasury-level rollup with
+    balance-weighted scalars; reuses `score_wallet`.
+  - `backtest::BacktestDataProvenance::audited_promotion_eligible` —
+    only `FullReplay` (no Dune extension) can promote a model from
+    `Draft → Audited`. Phase 06 §3.1 gate intact.
+- `atlas-rs` SDK: `get_wallet_intelligence` + `get_capital_flow_heatmap`.
+- `atlas-public-api`: 6 new REST endpoints (count test bumped 9 → 15).
+- `atlas-alert`: 3 Notify-class Dune kinds + 3 templates under
+  `ops/alerts/templates/dune_*.txt`.
+- `atlas-runtime::lints::forbid_third_party_in_commitment`: 6 Dune
+  types added to the default forbidden list.
+- `sdk/playground/wallet-intelligence.html` — public, no-auth UI.
+- Telemetry: 5 Phase 11 metrics (wallet_report_ms,
+  dune_query_failure_rate_bps, snapshot_provenance_missing_total,
+  commitment_path_dune_imports_total, cross_chain_lag_blocks).
+
+§14 deliverable checklist (off-chain): all closed except the demo
+video (operator artifact).
+
+Workspace: **722 tests** green (+32 vs Phase 10.1).
+
 ## Unreleased — Phase 10.1 (2026-05-06) — Directive 10 closeout (drift CI + defensive ladder + dashboard + one-pager)
 
 Final §12 items.

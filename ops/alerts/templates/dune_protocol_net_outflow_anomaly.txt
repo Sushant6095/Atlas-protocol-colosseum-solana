@@ -1,0 +1,7 @@
+NOTIFY — PROTOCOL NET OUTFLOW ANOMALY — slot {slot}
+Protocol: {protocol}
+Net outflow: {notional_usd} USD over {window_hours}h
+Anomaly: {sigma_score}σ above trailing 24h distribution
+Snapshot: dune-sim:{dune_execution_id}
+Source is Dune SIM (period beyond Atlas warehouse depth). Surfaced
+to dashboards + governance only. Not auto-acted.

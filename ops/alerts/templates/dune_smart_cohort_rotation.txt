@@ -1,0 +1,7 @@
+NOTIFY — SMART COHORT ROTATION — slot {slot}
+Cohort: {cohort_label}
+Direction: {direction} into protocol {protocol}
+Aggregated balance shift: {shift_pct}% ({notional_usd} USD).
+Snapshot: dune-sim:{dune_execution_id}
+This is advisory. Phase 01 risk topology is unchanged; surfaces in
+the intelligence dashboard for analyst review.

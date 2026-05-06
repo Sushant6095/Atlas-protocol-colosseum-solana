@@ -109,6 +109,14 @@ pub fn forbid_third_party_in_commitment(
         "SolflareSimulation",
         "HeliusParsedTx",
         "QuicknodeFeeSample",
+        // Phase 11 (directive 11 §0 hard rule + §10): Dune types
+        // are monitoring + UX, never commitment-path inputs.
+        "DuneSimSource",
+        "DuneQueryId",
+        "WalletIntelligenceReport",
+        "CapitalFlowHeatmap",
+        "SmartCohort",
+        "QuerySnapshot",
     ];
     let mut out = Vec::new();
     for needle in DEFAULT.iter().chain(forbidden_types.iter()) {

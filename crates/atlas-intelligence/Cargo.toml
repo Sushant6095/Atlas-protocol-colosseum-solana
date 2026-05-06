@@ -1,23 +1,24 @@
 [package]
-name = "atlas-rs"
+name = "atlas-intelligence"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Atlas platform client (Rust) — thin client over /api/v1/* with client-side proof verification. Implements directive 09 §7.2."
+description = "Atlas onchain intelligence engine — Dune SIM + warehouse joins, snapshot-tagged, NEVER in commitment path. Implements directive 11."
 
 [lib]
 
 [dependencies]
-atlas-public-api = { path = "../atlas-public-api" }
-atlas-blackbox = { path = "../atlas-blackbox" }
-atlas-presign = { path = "../atlas-presign" }
 atlas-runtime = { path = "../atlas-runtime" }
-atlas-intelligence = { path = "../atlas-intelligence" }
+atlas-failure = { path = "../atlas-failure" }
+atlas-treasury = { path = "../atlas-treasury" }
+atlas-vault-templates = { path = "../atlas-vault-templates" }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror.workspace = true
+blake3.workspace = true
 async-trait = "0.1"
 tokio = { workspace = true, features = ["full"] }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["full", "macros"] }
+proptest = "1.5"

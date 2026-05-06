@@ -1,0 +1,80 @@
+web/components/primitives/index.ts
+  s_c3576656714da0::t_55b55415e15bd6 1-12
+CHANGELOG.md
+  s_c3576656714da0::t_77eb3f74077b4e 3-80
+web/components/primitives/cn.ts
+  s_c3576656714da0::t_43216079d01bcf 1-8
+web/lib/state/query-defaults.ts
+  s_c3576656714da0::t_5891c3818429ac 1-56
+web/lib/realtime/store.ts
+  s_c3576656714da0::t_689580d0b102ad 1-187
+web/lib/perf/PerfBoundary.tsx
+  s_c3576656714da0::t_6b79f1559486b9 1-30
+web/lib/perf/index.ts
+  s_c3576656714da0::t_c90fa9e3b7feb6 7
+  s_c3576656714da0::t_182b330cb54ebc 1-6
+web/lib/realtime/index.ts
+  s_c3576656714da0::t_986b003ee7bb7d 1-19
+web/lib/realtime/hooks.ts
+  s_c3576656714da0::t_32372cb18651f9 1-68
+web/components/primitives/AlertPill.tsx
+  s_c3576656714da0::t_06058849fa4615 1-53
+web/lib/realtime/lru.ts
+  s_c3576656714da0::t_23886dd71095c6 1-37
+web/components/primitives/Panel.tsx
+  s_c3576656714da0::t_bd620cb3b100fd 1-65
+web/lib/state/index.ts
+  s_c3576656714da0::t_7522f3c1dc9766 1-14
+web/components/primitives/IdentifierMono.tsx
+  s_c3576656714da0::t_2e7056abff1c6d 1-103
+web/lib/realtime/transport.ts
+  s_c3576656714da0::t_d6fd2186aa5927 1-187
+web/components/primitives/Button.tsx
+  s_c3576656714da0::t_0734be89e10a1a 1-70
+web/lib/motion.ts
+  s_c3576656714da0::t_00c6f0c0dec39b 1-147
+web/lib/perf/render-counter.ts
+  s_c3576656714da0::t_06b887a8fcd99c 1-33
+web/eslint.config.mjs
+  s_c3576656714da0::t_3b9861f6a725ee 1-86
+web/components/primitives/__stories__/README.md
+  s_c3576656714da0::t_5f3beb81e0eada 1-23
+web/lib/three/supervisor.ts
+  s_c3576656714da0::t_38afcfd6a15b20 1-162
+web/lib/perf/memory-inspector.ts
+  s_c3576656714da0::t_d19c1c660ba430 1-66
+web/app/globals.css
+  s_c3576656714da0::t_89e1109be8ac21 3-11,13-19,21-26,28-32,34-40,42-46,48-53,55-71,74-85,88-90,93-98,100,102-111,114-116,118-121,124-133,136,138-144
+web/lib/state/registry.ts
+  s_c3576656714da0::t_71e1aeca2c9818 1-58
+web/package.json
+  s_c3576656714da0::t_031a4d6a179efc 31-32
+web/lib/perf/long-task.ts
+  s_c3576656714da0::t_2e31e99fb8b862 1-51
+web/lib/realtime/topics.ts
+  s_c3576656714da0::t_1a29f69a4d8792 1-44
+web/lib/tokens.ts
+  s_c3576656714da0::t_080e4614e2e07a 1-263
+web/lib/perf/vitals.ts
+  s_c3576656714da0::t_fd15c077b22f53 1-103
+FRONTEND.md
+  s_c3576656714da0::t_4725adaef515b8 1-164
+web/components/primitives/Tile.tsx
+  s_c3576656714da0::t_0e90f80039f661 1-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "29ce2c2426b69b192a0a1ea63fb004d5b054bb55",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

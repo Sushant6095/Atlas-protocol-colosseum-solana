@@ -1,5 +1,113 @@
 # Atlas Changelog
 
+## Unreleased — Phase 6.0 (2026-05-06) — Directive 06 §1–§3 (Sandbox / Registry / Governance)
+
+### Two new crates
+
+- **`atlas-sandbox`** — strategy sandbox (directive §1).
+  - `isolation::SandboxGuard` — runtime barrier rejecting production
+    warehouse URIs (`s3://atlas/...`, `clickhouse://atlas-prod/...`),
+    mainnet RPC endpoints, and production key paths
+    (`~/.config/solana/`, anything under `/prod/` or matching
+    `mainnet`). Sandbox URIs are accepted only with the `sandbox://` or
+    `mock://` prefix.
+  - `leakage::LeakageProbe` — point-in-time enforcement (§1.3) plus the
+    random-shuffle probe (§4). Records `LeakageViolation` rows for
+    `FutureFeature` (observed_at_slot > as_of_slot) and
+    `ShuffleProbeFailed` (shuffled MAE within tolerance of unshuffled).
+  - `whatif::WhatIfPlan` — parses the directive's CLI shapes for
+    `--override agent.X.weight=0`, `--override threshold.X=0.10`,
+    `--inject scenario:...,asset:...,bps:...,duration_slots:...`,
+    `--allocation-floor protocol:X,bps:0`. Fractional values are
+    converted to bps (`0.10 → 1_000`).
+  - `backtest::BacktestEngine<D: BacktestDriver>` — drives the Phase 01
+    pipeline in `replay=true` mode against a slot range. Runs the
+    isolation guard before any work, threads every feature read through
+    `LeakageProbe`, and aborts on the first hard violation. Emits a
+    `BacktestReport { report_id, guard, config, rebalances, aggregate,
+    leakage_violations }`. `report_id` is content-addressed by
+    `(strategy_hash, model_hash, vault_template_hash, slot_range)` —
+    determinism contract from §4 pinned by a 5×-run byte-identical test.
+  - `compare::paired_bootstrap_ci` — paired bootstrap on the difference
+    of means using SplitMix64 RNG; deterministic for a given seed.
+    `MetricDelta` reports value_a, value_b, delta, 95% CI low/high, and
+    a `significant_at_95` flag.
+  - `bin/atlas-sandbox` — CLI with three subcommands: `backtest`,
+    `whatif`, `compare`. `whatif` XORs the plan hash into the model hash
+    so determinism is preserved.
+
+- **`atlas-registry`** — model registry + governance (directive §2-§3).
+  - `record::ModelRecord` — full §2.1 schema: `model_id` (blake3),
+    `ensemble_hash`, `created_at_slot`, `trainer_pubkey`,
+    `training_dataset_hash`, `training_config_hash`,
+    `feature_schema_version` + `feature_schema_hash`, `parent_model_id`,
+    `performance_summary`, `status`, `audit_log`, `on_chain_anchor`.
+    `validate(is_genesis)` enforces: non-genesis → parent present;
+    `Audited`/`Approved` → at least one Pass audit; `Approved` →
+    `performance_summary` present; trainer ≠ auditor (§6 anti-pattern).
+    `check_content_address(bytes)` verifies `model_id == blake3(bytes)`.
+  - `lineage::validate_lineage` — DAG check: unique IDs, exactly one
+    genesis, dangling parents rejected, cycle detection via parent walk.
+  - `feature_schema::FeatureSchema` + `verify_feature_schema(model_v,
+    model_h, runtime)` — version + hash both required (same version
+    with different hash is a deployment bug). Canonical hash sorts
+    fields by name, so field order is invariant.
+  - `drift::evaluate_drift` — combines `mae_bps` (rolling 7d/30d),
+    defensive trigger spike vs `DefensiveBaseline.trigger_rate_per_kslot`
+    × `defensive_trigger_max_multiplier`, and `brier_score_bps` against
+    `DriftThresholds`. Defaults: 200 bps MAE-7d, 150 bps MAE-30d, 3×
+    defensive multiplier, 4_000 bps Brier.
+  - `anchor::anchor_leaf(&RegistryAnchor)` — canonical Bubblegum leaf
+    bytes for status transitions. Schema: `b"atlas.registry.anchor.v1"`
+    + model_id + prev_status_byte + new_status_byte + signer_set_root +
+    slot_le. Distinct transitions ⇒ distinct leaves; deterministic.
+  - `store::ModelRegistry` trait + `InMemoryRegistry` — status-transition
+    invariants (`Draft → Audited → Approved → DriftFlagged|Deprecated|
+    Slashed`, plus `DriftFlagged → Approved` recovery and `Audited →
+    Slashed` for proven-leak audits). `Slashed` is terminal.
+  - `bin/atlas-registryctl` — operator CLI: `register`, `audit`,
+    `approve` (with required performance-summary fields), `flag-drift`,
+    `slash`, `lineage`. Persists records + anchors to a JSON store at
+    `--db ops/registry/registry.json`.
+
+### Phase 06 telemetry (directive §5)
+
+`atlas-telemetry` adds 5 metrics:
+- `atlas_sandbox_backtest_runtime_minutes{range_class}` (Histogram, p95
+  SLO ≤ 30 min on 90-day range).
+- `atlas_sandbox_leakage_violations_total{kind}` (Counter, hard alert
+  on any).
+- `atlas_sandbox_determinism_violations_total{vault_id, replay}`
+  (Counter, hard alert on any).
+- `atlas_registry_unaudited_in_production_total{vault_id, replay}`
+  (Gauge, must be 0).
+- `atlas_registry_drift_flagged_models_total{model_family}` (Gauge,
+  dashboarded).
+
+### Runbook
+
+- `ops/runbooks/model-approval.md` — end-to-end approval flow per §3.
+  Documents trainer/auditor/governance key separation,
+  `atlas-registryctl` invocations for each stage, the §4 mandatory
+  sandbox suite (90-day replay × 3 regimes, chaos suite, A/B compare,
+  leakage probe, 5× determinism check), and the slashing path with
+  Phase 05 SecurityEvent linkage.
+
+### Test coverage
+
+- atlas-sandbox: 24/24 (isolation, leakage, what-if parsing, aggregate
+  metrics, report id determinism, backtest happy path + leakage abort
+  + production URI rejection + inverted range + 5× byte-identical
+  determinism, paired bootstrap CI shape + variance + seed determinism).
+- atlas-registry: 30/30 (record content addressing + validation +
+  trainer self-audit guard, lineage DAG validation across all 5 failure
+  modes, feature schema field-order invariance + version/hash
+  mismatches, drift report flagging across all 4 alert kinds, anchor
+  leaf distinctness + slot sensitivity + determinism, store happy path
+  + illegal transitions + duplicate insert + slashed terminality +
+  drift recovery).
+- Workspace total: **412 tests** green (54 new vs Phase 5.1).
+
 ## Unreleased — Phase 5.1 (2026-05-06) — Directive 05 §4–§8 (Alerts / Capital Efficiency / Runbooks)
 
 ### Two new crates

@@ -431,6 +431,63 @@ pub static CAPITAL_IDLE_SHARE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
     v
 });
 
+// ─── Phase 06 — Sandbox / Registry SLOs (directive 06 §5) ────────────────
+
+pub static SANDBOX_BACKTEST_RUNTIME_MINUTES: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_sandbox_backtest_runtime_minutes",
+        "Wall-clock minutes for a single backtest run. 90d range p95 SLO ≤ 30.",
+        vec![1.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0, 60.0, 120.0]
+    );
+    let h = HistogramVec::new(opts, &["range_class"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static SANDBOX_LEAKAGE_VIOLATIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_sandbox_leakage_violations_total",
+        "Backtests aborted due to point-in-time leakage. Hard alert on any.",
+        &["kind"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static SANDBOX_DETERMINISM_VIOLATIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_sandbox_determinism_violations_total",
+        "Sandbox runs that diverged across the 5x reproducibility check. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static REGISTRY_UNAUDITED_IN_PRODUCTION_TOTAL: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_registry_unaudited_in_production_total",
+        "Models in production whose registry status is not Approved. Must be 0.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static REGISTRY_DRIFT_FLAGGED_MODELS_TOTAL: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_registry_drift_flagged_models_total",
+        "Active count of models in DriftFlagged status. Dashboarded.",
+        &["model_family"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

@@ -1,0 +1,29 @@
+[package]
+name = "atlas-registry"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas model registry — record schema, lineage, feature schema versioning, drift monitoring. Implements directive 06 §2."
+
+[lib]
+
+[[bin]]
+name = "atlas-registryctl"
+path = "src/bin/registryctl.rs"
+
+[dependencies]
+atlas-warehouse = { path = "../atlas-warehouse" }
+atlas-telemetry = { path = "../atlas-telemetry" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tracing.workspace = true
+tracing-subscriber.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full", "macros"] }
+proptest = "1.5"

@@ -20,6 +20,8 @@ members = [
     "crates/atlas-blackbox",
     "crates/atlas-alert",
     "crates/atlas-capital",
+    "crates/atlas-sandbox",
+    "crates/atlas-registry",
     "tests/invariants",
     "tests/adversarial",
     "tests/warehouse",

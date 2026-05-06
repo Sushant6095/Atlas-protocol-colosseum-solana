@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas — Confidential Treasury Layer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; }
+    header small { color: #8893a8; }
+    main { padding: 24px; display: grid; gap: 18px; max-width: 1200px; margin: 0 auto; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 18px; }
+    h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    label { font-size: 12px; color: #8893a8; display: block; margin: 4px 0 2px; }
+    input, select { padding: 8px 10px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 280px; }
+    button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font: inherit; }
+    button:hover { background: #1f57d6; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    .stat { background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; padding: 12px; }
+    .stat .k { font-size: 11px; color: #8893a8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat .v { font: 600 16px/1.2 ui-monospace, Menlo, monospace; color: #e7eaf0; margin-top: 4px; word-break: break-all; }
+    .hidden-cell { color: #5a627a; font-style: italic; }
+    table { border-collapse: collapse; width: 100%; font: 12px ui-monospace, Menlo, monospace; }
+    th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #1d2230; }
+    th { font-size: 11px; text-transform: uppercase; color: #8893a8; letter-spacing: 0.06em; }
+    .scope-pill { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; }
+    .scope-pill.aggregate_only { background: #1f3d2e; color: #5be1a0; }
+    .scope-pill.per_protocol { background: #1f2d4d; color: #6aa6ff; }
+    .scope-pill.per_transaction { background: #4d3d1f; color: #ffc16a; }
+    .scope-pill.recipient_list { background: #4d1f3d; color: #ff9bd4; }
+    .scope-pill.full { background: #4d1f1f; color: #ff8b8b; }
+    .legend { font-size: 11px; color: #8893a8; margin-top: 8px; }
+    pre { margin: 0; padding: 12px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; overflow: auto; font: 11px/1.4 ui-monospace, Menlo, monospace; color: #c5cad6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas Confidential Treasury Layer <small>· /confidential — three views, one on-chain state</small></h1>
+  </header>
+  <main>
+    <section>
+      <h2>Inputs</h2>
+      <label>API base URL</label>
+      <input id="base" value="https://atlas.example">
+      <label>Vault id (hex32)</label>
+      <input id="vault" placeholder="0xab...">
+      <label>Disclosure role (selects which view to render)</label>
+      <select id="role">
+        <option value="public">PublicAuditor — aggregate only</option>
+        <option value="finance">FinanceAdmin — full</option>
+        <option value="recipient">Recipient — own balance only</option>
+      </select>
+      <p style="margin-top:12px"><button id="load">Render view</button></p>
+      <p class="legend">
+        Same on-chain state. Different rendering based on the
+        viewing key's <code>DisclosureScope</code>. Public verifies
+        <em>behaviour</em>; only the finance role sees plaintext
+        notionals.
+      </p>
+    </section>
+
+    <section>
+      <h2>Public input v3 (always visible)</h2>
+      <div class="grid">
+        <div class="stat"><div class="k">version</div><div class="v">0x03 (confidential mode)</div></div>
+        <div class="stat"><div class="k">allocation_ratios_root</div><div class="v" id="ratios-root">—</div></div>
+        <div class="stat"><div class="k">state_commitment_root</div><div class="v" id="state-root">—</div></div>
+        <div class="stat"><div class="k">disclosure_policy_hash</div><div class="v" id="policy-hash">—</div></div>
+      </div>
+      <p class="legend">
+        These four fields are public for <em>everyone</em> regardless
+        of viewing key. The ratios sum to 10_000 bps and obey the
+        strategy commitment's universe; you can verify that on chain
+        without unblinding a single notional.
+      </p>
+    </section>
+
+    <section>
+      <h2>Per-protocol allocation</h2>
+      <table>
+        <thead><tr><th>protocol</th><th>ratio (bps)</th><th>notional</th></tr></thead>
+        <tbody id="alloc"></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Disclosure policy</h2>
+      <table>
+        <thead><tr><th>role</th><th>scope</th><th>kind</th><th>revocable</th></tr></thead>
+        <tbody id="policy"></tbody>
+      </table>
+      <p class="legend">
+        Scope ladder: AggregateOnly → PerProtocol → PerTransaction →
+        RecipientList → Full. A viewing key cannot exceed its role's
+        policy scope (anti-pattern §11 third bullet enforced).
+      </p>
+    </section>
+
+    <section>
+      <h2>Disclosure audit log (Bubblegum-anchored)</h2>
+      <pre id="audit"><code>// every unblind event is anchored on chain (I-17)</code></pre>
+    </section>
+  </main>
+
+  <script type="module">
+    // Self-contained demo state — production reads from the API.
+    const SAMPLE = {
+      ratios_root: "9c2f3a8b...",
+      state_commitment_root: "0e7b1d23...",
+      disclosure_policy_hash: "ab12cd34...",
+      allocation: [
+        { protocol: "kamino-main", ratio_bps: 5000, plaintext: "1,250,000 PUSD" },
+        { protocol: "marginfi",    ratio_bps: 3000, plaintext: "750,000 PUSD" },
+        { protocol: "jupiter-lend",ratio_bps: 1500, plaintext: "375,000 PUSD" },
+        { protocol: "idle",        ratio_bps:  500, plaintext: "125,000 PUSD" },
+      ],
+      policy: [
+        { role: "PublicAuditor",         scope: "aggregate_only",  kind: "ElGamal",          revocable: true },
+        { role: "RegulatorTimeWindowed", scope: "per_transaction", kind: "AuditorEphemeral", revocable: true },
+        { role: "FinanceAdmin",          scope: "full",            kind: "ElGamal",          revocable: true },
+        { role: "Operator",              scope: "per_protocol",    kind: "ElGamal",          revocable: true },
+        { role: "Recipient",             scope: "recipient_list",  kind: "RecipientSpecific",revocable: false },
+      ],
+      audit_log: [
+        { slot: 254819327, role: "FinanceAdmin", scope: "full",         reason: "AccountingExport",      payload_hash: "f7d2..." },
+        { slot: 254819440, role: "Recipient",    scope: "recipient_list", reason: "RecipientUnblind",    payload_hash: "9ab3..." },
+        { slot: 254819550, role: "PublicAuditor",scope: "aggregate_only", reason: "AuditorVerification", payload_hash: "1c44..." },
+      ],
+    };
+
+    document.getElementById("load").onclick = () => {
+      const role = document.getElementById("role").value;
+      // Public input v3 always visible.
+      document.getElementById("ratios-root").textContent = SAMPLE.ratios_root;
+      document.getElementById("state-root").textContent = SAMPLE.state_commitment_root;
+      document.getElementById("policy-hash").textContent = SAMPLE.disclosure_policy_hash;
+      // Allocation rendering varies by role.
+      const allocBody = document.getElementById("alloc");
+      allocBody.innerHTML = "";
+      for (const a of SAMPLE.allocation) {
+        const tr = document.createElement("tr");
+        const visible =
+          role === "finance" ||
+          (role === "recipient" && a.protocol === "idle"); // recipient sees their balance only
+        const cell = visible ? a.plaintext : `<span class="hidden-cell">⟨confidential — commitment only⟩</span>`;
+        tr.innerHTML = `
+          <td>${escapeHtml(a.protocol)}</td>
+          <td>${escapeHtml(String(a.ratio_bps))}</td>
+          <td>${cell}</td>`;
+        allocBody.appendChild(tr);
+      }
+      // Disclosure policy rendering — public for all roles.
+      const policyBody = document.getElementById("policy");
+      policyBody.innerHTML = "";
+      for (const p of SAMPLE.policy) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(p.role)}</td>
+          <td><span class="scope-pill ${p.scope}">${escapeHtml(p.scope)}</span></td>
+          <td>${escapeHtml(p.kind)}</td>
+          <td>${p.revocable ? "yes" : "no"}</td>`;
+        policyBody.appendChild(tr);
+      }
+      // Audit log entries — public.
+      document.getElementById("audit").innerHTML =
+        `<code>${escapeHtml(JSON.stringify(SAMPLE.audit_log, null, 2))}</code>`;
+    };
+
+    function escapeHtml(s) { return String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+  </script>
+</body>
+</html>

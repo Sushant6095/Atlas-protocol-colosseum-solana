@@ -201,6 +201,55 @@ impl AtlasClient {
             .await?;
         serde_json::from_slice(&bytes).map_err(ClientError::Decode)
     }
+
+    /// Phase 14 §6 — issue a viewing key against a vault's
+    /// disclosure policy. The on-chain policy hash binds the
+    /// scope; this endpoint returns the off-chain key material the
+    /// holder uses to unblind balances within scope.
+    pub async fn issue_viewing_key(
+        &self,
+        request: &serde_json::Value,
+    ) -> Result<atlas_confidential::ViewingKey, ClientError> {
+        let bytes = self
+            .transport
+            .post_json("/api/v1/disclosure/viewing-keys", request.to_string().as_bytes())
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 14 §6.4 — revoke a viewing key. Past disclosures still
+    /// verify; future disclosures under the rotated key are blocked.
+    pub async fn revoke_viewing_key(
+        &self,
+        key_id_hex: &str,
+    ) -> Result<atlas_confidential::ViewingKey, ClientError> {
+        let body = serde_json::json!({"key_id": key_id_hex});
+        let bytes = self
+            .transport
+            .post_json(
+                "/api/v1/disclosure/viewing-keys/revoke",
+                body.to_string().as_bytes(),
+            )
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
+
+    /// Phase 14 §5 — read the most recent confidential payroll
+    /// batch's commitment + entry count. Plaintext amounts require
+    /// a viewing key.
+    pub async fn get_confidential_payroll_batch(
+        &self,
+        treasury_id: &Pubkey,
+    ) -> Result<atlas_confidential::ConfidentialPayrollBatch, ClientError> {
+        let bytes = self
+            .transport
+            .get(&format!(
+                "/api/v1/treasury/{}/confidential/payroll",
+                hex32(treasury_id)
+            ))
+            .await?;
+        serde_json::from_slice(&bytes).map_err(ClientError::Decode)
+    }
 }
 
 fn hex32(b: &[u8; 32]) -> String {

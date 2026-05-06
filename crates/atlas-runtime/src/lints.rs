@@ -117,6 +117,14 @@ pub fn forbid_third_party_in_commitment(
         "CapitalFlowHeatmap",
         "SmartCohort",
         "QuerySnapshot",
+        // Phase 14 (directive 14 confidential mode): plaintext
+        // amounts never enter commitment-path source files. Notionals
+        // enter the public input only as Pedersen / ElGamal
+        // commitments with mandatory range proofs.
+        "plaintext_notional",
+        "cleartext_amount",
+        "plaintext_balance",
+        "unblinded_amount",
     ];
     let mut out = Vec::new();
     for needle in DEFAULT.iter().chain(forbidden_types.iter()) {

@@ -1122,6 +1122,85 @@ pub static COMPLIANCE_SANCTIONS_BLOCKED_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
     v
 });
 
+// ─── Phase 14 — Confidential Treasury Layer SLOs (directive 14 §10) ──────
+
+pub static CONFIDENTIAL_PROOF_SIZE_INCREASE_BPS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_confidential_proof_size_increase_bps",
+        "Proof size increase in bps for confidential mode vs v2. SLO \u{2264} 2_500.",
+        vec![100.0, 500.0, 1_000.0, 2_500.0, 5_000.0]
+    );
+    let h = HistogramVec::new(opts, &[]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static CONFIDENTIAL_VERIFIER_CU: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_confidential_verifier_cu",
+        "Compute units consumed by the confidential verifier ix. p99 SLO \u{2264} 320k (vs 250k baseline).",
+        vec![100_000.0, 200_000.0, 250_000.0, 320_000.0, 400_000.0]
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static CONFIDENTIAL_REBALANCE_E2E_SECONDS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_confidential_rebalance_e2e_seconds",
+        "End-to-end confidential rebalance wall time. p99 SLO \u{2264} 100s (vs 90s baseline).",
+        vec![10.0, 30.0, 60.0, 90.0, 100.0, 180.0]
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static DISCLOSURE_UNBLINDING_EVENTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_disclosure_unblinding_events_total",
+        "Disclosure events bucketed by role + reason. Dashboarded; alert on rate spike.",
+        &["role", "reason"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static DISCLOSURE_UNAUTHORIZED_ATTEMPTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_disclosure_unauthorized_attempts_total",
+        "Disclosure attempts that exceeded the policy scope or used a revoked key. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static CONFIDENTIAL_RANGE_PROOF_FAILURES_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_confidential_range_proof_failures_total",
+        "Range-proof verification failures on confidential transfers. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static CONFIDENTIAL_AML_CLEARANCE_FAILURES_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_confidential_aml_clearance_failures_total",
+        "Pre-shield AML clearance failures. Payment auto-aborts.",
+        &["reason"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

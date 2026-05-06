@@ -1,5 +1,78 @@
 # Atlas Changelog
 
+## Unreleased — Phase 14.0 (2026-05-07) — Directive 14 (Atlas Confidential Treasury Layer — Cloak)
+
+One new crate (`atlas-confidential`, 8 modules) lands the Cloak
+side-track. Principle: **public verifiability of behavior,
+confidentiality of amounts.** Anyone verifies Atlas obeyed its
+strategy commitment without learning treasury size, per-protocol
+notionals, payroll recipients, or settlement amounts.
+
+- `atlas-confidential::surface` (§2) — authoritative
+  public/confidential field table + `classify_field` construction-
+  time gate refusing to mark a confidential field as public.
+- `atlas-confidential::pattern` (§3) — `ConfidentialPattern::
+  Token2022Native` (Pattern A) vs `CloakShieldedWrapper` (Pattern B);
+  one per vault; immutable post-creation (I-16).
+  `validate_against_extensions` rejects A without
+  ConfidentialTransferAccount; rejects B when A would suffice
+  (uniformity wins).
+- `atlas-confidential::commitment` — `AmountCommitment`,
+  `PedersenBlinding`, `RangeProof` shapes + `aggregate_commitments`
+  (order-invariant) + `verify_range_proof` (domain-tagged
+  `atlas.range_proof.v1`; empty / wrong-domain rejects).
+- `atlas-confidential::public_input_v3` (§4) — 300-byte v3 layout
+  with `confidential_mode` flag + `disclosure_policy_hash` at
+  offset 268. Tests pin every offset.
+- `atlas-confidential::disclosure` (§6) — `DisclosurePolicy` with
+  5 `DisclosureRole` variants × 5 `DisclosureScope` variants.
+  Validator enforces: `Full` reserved for `FinanceAdmin`;
+  `RegulatorTimeWindowed` requires a time window; null revocation
+  authority rejects; duplicate role entries reject.
+  `issue_viewing_key` clamps issuance to the role's policy scope;
+  `validate_viewing_key` enforces revocation + time-window gates.
+  `commitment_hash` enters every proof's public input.
+- `atlas-confidential::audit_log` (I-17) — `DisclosureEvent` with
+  blake3-anchored `event_id` over `(vault, key, role, scope, reason,
+  holder, slot, payload_hash)`; `validate()` detects tampering.
+  Bubblegum-anchored on-chain (Phase 03 §3).
+- `atlas-confidential::payroll` (§5) — `ConfidentialPayrollBatch`
+  with encrypted `recipient_ref_hash` + `AmountCommitment` per
+  entry; aggregate commitment computed at construction; duplicate
+  recipient + tampered aggregate reject.
+- `atlas-confidential::compliance` (§7) — `AmlClearance`
+  attestation with bad-signature / expired / recipient-mismatch /
+  null-signer reject paths; `requires_travel_rule_payload` predicate
+  at `TRAVEL_RULE_THRESHOLD_USD_Q64 = 3 000 USD-Q64`.
+- `atlas-cpi-guard::ALLOWLIST` adds `CloakShielded` (count 13 → 14).
+- `atlas-runtime::lints::forbid_third_party_in_commitment` extends
+  default forbidden list with `plaintext_notional`, `cleartext_amount`,
+  `plaintext_balance`, `unblinded_amount` — the lint blocks any
+  commitment-path source from referencing plaintext amounts.
+- `atlas-rs` adds `issue_viewing_key` + `revoke_viewing_key` +
+  `get_confidential_payroll_batch`.
+- `atlas-public-api` adds 4 endpoints (count 27 → 31). The 2 viewing-
+  key authoring POSTs join the writable surface (now 8 POSTs).
+- 7 Phase 14 telemetry metrics
+  (`confidential_proof_size_increase_bps`, `confidential_verifier_cu`,
+  `confidential_rebalance_e2e_seconds`,
+  `disclosure_unblinding_events_total`,
+  `disclosure_unauthorized_attempts_total`,
+  `confidential_range_proof_failures_total`,
+  `confidential_aml_clearance_failures_total`).
+- `sdk/playground/confidential.html` — 3-view demo (public auditor /
+  finance admin / recipient) reading the same simulated state with
+  scope-driven cell rendering. Public input v3 + disclosure policy
+  + Bubblegum audit log render for every role.
+- `CONFIDENTIAL-TREASURY.md` — §14 positioning + §2 surface table +
+  §6 disclosure tier ladder + 6-layer hard-rule enforcement summary.
+
+§12 deliverable checklist (off-chain side): all closed except the
+≤90-second eligibility demo videos and the operator-side one-page
+PDF (operator artifacts).
+
+Workspace: **888 tests** green (+46 vs Phase 13.1).
+
 ## Unreleased — Phase 13.1 (2026-05-06) — Directive 13 closeout (auto-deposit / settlement route / warehouse / compliance / ledger)
 
 Final §14 items.

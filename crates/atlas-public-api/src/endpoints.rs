@@ -75,6 +75,11 @@ pub const fn rest_endpoints() -> &'static [RestEndpoint] {
         RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/ledger", description: "unified treasury timeline (deposits, rebalances, pre-warms, payouts, invoices)", rate_limit_per_minute: 300 },
         RestEndpoint { method: Method::Post, path: "/api/v1/payments/settlement/quote", description: "quote settlement routes (Dodo + on-chain) with peg-deviation guard", rate_limit_per_minute: 300 },
         RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/compliance", description: "treasury compliance posture (region policy + AML grant)", rate_limit_per_minute: 300 },
+        // Phase 14 — Atlas Confidential Treasury Layer (Cloak).
+        RestEndpoint { method: Method::Post, path: "/api/v1/disclosure/viewing-keys", description: "issue a viewing key bound to a vault's disclosure policy", rate_limit_per_minute: 120 },
+        RestEndpoint { method: Method::Post, path: "/api/v1/disclosure/viewing-keys/revoke", description: "revoke a viewing key (past disclosures still verify)", rate_limit_per_minute: 120 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/disclosure", description: "disclosure policy + Bubblegum-anchored audit log entries", rate_limit_per_minute: 300 },
+        RestEndpoint { method: Method::Get, path: "/api/v1/treasury/{entity_id}/confidential/payroll", description: "most recent confidential payroll batch (aggregate commitment + entry count)", rate_limit_per_minute: 300 },
     ]
 }
 
@@ -95,8 +100,10 @@ mod tests {
         // wallet intelligence + treasury cross-chain. Phase 12 adds
         // 5 more for Jupiter execution (triggers, recurring, hedging).
         // Phase 13 adds 4 + 3 (closeout: ledger, settlement quote,
-        // compliance) for the Dodo treasury OS.
-        assert_eq!(rest_endpoints().len(), 27);
+        // compliance) for the Dodo treasury OS. Phase 14 adds 4 for
+        // the Cloak confidential layer (viewing key issue/revoke,
+        // disclosure log, confidential payroll batch).
+        assert_eq!(rest_endpoints().len(), 31);
     }
 
     #[test]
@@ -123,12 +130,14 @@ mod tests {
         // on-chain ix must still be user-signed.
         let posts: Vec<_> = rest_endpoints().iter().filter(|r| r.method == Method::Post).collect();
         let post_paths: Vec<&str> = posts.iter().map(|r| r.path).collect();
-        assert_eq!(posts.len(), 6);
+        assert_eq!(posts.len(), 8);
         assert!(post_paths.contains(&"/api/v1/simulate/{ix}"));
         assert!(post_paths.contains(&"/api/v1/triggers"));
         assert!(post_paths.contains(&"/api/v1/recurring"));
         assert!(post_paths.contains(&"/api/v1/hedging/preview"));
         assert!(post_paths.contains(&"/api/v1/payments/webhook"));
         assert!(post_paths.contains(&"/api/v1/payments/settlement/quote"));
+        assert!(post_paths.contains(&"/api/v1/disclosure/viewing-keys"));
+        assert!(post_paths.contains(&"/api/v1/disclosure/viewing-keys/revoke"));
     }
 }

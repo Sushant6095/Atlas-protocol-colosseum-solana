@@ -16,6 +16,7 @@ atlas-intelligence = { path = "../atlas-intelligence" }
 atlas-trigger-gate = { path = "../atlas-trigger-gate" }
 atlas-recurring-plan = { path = "../atlas-recurring-plan" }
 atlas-payments = { path = "../atlas-payments" }
+atlas-confidential = { path = "../atlas-confidential" }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror.workspace = true

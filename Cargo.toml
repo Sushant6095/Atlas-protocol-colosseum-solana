@@ -47,6 +47,7 @@ members = [
     "crates/atlas-recurring-plan",
     "crates/atlas-jupiter",
     "crates/atlas-payments",
+    "crates/atlas-confidential",
     "tests/invariants",
     "tests/adversarial",
     "tests/warehouse",

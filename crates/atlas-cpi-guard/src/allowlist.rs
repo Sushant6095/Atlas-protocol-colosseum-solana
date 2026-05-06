@@ -24,6 +24,8 @@ pub enum AllowlistedProgram {
     JupiterRecurring,
     JupiterLend,
     JupiterPerps,
+    // Phase 14 — Cloak shielded program for Pattern B wrapper mints.
+    CloakShielded,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -49,6 +51,7 @@ pub const ALLOWLIST: &[AllowlistedTarget] = &[
     AllowlistedTarget { program: AllowlistedProgram::JupiterRecurring, program_id: derive_id(b"atlas.allow.jupiter_recurring") },
     AllowlistedTarget { program: AllowlistedProgram::JupiterLend, program_id: derive_id(b"atlas.allow.jupiter_lend") },
     AllowlistedTarget { program: AllowlistedProgram::JupiterPerps, program_id: derive_id(b"atlas.allow.jupiter_perps") },
+    AllowlistedTarget { program: AllowlistedProgram::CloakShielded, program_id: derive_id(b"atlas.allow.cloak_shielded") },
 ];
 
 const fn derive_id(seed: &[u8]) -> Pubkey {
@@ -98,8 +101,9 @@ mod tests {
         // 9 programs per Phase 07 §4.2 (Kamino, Drift, Jupiter,
         // Marginfi, Token, Token-2022, ATA, Compute Budget, Memo)
         // + 4 Jupiter family programs from Phase 12 (Trigger,
-        // Recurring, Lend, Perps).
-        assert_eq!(ALLOWLIST.len(), 13);
+        // Recurring, Lend, Perps) + 1 Cloak shielded program from
+        // Phase 14.
+        assert_eq!(ALLOWLIST.len(), 14);
     }
 
     #[test]

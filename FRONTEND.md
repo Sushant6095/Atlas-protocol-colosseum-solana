@@ -154,7 +154,7 @@ warns on monotonic heap growth across navigations.
 
 | Phase | Adds |
 |---|---|
-| 21 | Routing + provider tree + page suspense scaffolds + persistence layer |
+| 21 ✅ | Application shell · routing · auth · state architecture |
 | 22 | Intelligence surfaces (capital flow heatmap, /infra observatory, exposure graph) |
 | 23 | Operator surfaces (vault terminal, command palette, pending queue, agent dashboard) |
 | 24 | 3D + viz + distribution (landing globe, zk-proof geometry, force-directed exposure graph, embedded widgets) |
@@ -162,3 +162,91 @@ warns on monotonic heap growth across navigations.
 Every one of those parts will reuse Phase 20's tokens and budgets
 without exception. A surface that violates Phase 20 is a surface
 that does not ship.
+
+---
+
+# Frontend Part 2 — Application Shell, Routing, Auth, State (Phase 21)
+
+Phase 20 was the spine. Phase 21 wires the route map, the five
+shells, the auth flow, the data plane, and the cross-cutting chrome
+(palette, alert center, keyboard shortcuts).
+
+## Route map
+
+Eight route groups, each owning a shell. Existing flat routes
+(`/`, `/vaults`, `/markets`, `/proofs`, `/how-it-works`) keep their
+legacy `<Navbar />` until Phase 22's migration; new routes use the
+group shells exclusively.
+
+| Group | Shell | Routes |
+|---|---|---|
+| `(marketing)` | MarketingShell | `/architecture` · `/security` · `/legal` |
+| `(public)` | PublicShell | `/infra` · `/proofs/live` · `/decision-engine` |
+| `(intel)` | IntelligenceShell | `/intelligence` · `/wallet-intelligence` · `/market` · `/risk` |
+| `(operator)` | TerminalShell | `/vault/[id]/...` · `/rebalance/live` · `/triggers` · `/recurring` · `/hedging` |
+| `(treasury)` | TerminalShell | `/treasury/...` (overview, ledger, runway, invoices, payments, proofs, pending, confidential) |
+| `(governance)` | TerminalShell | `/governance/...` (models, agents) |
+| `(docs)` | DocsShell | `/docs` · `/docs/api` · `/docs/sdk` · `/docs/shortcuts` · `/playground` · `/webhooks` |
+| `(account)` | IntelligenceShell | `/account/...` (devices, viewing-keys, preferences) |
+
+## SDK + queryKeys
+
+[lib/sdk/client.ts](web/lib/sdk/client.ts) is the single API client.
+The Phase 21 ESLint rule blocks `fetch("/api/v1/...")` everywhere
+except the BFF and the SDK wrapper itself. The
+[queryKeys factory](web/lib/sdk/queryKeys.ts) is the only place a
+TanStack Query key is constructed — scoped invalidation comes for
+free (`queryClient.invalidateQueries({ queryKey: queryKeys.vault(id).rebalances() })`
+touches one vault, never the whole app).
+
+## Auth — Sign-In With Solana
+
+Three-step BFF exchange at
+[/api/v1/auth/{challenge,verify,refresh,session,signout}](web/app/api/v1/auth/):
+
+1. `POST /challenge` — server-issued nonce + scoped cookie
+2. wallet `signMessage` over the canonical SIWS payload
+3. `POST /verify` — JWT issued, set as `httpOnly + Secure +
+   SameSite=Strict` cookie
+
+[useSession()](web/lib/auth/useSession.ts) exposes the in-memory
+mirror plus scope helpers (`isVaultMember(id)`,
+`treasuryRoleAtLeast(id, "FinanceAdmin")`, `isAuditor(policyId)`).
+The JWT itself never lives in localStorage.
+
+## Viewing-key vault
+
+[lib/viewing-keys/vault.ts](web/lib/viewing-keys/vault.ts) ships
+the encrypted IndexedDB pattern: AES-GCM ciphertext at rest, a
+CryptoKey derived via PBKDF2 from `wallet_signature || passphrase`,
+auto-locks 10 minutes after the tab leaves the foreground.
+Plaintext exists only in the in-memory `unlocked` map; the API
+surfaces `getPlaintext(id)` for transient reads. The server never
+sees a viewing key.
+
+## Command palette + keyboard shortcuts
+
+⌘K opens [CommandPalette](web/components/command-palette/CommandPalette.tsx);
+the catalog at [commands.ts](web/components/command-palette/commands.ts)
+covers every named route. Cross-route shortcuts (`g v`, `g t`,
+`g i`, `g d`, `g r`, `⌘ .`, `?`) are wired by
+[KeyboardShortcuts](web/components/command-palette/KeyboardShortcuts.tsx);
+the printable cheat sheet ships at `/docs/shortcuts`.
+
+## System components
+
+| Component | Purpose |
+|---|---|
+| `Skeleton`, `SkeletonText`, `SkeletonRow`, `SkeletonChart` | layout-preserving loaders |
+| `EmptyState` | one-sentence description + CTA + doc link |
+| `InlineErrorPill` | panel-level fallback with retry |
+| `RouteErrorBoundary` | route-level fallback with copyable trace id |
+| `LiveStatusPill` | live / connecting / degraded / closed pill wired to the realtime store |
+| `AlertCenter` | flyout list backed by `stream.*.alert` topics; flag for first-open before any push prompt |
+
+## Lint additions
+
+Raw `fetch("/api/v1/*")` blocked outside `app/api/**`,
+`lib/sdk/client.ts`, `lib/realtime/**`, `lib/auth/siws.ts`, and
+`app/providers.tsx`. Phase 20's token + state library blocks remain
+in force.

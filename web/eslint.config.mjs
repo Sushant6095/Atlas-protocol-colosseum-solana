@@ -83,4 +83,35 @@ export default [
       ],
     },
   },
+  {
+    // Phase 21 §1, §6 — raw fetch to /api/v1/* is forbidden outside
+    // the BFF directory. Use @atlas/sdk (lib/sdk) from server
+    // components or `useAtlas()` from client components.
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"],
+    ignores: [
+      "app/api/**",          // BFF endpoints can use raw fetch upstream.
+      "lib/sdk/client.ts",   // The single SDK wrapper.
+      "lib/realtime/**",     // The multiplexed WebSocket transport.
+      "lib/auth/siws.ts",    // SIWS calls /api/v1/auth/* via the SDK.
+      "lib/auth/session-store.ts",
+      "app/providers.tsx",   // Boot-time session hydration.
+    ],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "CallExpression[callee.name='fetch'][arguments.0.type='Literal'][arguments.0.value=/^\\/api\\/v1\\//]",
+          message:
+            "Raw fetch to /api/v1/* is forbidden outside the BFF and the SDK wrapper. Use `useAtlas()` or the server-side `getServerClient()`.",
+        },
+        {
+          selector:
+            "CallExpression[callee.name='fetch'][arguments.0.type='TemplateLiteral']:has(TemplateElement[value.cooked=/^\\/api\\/v1\\//])",
+          message:
+            "Raw fetch to /api/v1/* is forbidden outside the BFF and the SDK wrapper. Use `useAtlas()` or the server-side `getServerClient()`.",
+        },
+      ],
+    },
+  },
 ];

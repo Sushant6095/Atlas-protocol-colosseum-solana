@@ -1,5 +1,67 @@
 # Atlas Changelog
 
+## Unreleased — Phase 21.0 (2026-05-07) — Directive 21 (Frontend Part 2 — Application Shell, Routing, Auth, State Architecture)
+
+Wires the route map, five shells, SIWS auth, the data plane, and
+the cross-cutting chrome on top of the Phase 20 spine.
+
+- `web/lib/sdk/` — single API client (`AtlasClient`,
+  `getServerClient`, `useAtlas`) with helpers mirroring the 45 REST
+  endpoints + WS streams; `queryKeys` factory produces structured
+  TanStack Query keys for scoped invalidation.
+- `web/lib/auth/` — `Scope` model (anonymous / connected /
+  vault_member / treasury_member:role / auditor / developer);
+  `useSession()` exposes scope helpers; `useSiws()` runs the
+  three-step Sign-In-With-Solana exchange.
+- `web/app/api/v1/auth/` — BFF endpoints (`challenge`, `verify`,
+  `refresh`, `session`, `signout`). JWT cookie is `httpOnly +
+  Secure + SameSite=Strict`. Production cuts over to an upstream
+  auth service via `ATLAS_AUTH_UPSTREAM_URL`; dev mints HS256
+  tokens locally.
+- `web/lib/viewing-keys/` — IndexedDB AES-GCM vault. Key derived
+  via PBKDF2 from `wallet_signature || passphrase`; auto-locks 10
+  min after backgrounding; plaintext lives only in the in-memory
+  `unlocked` map.
+- `web/components/shells/` — five shells:
+  `MarketingShell`, `PublicShell`, `IntelligenceShell`,
+  `TerminalShell` (with optional sidecar), `DocsShell`. All consume
+  Phase 20 tokens + the new `HeaderBar` (LiveStatusPill, command
+  palette hint, alert bell, optional right-rail toggle).
+- `web/components/command-palette/` — `CommandPalette` (⌘K, fuzzy
+  match, keyboard navigation, focus trap), `KeyboardShortcuts`
+  (cross-route `g v` / `g t` / `g i` / `g d` / `g r` / `⌘ .` /
+  `?` / `⌘ /` chords), `commands.ts` catalog covering every named
+  route + base actions.
+- `web/components/system/` — `Skeleton`/`SkeletonText`/`SkeletonRow`/
+  `SkeletonChart` (layout-preserving loaders); `EmptyState`
+  (description + CTA + doc link, no bare "No data"); `InlineErrorPill`
+  (panel-level retry); `RouteErrorBoundary` (route-level fallback
+  with copyable trace id); `LiveStatusPill` (realtime status
+  indicator); `AlertCenter` (flyout backed by `stream.*.alert`
+  topics).
+- `web/lib/ui-store.ts` — shell-level Zustand slice (palette,
+  alert center, right rail).
+- `web/app/(marketing) (public) (intel) (operator) (treasury)
+  (governance) (docs) (account)/` — eight route groups, ~28
+  placeholder pages covering every directive §2 surface. Each
+  group's `layout.tsx` mounts its shell.
+- `web/app/error.tsx` + `web/app/not-found.tsx` — root-level error
+  + 404 boundaries using the system components.
+- `web/app/providers.tsx` updated — TanStack Query consumes
+  `createQueryClient`; Solflare is the highlighted wallet partner;
+  `initRealtime()` boots the multiplexed WebSocket;
+  `CommandPalette`, `AlertCenter`, `KeyboardShortcuts` mount
+  globally; session hydrates from `/api/v1/auth/session` on first
+  paint.
+- `web/eslint.config.mjs` — adds `no-restricted-syntax` rule
+  blocking raw `fetch("/api/v1/...")` outside `app/api/**`,
+  `lib/sdk/client.ts`, `lib/realtime/**`, `lib/auth/siws.ts`, and
+  `app/providers.tsx`. Use `useAtlas()` (client) or
+  `getServerClient()` (RSC).
+- `FRONTEND.md` extended with the Phase 21 section: route map,
+  SDK contract, auth flow, viewing-key vault, command palette,
+  system components, lint additions.
+
 ## Unreleased — Phase 20.0 (2026-05-07) — Directive 20 (Frontend Part 1 — Design Language, Motion, Performance Architecture)
 
 The frontend pack starts here. Phase 20 is the spine — every surface

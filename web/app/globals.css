@@ -133,6 +133,14 @@ html, body {
   background-size: 48px 48px;
 }
 
+/* ── Skeleton shimmer (Phase 21 §12.1) ─────────────────────── */
+
+@keyframes atlas-skeleton {
+  0%   { opacity: 0.55; }
+  50%  { opacity: 0.85; }
+  100% { opacity: 0.55; }
+}
+
 /* ── Reduced-motion contract (Phase 20 §2.4) ───────────────── */
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,0 +1,37 @@
+crates/atlas-warehouse/src/forensic.rs
+  c3576656714da0ca 1-177
+crates/atlas-warehouse/Cargo.toml
+  c3576656714da0ca 14-17
+crates/atlas-warehouse/src/lib.rs
+  c3576656714da0ca 23-25,36-41
+crates/atlas-warehouse/src/write_path.rs
+  c3576656714da0ca 1-192
+crates/atlas-warehouse/src/flusher.rs
+  c3576656714da0ca 1-217
+crates/atlas-warehouse/src/feature_store.rs
+  c3576656714da0ca 101-148,180-217
+CHANGELOG.md
+  c3576656714da0ca 3-102
+crates/atlas-warehouse/src/bin/replay.rs
+  c3576656714da0ca 1-172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "1175ff53e4175d2da9ce7083f8eff7c80281b3ab",
+  "prompts": {
+    "c3576656714da0ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 965,
+      "total_deletions": 8,
+      "accepted_lines": 957,
+      "overriden_lines": 0
+    }
+  }
+}

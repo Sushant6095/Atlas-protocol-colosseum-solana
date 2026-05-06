@@ -1,5 +1,50 @@
 # Atlas Changelog
 
+## Unreleased — Phase 13.1 (2026-05-06) — Directive 13 closeout (auto-deposit / settlement route / warehouse / compliance / ledger)
+
+Final §14 items.
+
+- `atlas-payments::auto_deposit` (§6.2 third bullet) — per-role
+  `AutoDepositPolicy` with single-invoice + daily caps;
+  `decide_auto_deposit` returns `Auto` / `QueueMultisig{reason}` /
+  `NoPolicy`. Wrong-treasury and zero-amount events reject before
+  any state change.
+- `atlas-payments::settlement_route` (§7 + §8) —
+  `SettlementRoute` trait + `DodoSettlementRoute` concrete impl.
+  `pick_settlement` filters by region permission, peg-deviation gate
+  (`tau_peg_swap_bps`), then minimum total cost; deferred routes
+  surface in `deferred_due_to_peg`; `deadline_at_risk` set when
+  `current_slot + lag > latest_at`. Region-unsupported and
+  all-pegged-out cases return typed errors.
+- `atlas-payments::warehouse_schema` (§9.1) — `PaymentRow` (8-state
+  status enum) + `InvoiceRow` matching the directive's column list.
+  `compute_payment_id = blake3("atlas.payment.v1" || treasury_id ||
+  dodo_intent_id)` for idempotency. `compute_recipient_ref_hash`
+  protects PII at the warehouse boundary.
+- `atlas-payments::compliance` (§10) — `RegionPolicy` with
+  permitted/forbidden disjoint validation; `compliance_preflight`
+  combines region + sanctions check (`Clear` / `PendingManualReview`
+  / `Blocked`); `AmlReadGrant` with scope-bound table access +
+  IP allowlist + expiration.
+- `atlas-public-api` adds 3 endpoints (count 24 → 27): unified
+  `/ledger`, `/payments/settlement/quote`, `/treasury/{id}/compliance`.
+  Writeable authoring surface count 5 → 6 (settlement quote joined).
+- 6 Phase 13.1 telemetry metrics
+  (`payment_prewarm_meets_deadline_rate_bps`,
+  `payment_role_cap_violation_attempts_total`,
+  `settlement_peg_guard_defer_total`,
+  `ledger_unified_join_lag_slots`,
+  `invoice_auto_deposit_failure_total`,
+  `compliance_sanctions_blocked_total`).
+- `sdk/playground/ledger.html` — unified timeline page with per-row
+  Bubblegum / Dodo receipt link.
+
+§14 deliverable checklist (off-chain side): all closed except the
+≤90-second eligibility demo videos and the operator-side one-page PDF
+(operator artifacts).
+
+Workspace: **842 tests** green (+26 vs Phase 13.0).
+
 ## Unreleased — Phase 13.0 (2026-05-06) — Directive 13 (Atlas Treasury OS for Internet Businesses — Dodo Payments)
 
 One new crate (`atlas-payments`, 6 modules) lands the business-treasury

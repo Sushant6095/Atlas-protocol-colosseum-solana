@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas — Unified Treasury Ledger</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; }
+    header small { color: #8893a8; }
+    main { padding: 24px; display: grid; gap: 18px; max-width: 1200px; margin: 0 auto; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 18px; }
+    h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    label { font-size: 12px; color: #8893a8; display: block; margin: 4px 0 2px; }
+    input { padding: 8px 10px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 320px; }
+    button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font: inherit; }
+    button:hover { background: #1f57d6; }
+    table { border-collapse: collapse; width: 100%; font: 12px ui-monospace, Menlo, monospace; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #1d2230; vertical-align: top; }
+    th { font-size: 11px; text-transform: uppercase; color: #8893a8; letter-spacing: 0.06em; }
+    .kind { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; }
+    .kind.deposit { background: #1f3d2e; color: #5be1a0; }
+    .kind.rebalance { background: #1f2d4d; color: #6aa6ff; }
+    .kind.prewarm { background: #4d3d1f; color: #ffc16a; }
+    .kind.payout { background: #4d1f3d; color: #ff9bd4; }
+    .kind.invoice { background: #1f3d3d; color: #5be1d4; }
+    .legend { font-size: 11px; color: #8893a8; margin-top: 8px; }
+    a.link { color: #6aa6ff; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas — Unified Treasury Ledger <small>· /treasury/{id}/ledger</small></h1>
+  </header>
+  <main>
+    <section>
+      <h2>Inputs</h2>
+      <label>API base URL</label>
+      <input id="base" value="https://atlas.example">
+      <label>Treasury entity id (hex32)</label>
+      <input id="treasury" placeholder="0xab...">
+      <p style="margin-top:12px"><button id="load">Load timeline</button></p>
+      <p class="legend">
+        Every row links to its black box (Phase 05 §3) or Dodo
+        receipt. Bubblegum anchoring covers deposits, rebalances,
+        pre-warms, payouts, and invoice settlements with a single
+        Merkle proof.
+      </p>
+    </section>
+
+    <section>
+      <h2>Timeline</h2>
+      <table>
+        <thead><tr><th>slot</th><th>kind</th><th>summary</th><th>amount</th><th>status</th><th>proof / receipt</th></tr></thead>
+        <tbody id="timeline"><tr><td colspan="6" style="color:#8893a8">load to populate</td></tr></tbody>
+      </table>
+    </section>
+  </main>
+  <script type="module">
+    document.getElementById("load").onclick = async () => {
+      const base = document.getElementById("base").value.replace(/\/$/, "");
+      const t = document.getElementById("treasury").value.trim();
+      if (!t) return;
+      const tbody = document.getElementById("timeline");
+      try {
+        const r = await fetch(`${base}/api/v1/treasury/${t}/ledger`);
+        if (!r.ok) throw new Error(`GET → ${r.status}`);
+        const data = await r.json();
+        tbody.innerHTML = "";
+        const rows = (data.events ?? data ?? []).slice().sort((a, b) => Number(b.slot) - Number(a.slot));
+        for (const e of rows) {
+          const tr = document.createElement("tr");
+          const kindClass = (e.kind || "").toLowerCase();
+          const link = e.proof_uri || e.dodo_receipt_uri || e.public_input_hash || "";
+          tr.innerHTML = `
+            <td>${escapeHtml(String(e.slot ?? ""))}</td>
+            <td><span class="kind ${kindClass}">${escapeHtml(e.kind || "")}</span></td>
+            <td>${escapeHtml(e.summary || "")}</td>
+            <td>${escapeHtml(String(e.amount_q64 ?? ""))} ${escapeHtml(e.mint || "")}</td>
+            <td>${escapeHtml(e.status || "")}</td>
+            <td>${link ? `<a class="link" href="${escapeHtml(link)}">${escapeHtml(shortLink(link))}</a>` : "—"}</td>`;
+          tbody.appendChild(tr);
+        }
+        if (rows.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="color:#8893a8">no events</td></tr>`;
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="color:#ff8b8b">${escapeHtml(String(err))}</td></tr>`;
+      }
+    };
+    function shortLink(s) { return String(s ?? "").slice(0, 24) + (s.length > 24 ? "…" : ""); }
+    function escapeHtml(s) { return String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+  </script>
+</body>
+</html>

@@ -1054,6 +1054,74 @@ pub static PREWARM_CONSTRAINT_VIOLATIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| 
     v
 });
 
+// ─── Phase 13 closeout — settlement / ledger / compliance ────────────────
+
+pub static PAYMENT_PREWARM_MEETS_DEADLINE_RATE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_payment_prewarm_meets_deadline_rate_bps",
+        "Rolling 30d rate at which pre-warm completed by latest_at_slot. SLO \u{2265} 9_990.",
+        &["treasury_id"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PAYMENT_ROLE_CAP_VIOLATION_ATTEMPTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_payment_role_cap_violation_attempts_total",
+        "Settlement attempts where a role tried to authorise above its single-payout cap. Hard alert on any.",
+        &["treasury_id", "role"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static SETTLEMENT_PEG_GUARD_DEFER_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_settlement_peg_guard_defer_total",
+        "Settlement quotes deferred because a swap leg's peg deviation exceeded \u{03c4}_peg_swap_bps.",
+        &["route"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static LEDGER_UNIFIED_JOIN_LAG_SLOTS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_ledger_unified_join_lag_slots",
+        "Slots between Dodo receipt arrival and warehouse-side join landing. p99 SLO \u{2264} 600.",
+        vec![32.0, 64.0, 128.0, 256.0, 600.0, 1_024.0]
+    );
+    let h = HistogramVec::new(opts, &[]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static INVOICE_AUTO_DEPOSIT_FAILURE_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_invoice_auto_deposit_failure_total",
+        "Invoice → vault auto-deposit attempts that failed (after Auto decision). Alert on rate.",
+        &["reason"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static COMPLIANCE_SANCTIONS_BLOCKED_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_compliance_sanctions_blocked_total",
+        "Settlement intents hard-blocked by Dodo's sanctions screening pre-flight.",
+        &["region"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

@@ -27,13 +27,34 @@
 #![deny(unsafe_code)]
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
+pub mod auto_deposit;
 pub mod business;
+pub mod compliance;
 pub mod dodo;
 pub mod invoice;
 pub mod kyb;
 pub mod prewarm;
 pub mod runway;
+pub mod settlement_route;
+pub mod warehouse_schema;
 
+pub use auto_deposit::{
+    decide_auto_deposit, AutoDepositDecision, AutoDepositDeferralReason, AutoDepositError,
+    AutoDepositPolicy, InvoiceSettledEvent,
+};
+pub use compliance::{
+    compliance_preflight, AmlReadGrant, AmlReadScope, ComplianceCheckError,
+    CompliancePolicyError, RegionPolicy, SanctionsScreening,
+};
+pub use settlement_route::{
+    pick_settlement, DodoSettlementRoute, MultiStableSettlementOptions, PaymentIntent,
+    PickedSettlement, SettlementQuote, SettlementReceipt, SettlementRoute, SettlementRouteId,
+    SettlementSelectError,
+};
+pub use warehouse_schema::{
+    compute_payment_id, compute_recipient_ref_hash, InvoiceRow, PaymentRow, PaymentStatus,
+    SettlementRouteTag,
+};
 pub use business::{
     business_commitment_hash, BusinessKind, BusinessTreasury, BusinessTreasuryError, Role,
     SignerRoster, SignerRosterEntry,

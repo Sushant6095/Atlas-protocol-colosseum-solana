@@ -1,0 +1,76 @@
+crates/atlas-per/src/lib.rs
+  s_c3576656714da0::t_6a468323cf3d17 1-49
+crates/atlas-telemetry/src/lib.rs
+  s_c3576656714da0::t_4fb07ae5f0f7f6 1395-1473
+crates/atlas-chaos/src/inject.rs
+  s_c3576656714da0::t_21e51393c38bc4 225-229
+  s_c3576656714da0::t_ba37e21de68150 131-148
+  s_c3576656714da0::t_209a66820cb446 185-190
+crates/atlas-chaos/src/scenario.rs
+  s_c3576656714da0::t_294f274b1cbfe9 115-117
+  s_c3576656714da0::t_30139b49e48707 259
+  s_c3576656714da0::t_216e7849eddb30 81-87
+  s_c3576656714da0::t_d9041036b78b14 100
+  s_c3576656714da0::t_d396e51a80a593 205-246
+  s_c3576656714da0::t_27758501879dd0 289-292
+crates/atlas-per/src/execution_privacy.rs
+  s_c3576656714da0::t_b26cfacf944c1b 1-272
+crates/atlas-per/src/settlement.rs
+  s_c3576656714da0::t_ce3cb6bae9df7e 1-215
+Cargo.toml
+  s_c3576656714da0::t_414cf77c922ebb 53
+crates/atlas-confidential/src/disclosure.rs
+  s_c3576656714da0::t_ac153a142bf19d 232-240,242-257
+  s_c3576656714da0::t_98342c897bfc0a 30-40
+crates/atlas-public-api/src/endpoints.rs
+  s_c3576656714da0::t_77ae8d0f90a04f 92-96
+  s_c3576656714da0::t_cbadc87bb3e158 124-127
+crates/atlas-per/src/session.rs
+  s_c3576656714da0::t_f9e79c8c5b7533 1-193
+crates/atlas-failure/src/class.rs
+  s_c3576656714da0::t_5d183cc1239c7b 90-101
+  s_c3576656714da0::t_0a8d2f6cc7c78b 219-222
+  s_c3576656714da0::t_b867aeb0790c60 173-176
+  s_c3576656714da0::t_d7bb3ca89513d4 137-141
+CHANGELOG.md
+  s_c3576656714da0::t_1ed7194b17fb95 3-76
+crates/atlas-failure/src/remediation.rs
+  s_c3576656714da0::t_e41f55fcb9bbfc 111-116
+crates/atlas-rs/Cargo.toml
+  s_c3576656714da0::t_37454ebfb76fb4 22
+PRIVATE-EXECUTION.md
+  s_c3576656714da0::t_d076c47e458120 1-191
+crates/atlas-cpi-guard/src/allowlist.rs
+  s_c3576656714da0::t_8acec25aa6647b 60-61
+  s_c3576656714da0::t_26e6786e5125ae 29-33
+  s_c3576656714da0::t_9f3eef92ad8729 112-114
+crates/atlas-rs/src/client.rs
+  s_c3576656714da0::t_7e27903c1aee89 339-383
+sdk/playground/per.html
+  s_c3576656714da0::t_bfcfb359d1b1c8 1-259
+sdk/ts/src/platform.ts
+  s_c3576656714da0::t_4440ed9f1e4bf4 188-226
+  s_c3576656714da0::t_9afaf57feb2281 324-345
+crates/atlas-per/Cargo.toml
+  s_c3576656714da0::t_ab314343b840e1 1-20
+crates/atlas-per/src/public_input_v4.rs
+  s_c3576656714da0::t_3d1963d95744dd 1-181
+crates/atlas-per/src/gateway.rs
+  s_c3576656714da0::t_2a5399a2d02f81 1-340
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "68d10e559e358725a7c04296569a52389cbc33fc",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

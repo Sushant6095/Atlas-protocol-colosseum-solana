@@ -33,6 +33,15 @@ pub enum TemplateId {
     KaminoStableBalanced,
     KaminoYieldAggressive,
     KaminoVolSuppress,
+    /// PUSD-native conservative template (directive 10 §2):
+    /// Kamino main + Marginfi + idle, Drift forbidden.
+    PusdSafeYield,
+    /// PUSD-native default template:
+    /// Kamino + Marginfi + Drift (small) + idle.
+    PusdYieldBalanced,
+    /// PUSD-native treasury default:
+    /// idle-heavy, Kamino conservative, large defensive vector.
+    PusdTreasuryDefense,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -189,6 +198,76 @@ pub fn build(id: TemplateId, band: RiskBand) -> VaultTemplate {
             vol_suppress_agent_weights(),
             72_000, // ≈ 8h
         ),
+        // ── PUSD-native templates (directive 10 §2) ─────────────────
+        // pusd-safe-yield: Kamino + Marginfi + idle, Drift forbidden.
+        (TemplateId::PusdSafeYield, RiskBand::Conservative) => (
+            vec![
+                alloc(ProtocolId(1), 6_000, "kamino-main"),
+                alloc(ProtocolId(3), 2_500, "marginfi"),
+                alloc(ProtocolId(0), 1_500, "idle"),
+            ],
+            balanced_agent_weights(),
+            54_000,
+        ),
+        (TemplateId::PusdSafeYield, RiskBand::Balanced) => (
+            vec![
+                alloc(ProtocolId(1), 5_500, "kamino-main"),
+                alloc(ProtocolId(3), 3_500, "marginfi"),
+                alloc(ProtocolId(0), 1_000, "idle"),
+            ],
+            balanced_agent_weights(),
+            36_000,
+        ),
+        (TemplateId::PusdSafeYield, RiskBand::Aggressive) => (
+            vec![
+                alloc(ProtocolId(1), 5_000, "kamino-main"),
+                alloc(ProtocolId(3), 4_000, "marginfi"),
+                alloc(ProtocolId(0), 1_000, "idle"),
+            ],
+            aggressive_agent_weights(),
+            18_000,
+        ),
+        // pusd-yield-balanced: Kamino + Marginfi + Drift (small) + idle.
+        (TemplateId::PusdYieldBalanced, RiskBand::Conservative) => (
+            vec![
+                alloc(ProtocolId(1), 4_500, "kamino-main"),
+                alloc(ProtocolId(3), 3_000, "marginfi"),
+                alloc(ProtocolId(2), 1_000, "drift-perp"),
+                alloc(ProtocolId(0), 1_500, "idle"),
+            ],
+            balanced_agent_weights(),
+            36_000,
+        ),
+        (TemplateId::PusdYieldBalanced, RiskBand::Balanced) => (
+            vec![
+                alloc(ProtocolId(1), 4_000, "kamino-main"),
+                alloc(ProtocolId(3), 3_000, "marginfi"),
+                alloc(ProtocolId(2), 2_000, "drift-perp"),
+                alloc(ProtocolId(0), 1_000, "idle"),
+            ],
+            balanced_agent_weights(),
+            18_000,
+        ),
+        (TemplateId::PusdYieldBalanced, RiskBand::Aggressive) => (
+            vec![
+                alloc(ProtocolId(1), 3_500, "kamino-main"),
+                alloc(ProtocolId(3), 3_000, "marginfi"),
+                alloc(ProtocolId(2), 3_000, "drift-perp"),
+                alloc(ProtocolId(0), 500, "idle"),
+            ],
+            aggressive_agent_weights(),
+            9_000,
+        ),
+        // pusd-treasury-defense: idle-heavy, Kamino conservative.
+        (TemplateId::PusdTreasuryDefense, _band) => (
+            vec![
+                alloc(ProtocolId(0), 6_000, "idle"),
+                alloc(ProtocolId(1), 3_500, "kamino-main"),
+                alloc(ProtocolId(3), 500, "marginfi"),
+            ],
+            vol_suppress_agent_weights(),
+            72_000,
+        ),
     };
     let drift_band_bps = match band {
         RiskBand::Conservative => 200,
@@ -253,6 +332,16 @@ pub const ALL_TEMPLATES: &[TemplateId] = &[
     TemplateId::KaminoStableBalanced,
     TemplateId::KaminoYieldAggressive,
     TemplateId::KaminoVolSuppress,
+    TemplateId::PusdSafeYield,
+    TemplateId::PusdYieldBalanced,
+    TemplateId::PusdTreasuryDefense,
+];
+
+/// Subset of templates that are PUSD-native (directive 10 §2).
+pub const PUSD_TEMPLATES: &[TemplateId] = &[
+    TemplateId::PusdSafeYield,
+    TemplateId::PusdYieldBalanced,
+    TemplateId::PusdTreasuryDefense,
 ];
 
 #[cfg(test)]
@@ -267,6 +356,28 @@ mod tests {
                 t.validate().expect("template must validate");
             }
         }
+    }
+
+    #[test]
+    fn pusd_safe_yield_excludes_drift() {
+        for band in [RiskBand::Conservative, RiskBand::Balanced, RiskBand::Aggressive] {
+            let t = build(TemplateId::PusdSafeYield, band);
+            // Drift is ProtocolId(2) — directive forbids it from
+            // pusd-safe-yield.
+            assert!(!t.allocations.iter().any(|a| a.protocol == ProtocolId(2)));
+        }
+    }
+
+    #[test]
+    fn pusd_treasury_defense_is_idle_heavy() {
+        let t = build(TemplateId::PusdTreasuryDefense, RiskBand::Balanced);
+        let idle = t.allocations.iter().find(|a| a.protocol == ProtocolId(0)).unwrap();
+        assert!(idle.bps >= 5_000, "idle allocation must dominate, got {}", idle.bps);
+    }
+
+    #[test]
+    fn pusd_template_count_is_three() {
+        assert_eq!(PUSD_TEMPLATES.len(), 3);
     }
 
     #[test]

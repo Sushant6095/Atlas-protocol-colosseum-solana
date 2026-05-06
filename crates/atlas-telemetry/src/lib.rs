@@ -749,6 +749,74 @@ pub static PRESIGN_FAILURE_RATE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
     v
 });
 
+// ─── Phase 10 — PUSD treasury SLOs (directive 10 §10) ────────────────────
+
+pub static PUSD_PEG_DEVIATION_BPS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_pusd_peg_deviation_bps",
+        "PUSD peg deviation in bps over the consensus mid. p99 24h dashboarded; alert > 50.",
+        vec![10.0, 25.0, 50.0, 100.0, 250.0, 500.0]
+    );
+    let h = HistogramVec::new(opts, &["source"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static PUSD_VAULT_IDLE_BUFFER_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_pusd_vault_idle_buffer_bps",
+        "Effective idle buffer per PUSD vault in bps. Alert if < 0.8 \u{00d7} policy.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PUSD_INSTANT_WITHDRAW_SUCCESS_RATE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_pusd_instant_withdraw_success_rate_bps",
+        "Instant-withdraw success rate under buffer in bps. SLO \u{2265} 9_990.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static PUSD_REBALANCE_PROOF_LAG_SLOTS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_pusd_rebalance_proof_lag_slots",
+        "Slots between rebalance submission and proof anchor. p99 SLO \u{2264} 150 (matches I-3).",
+        vec![32.0, 64.0, 128.0, 150.0, 256.0, 512.0]
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static PUSD_TOKEN2022_EXTENSION_DRIFT_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_pusd_token2022_extension_drift_total",
+        "PUSD on-chain extension drift detections. Hard alert on any.",
+        &["drift_kind"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static TREASURY_POLICY_VIOLATION_ATTEMPTS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_treasury_policy_violation_attempts_total",
+        "Pipeline tried to do something the treasury policy forbade. Hard alert on any.",
+        &["entity_id", "violation_kind"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

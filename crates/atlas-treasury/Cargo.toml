@@ -1,0 +1,21 @@
+[package]
+name = "atlas-treasury"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas Treasury — TreasuryEntity, RiskPolicy, PUSD Yield Account, emergency reserve pull, cross-stable router, stable-intel triggers. Implements directive 10."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+atlas-failure = { path = "../atlas-failure" }
+atlas-assets = { path = "../atlas-assets" }
+atlas-governance = { path = "../atlas-governance" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

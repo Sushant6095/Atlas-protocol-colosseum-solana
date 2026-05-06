@@ -1,0 +1,17 @@
+[package]
+name = "atlas-assets"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas asset registry — PUSD mint, Token-2022 extension manifest, drift detector. Implements directive 10 §1."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

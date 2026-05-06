@@ -1,5 +1,62 @@
 # Atlas Changelog
 
+## Unreleased — Phase 10.0 (2026-05-06) — Directive 10 (PUSD treasury layer)
+
+PUSD as the primary reserve asset of Atlas. Two new crates and three
+new vault templates land the directive's deliverables; the
+commitment-path hard rule from Phase 9 is extended to PUSD-derived
+intel signals (peg deviation et al. are monitoring + alerting,
+**never** commitment inputs).
+
+- `atlas-assets` (§1) — `PUSD_DECIMALS = 6`, allowed/forbidden
+  Token-2022 extension manifests, `extension::check_drift` returning
+  typed `ExtensionDrift` rows for forbidden / unauthorized /
+  non-zero-fee / freeze-by-default conditions. `transfer_fee::
+  net_amount_after_fee` for pre-sign withdrawals.
+- `atlas-treasury` (§3-§8) —
+  - `policy::TreasuryRiskPolicy` with full §3.2 schema +
+    `policy_commitment_hash` (protocol order invariant; field changes
+    invalidate the hash).
+  - `entity::TreasuryEntity` wraps multisig + vaults + policy + signer
+    board; cross-validates Squads threshold ≥ `pause_signers_required`.
+  - `yield_account::WithdrawDecision` (Instant /
+    RebalanceTargeted / InsufficientFunds) and
+    `effective_idle_buffer_bps` enforcing the §4.2 ratchet (defensive
+    raises, never lowers).
+  - `emergency::prepare_emergency_pull` — multisig-queued proposal
+    with the Phase 05 black-box hash baked in. Wrong-recipient and
+    unowned-vault rejects pinned.
+  - `stable_swap::route_stable_swap` — `τ_peg_swap = 50 bps` gate on
+    both legs; same-mint and zero-amount rejects.
+  - `intel::{PegDeviationTracker, StableFlowSpikeTracker,
+    StablePoolDepthCollapseTracker}` — Phase 02 CEP triggers + Phase
+    05 alert sources. Welford-based 5σ flow detector seeded with 32
+    modestly-varied samples; depth tracker uses a 150-slot window
+    (≈60 s) and a 4_000-bps drop threshold.
+- `atlas-vault-templates` extended with `PusdSafeYield`,
+  `PusdYieldBalanced`, `PusdTreasuryDefense` × 3 risk bands.
+  `PUSD_TEMPLATES` const lists them; tests pin `PusdSafeYield`
+  excludes Drift and `PusdTreasuryDefense` keeps idle ≥ 50 %.
+- `sdk/playground/treasury.html` — `/proofs/treasury` static page
+  with API base + entity inputs, live snapshot panel, and a "Verify
+  latest rebalance proof" button that runs the SDK-shape sanity
+  check client-side. The page is build-step-free; the real frontend
+  imports from `@atlas/sdk/platform`.
+- Telemetry: 6 PUSD-specific metrics
+  (`atlas_pusd_peg_deviation_bps`, `atlas_pusd_vault_idle_buffer_bps`,
+  `atlas_pusd_instant_withdraw_success_rate_bps`,
+  `atlas_pusd_rebalance_proof_lag_slots`,
+  `atlas_pusd_token2022_extension_drift_total`,
+  `atlas_treasury_policy_violation_attempts_total`).
+
+§12 deliverable checklist (off-chain): atlas-assets ✅, three PUSD
+templates ✅, TreasuryEntity + multisig wiring ✅, PUSD Yield Account
+✅, /proofs/treasury static page ✅, stable-intel triggers ✅,
+emergency reserve pull ✅, cross-stable router with peg-deviation
+guards ✅. Demo videos + one-pager PDF are operator artifacts.
+
+Workspace: **683 tests** green (+50 vs Phase 9.1).
+
 ## Unreleased — Phase 9.1 (2026-05-06) — Directive 09 SDK + playground closeout
 
 - `atlas-rs` (`crates/atlas-rs/`) — Phase 9 platform client. `AtlasClient`

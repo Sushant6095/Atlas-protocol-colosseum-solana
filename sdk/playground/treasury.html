@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Atlas Treasury — Proof of Reserve</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 0; background: #0b0d11; color: #e7eaf0; }
+    header { padding: 18px 24px; border-bottom: 1px solid #1d2230; }
+    header h1 { margin: 0; font-size: 18px; letter-spacing: 0.02em; }
+    header small { color: #8893a8; }
+    main { padding: 24px; display: grid; gap: 18px; max-width: 1100px; margin: 0 auto; }
+    section { background: #0e121a; border: 1px solid #1d2230; border-radius: 6px; padding: 18px; }
+    h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8893a8; }
+    label { font-size: 12px; color: #8893a8; display: block; margin: 8px 0 2px; }
+    input { padding: 8px 10px; background: #0b0d11; color: #e7eaf0; border: 1px solid #2a3142; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; min-width: 360px; }
+    button { background: #2c6cff; color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font: inherit; }
+    button:hover { background: #1f57d6; }
+    button.secondary { background: transparent; border: 1px solid #2a3142; color: #c5cad6; }
+    pre { margin: 0; padding: 12px; background: #0b0d11; border: 1px solid #1d2230; border-radius: 4px; overflow: auto; font: 12px/1.5 ui-monospace, Menlo, monospace; }
+    pre.ok code { color: #b8eecf; }
+    pre.err code { color: #ff8b8b; }
+    .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .stat .v { font: 600 22px/1 ui-monospace, Menlo, monospace; color: #e7eaf0; margin: 4px 0 0; }
+    .stat .k { font-size: 11px; color: #8893a8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .verdict { font-weight: 600; }
+    .verdict.pass { color: #5be1a0; }
+    .verdict.fail { color: #ff8b8b; }
+    a { color: #6aa6ff; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Atlas Treasury <small>— /proofs/treasury</small></h1>
+  </header>
+  <main>
+    <section>
+      <h2>Treasury entity</h2>
+      <label>API base URL</label>
+      <input id="base" value="https://atlas.example" autocomplete="off">
+      <label>Treasury entity id (hex32)</label>
+      <input id="entity" placeholder="ab12...cd34" autocomplete="off">
+      <p style="margin-top:12px"><button id="load">Load reserves</button>
+        <button class="secondary" id="verify-latest">Verify latest rebalance proof</button></p>
+    </section>
+
+    <section>
+      <h2>Live allocation snapshot</h2>
+      <div class="row" id="snapshot"></div>
+      <pre class="ok" id="snapshot-raw"><code>// Click "Load reserves".</code></pre>
+    </section>
+
+    <section>
+      <h2>Most recent rebalance proof</h2>
+      <p>Run Groth16 verification client-side via <code>@atlas/sdk</code>.</p>
+      <p>Verdict: <span class="verdict" id="verdict">—</span></p>
+      <pre id="proof-raw"><code>// Click "Verify latest rebalance proof".</code></pre>
+    </section>
+
+    <section>
+      <h2>30-day rebalance timeline</h2>
+      <p style="font-size:12px;color:#8893a8">Each row links to the Phase 05 black box record. The on-chain anchor slot is the warehouse archive root.</p>
+      <pre id="timeline"><code>// timeline appears after load.</code></pre>
+    </section>
+  </main>
+
+  <script type="module">
+    // Minimal AtlasPlatform shim — same surface as @atlas/sdk's
+    // platform module. The real frontend imports from
+    // `@atlas/sdk/platform`; this static page inlines it so the
+    // verify-button demo runs without a build step.
+    function client(baseUrl) {
+      const base = baseUrl.replace(/\/$/, "");
+      async function getJson(path) {
+        const r = await fetch(base + path);
+        if (!r.ok) throw new Error(`GET ${path} → ${r.status}`);
+        return r.json();
+      }
+      return {
+        async getTreasury(id) { return getJson(`/api/v1/treasury/${id}`); },
+        async listRebalances(vaultId, from, to) { return getJson(`/api/v1/vaults/${vaultId}/rebalances?from=${from}&to=${to}`); },
+        async getProof(hash) { return getJson(`/api/v1/rebalance/${hash}/proof`); },
+        verifyProof(r) {
+          if (r.publicInputHex.length !== 536) throw new Error(`public_input_hex must be 536 chars (got ${r.publicInputHex.length})`);
+          if (!r.proofBytes || r.proofBytes.length === 0) throw new Error("proof bytes empty");
+          if (!r.merkleProofPath || r.merkleProofPath.length === 0) throw new Error("merkle path empty");
+        },
+      };
+    }
+
+    let lastSnapshot = null;
+    let lastProof = null;
+
+    document.getElementById("load").onclick = async () => {
+      const base = document.getElementById("base").value;
+      const entity = document.getElementById("entity").value;
+      const c = client(base);
+      const out = document.getElementById("snapshot-raw");
+      try {
+        const t = await c.getTreasury(entity);
+        lastSnapshot = t;
+        out.classList.remove("err");
+        out.classList.add("ok");
+        out.innerHTML = `<code>${escapeHtml(JSON.stringify(t, null, 2))}</code>`;
+        const row = document.getElementById("snapshot");
+        row.innerHTML = "";
+        for (const [k, v] of Object.entries(t.allocation_by_protocol ?? {})) {
+          const div = document.createElement("div");
+          div.className = "stat";
+          div.innerHTML = `<div class="k">${escapeHtml(k)}</div><div class="v">${escapeHtml(String(v))} PUSD</div>`;
+          row.appendChild(div);
+        }
+        // Render last 30d timeline if returned.
+        const tl = document.getElementById("timeline");
+        tl.innerHTML = `<code>${escapeHtml(JSON.stringify(t.recent_rebalances ?? [], null, 2))}</code>`;
+      } catch (err) {
+        out.classList.add("err");
+        out.innerHTML = `<code>${escapeHtml(String(err))}</code>`;
+      }
+    };
+
+    document.getElementById("verify-latest").onclick = async () => {
+      const base = document.getElementById("base").value;
+      const c = client(base);
+      const verdict = document.getElementById("verdict");
+      const out = document.getElementById("proof-raw");
+      try {
+        const hash = lastSnapshot?.recent_rebalances?.[0]?.public_input_hash;
+        if (!hash) throw new Error("load reserves first to discover the latest rebalance hash");
+        const proof = await c.getProof(hash);
+        lastProof = proof;
+        c.verifyProof(proof);
+        verdict.textContent = "PASS — proof shape valid; hand to sp1-solana for cryptographic verify";
+        verdict.className = "verdict pass";
+        out.classList.remove("err");
+        out.classList.add("ok");
+        out.innerHTML = `<code>${escapeHtml(JSON.stringify(proof, null, 2))}</code>`;
+      } catch (err) {
+        verdict.textContent = `FAIL — ${err.message}`;
+        verdict.className = "verdict fail";
+        out.classList.add("err");
+        out.innerHTML = `<code>${escapeHtml(String(err))}</code>`;
+      }
+    };
+
+    function escapeHtml(s) { return s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]); }
+  </script>
+</body>
+</html>

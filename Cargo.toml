@@ -40,6 +40,8 @@ members = [
     "crates/atlas-vault-templates",
     "crates/atlas-public-api",
     "crates/atlas-rs",
+    "crates/atlas-assets",
+    "crates/atlas-treasury",
     "tests/invariants",
     "tests/adversarial",
     "tests/warehouse",

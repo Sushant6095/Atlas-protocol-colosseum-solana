@@ -1,0 +1,51 @@
+crates/atlas-registry/src/bin/registryctl.rs
+  c3576656714da0ca 26,76-80,233,236-252
+crates/atlas-governance/src/signer_set.rs
+  c3576656714da0ca 1-144
+crates/atlas-registry/Cargo.toml
+  c3576656714da0ca 17
+crates/atlas-sandbox/src/lib.rs
+  c3576656714da0ca 19-20,28-29
+crates/atlas-governance/src/lib.rs
+  c3576656714da0ca 1-33
+crates/atlas-sandbox/src/corpus.rs
+  c3576656714da0ca 1-168
+Cargo.toml
+  c3576656714da0ca 25-26
+crates/atlas-monitor/src/lib.rs
+  c3576656714da0ca 1-23
+crates/atlas-governance/Cargo.toml
+  c3576656714da0ca 1-18
+crates/atlas-monitor/src/bin/monitorctl.rs
+  c3576656714da0ca 1-63
+crates/atlas-monitor/Cargo.toml
+  c3576656714da0ca 1-29
+crates/atlas-monitor/src/bridge.rs
+  c3576656714da0ca 1-195
+CHANGELOG.md
+  c3576656714da0ca 3-72
+crates/atlas-sandbox/src/db.rs
+  c3576656714da0ca 1-133
+crates/atlas-governance/src/proposal.rs
+  c3576656714da0ca 1-247
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "1e62a569adbdc14d86324c9d0b2d5a895fc8a1be",
+  "prompts": {
+    "c3576656714da0ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 1263,
+      "total_deletions": 109,
+      "accepted_lines": 1154,
+      "overriden_lines": 0
+    }
+  }
+}

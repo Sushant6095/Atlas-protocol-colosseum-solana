@@ -1,0 +1,4 @@
+DEFENSIVE MODE — vault {vault_id} slot {slot}
+Trigger: {trigger} (severity {severity_bps} bps), affecting {protocol}.
+Allocation collapsed to idle {idle_share_pct}% / {fallback_protocol} {fallback_share_pct}% per defensive vector.
+Black box: atlas inspect {public_input_hash}

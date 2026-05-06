@@ -1,0 +1,14 @@
+DIGEST — Atlas daily summary {date_utc}
+Vault {vault_id} TVL {tvl_usd} USD.
+Rebalances: {rebalance_count} ({landed_count} landed, {aborted_count} aborted, {rejected_count} rejected).
+Proof latency p50/p99: {proof_p50_s}s / {proof_p99_s}s.
+E2E latency p50/p99: {e2e_p50_s}s / {e2e_p99_s}s.
+Capital efficiency:
+  idle_share: {idle_share_bps} bps
+  realized_apy: {realized_apy_bps} bps
+  expected_apy: {expected_apy_bps} bps
+  yield_efficiency: {yield_efficiency_bps} bps
+  rebalance_cost: {rebalance_cost_bps} bps
+  rebalance_efficiency: {rebalance_efficiency_bps} bps
+  defensive_share: {defensive_share_bps} bps
+Alerts (24h): {page_count} pages, {notify_count} notifies.

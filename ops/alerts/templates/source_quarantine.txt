@@ -1,0 +1,4 @@
+NOTIFY — SOURCE QUARANTINE — slot {slot}
+Source {source} quarantined; reliability EMA fell below threshold.
+Match rate (1h): {match_rate_bps} bps.
+Quorum continues with remaining sources.

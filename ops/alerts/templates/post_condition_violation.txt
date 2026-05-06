@@ -1,0 +1,6 @@
+PAGE — POST-CONDITION VIOLATION — vault {vault_id} slot {slot}
+Invariant {invariant_code} ({invariant_name}) failed after CPI execution.
+Bundle reverted; vault state pinned to before-hash {before_state_hash}.
+Remediation: {remediation_id}.
+Black box: atlas inspect {public_input_hash}
+Runbook: ops/runbooks/execution.md

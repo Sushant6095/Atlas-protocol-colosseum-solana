@@ -1,0 +1,6 @@
+PAGE — ARCHIVAL FAILURE — vault {vault_id} slot {slot}
+Warehouse write rejected; rebalance ABORTED per I-8.
+Failure class: {failure_class} ({variant_tag}).
+Remediation: {remediation_id} — {remediation_text}.
+Last successful archive: slot {last_ok_slot}.
+Runbook: ops/runbooks/archival.md

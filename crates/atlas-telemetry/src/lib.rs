@@ -11,8 +11,8 @@
 
 use once_cell::sync::Lazy;
 use prometheus::{
-    exponential_buckets, register_counter_vec, register_gauge_vec, register_histogram_vec,
-    CounterVec, Encoder, GaugeVec, HistogramVec, Registry, TextEncoder,
+    exponential_buckets, register_counter_vec, register_gauge_vec, CounterVec, Encoder, GaugeVec,
+    HistogramVec, Registry, TextEncoder,
 };
 
 /// Mandatory label set for every Atlas metric.
@@ -368,6 +368,63 @@ pub static OVL_CONSENSUS_CONFIDENCE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
         "atlas_ovl_consensus_confidence_bps",
         "Per-asset consensus confidence (0..=10_000 bps). p10 SLO ≥ 7_000.",
         &["asset"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+// ─── Phase 05 — Forensic / Failure / Black-Box SLOs (directive 05 §6) ─────
+
+pub static FORENSIC_SIGNAL_LAG_SLOTS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_forensic_signal_lag_slots",
+        "Slots between on-chain triggering tx and ForensicSignal emission. p99 SLO ≤ 8.",
+        vec![0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0]
+    );
+    let h = HistogramVec::new(opts, &["kind"]).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static FAILURE_UNCATEGORIZED_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_failure_uncategorized_total",
+        "Pipeline errors that escaped FailureClass coverage. Hard alert on any.",
+        &["stage"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static ALERTS_PAGE_PER_DAY: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_alerts_page_per_day",
+        "Rolling 24h Page-severity alert count. SLO ≤ 5/day in steady state.",
+        &["category"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static BLACKBOX_RECORD_COMPLETENESS_VIOLATIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_blackbox_record_completeness_violations_total",
+        "BlackBoxRecord write attempts rejected by validate(). Hard alert on any (anti-pattern §7).",
+        &["reason"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static CAPITAL_IDLE_SHARE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_capital_idle_share_bps",
+        "Idle capital share in bps (0..=10_000). p95 SLO ≤ 2_000 in steady state.",
+        LABELS
     )
     .expect("register");
     REGISTRY.register(Box::new(v.clone())).ok();

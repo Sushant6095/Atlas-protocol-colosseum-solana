@@ -1,0 +1,5 @@
+PAGE — PROVER NETWORK DOWN — vault {vault_id} slot {slot}
+SP1 prover unreachable; pipeline frozen at stage 12 (proof).
+Last successful proof at slot {last_proof_slot}; backlog depth {backlog_depth}.
+Remediation: {remediation_id} — failover to local prover, then halt if both unreachable.
+Runbook: ops/runbooks/proof.md

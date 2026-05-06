@@ -1,0 +1,4 @@
+NOTIFY — ORACLE DEVIATION — vault {vault_id} slot {slot}
+Asset {asset} deviation across feeds: {deviation_bps} bps (band {band_bps}).
+Confidence dropped to {confidence_bps} bps.
+Action: defensive vector active until deviation < {recover_bps} bps for 8 slots.

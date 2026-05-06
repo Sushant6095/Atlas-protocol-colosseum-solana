@@ -1,0 +1,4 @@
+NOTIFY — CONSENSUS DISAGREEMENT SPIKE — vault {vault_id} slot {slot}
+Agent ensemble disagreement: {disagreement_bps} bps (alert > 1500 sustained).
+Top divergent agents: {top_agents}.
+Action: monitoring; if sustained 8 slots, defensive vector engages.

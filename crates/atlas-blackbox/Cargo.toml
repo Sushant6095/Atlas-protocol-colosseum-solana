@@ -1,0 +1,28 @@
+[package]
+name = "atlas-blackbox"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rebalance black-box recording — every input, every decision, every CPI return. Implements directive 05 §3."
+
+[lib]
+
+[[bin]]
+name = "atlas-inspect"
+path = "src/bin/inspect.rs"
+
+[dependencies]
+atlas-failure = { path = "../atlas-failure" }
+atlas-warehouse = { path = "../atlas-warehouse" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tracing.workspace = true
+tracing-subscriber.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full", "macros"] }
+proptest = "1.5"

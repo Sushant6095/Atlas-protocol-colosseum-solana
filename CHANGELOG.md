@@ -1,5 +1,175 @@
 # Atlas Changelog
 
+## Unreleased — Phase 5.1 (2026-05-06) — Directive 05 §4–§8 (Alerts / Capital Efficiency / Runbooks)
+
+### Two new crates
+
+- **`atlas-alert`** — autonomous alert engine (directive §4).
+  - 11 typed `AlertKind` variants across the three classes the directive
+    mandates: 5 `Page` (archival, hard quorum, post-condition, prover
+    down, security event), 5 `Notify` (degraded mode, defensive mode,
+    oracle deviation, consensus disagreement, source quarantine), 1
+    `Digest` (daily). `class()` and `template_path()` are
+    compile-time exhaustive — adding a kind without a template fails to
+    build.
+  - `engine::AlertEngine` — dedup over a 60 s window per
+    `(class, vault_id, kind)` collapsing to one fire with `[xN]` count
+    re-emitted on the next fire; auto-resolve after K=8 consecutive
+    `observe_clear()` calls; maintenance windows that suppress
+    non-security pages while always firing security pages.
+    `pages_dispatched` / `pages_suppressed` counters back the
+    `atlas_alerts_page_per_day` SLO.
+  - `render::render_alert` — substitutes `{key}` placeholders from
+    `Alert.fields`. Missing keys render as `<missing>` with a
+    `template.missing_field` warning span — visible incompleteness beats
+    silent suppression. `{{` / `}}` escape literal braces. Free-form
+    text is impossible at the API: every dispatched alert flows through
+    this function.
+  - `sink::AlertSink` trait + `AlertDispatcher` — class-aware fan-out.
+    `NoopSink` for tests, `RecordingSink` for assertion. Production
+    PagerDuty/Slack webhooks wired by reading
+    `ops/secrets/{pagerduty,slack}.url`.
+  - `bin/atlas-alertctl` — operator CLI with two subcommands:
+    `maintenance set/list` persists `MaintenanceWindow`s to
+    `ops/secrets/maintenance.json`; `render --kind X --field key=val ...`
+    renders a template locally for runbook QA without dispatching.
+
+- **`atlas-capital`** — capital efficiency engine (directive §5).
+  - 7 metrics per epoch:
+    - `idle_capital_share_bps` — averaged `(idle, tvl)` ratio.
+    - `realized_apy_bps` — Money-Weighted Rate of Return solved by
+      Newton-Raphson on the cash-flow series, annualised, signed.
+    - `expected_apy_bps` — `Σ allocation × oracle_apy` with allocation
+      summing to 10_000 (rejected otherwise).
+    - `yield_efficiency_bps` — realized / expected, capped at
+      2× BPS_DENOM.
+    - `rebalance_cost_bps` — `(gas + tip + slippage) / tvl`.
+    - `rebalance_efficiency_bps` — `realized / (realized + cost)`.
+    - `defensive_share_bps` — defensive_slots / total_slots.
+  - `rollup(EpochInputs)` aggregates all seven into a `CapitalEpoch`
+    record consumed by the daily digest template + the public
+    transparency page.
+  - Pure (no I/O); all inputs come from the warehouse. Replay parity
+    guaranteed.
+
+### Alert templates (`ops/alerts/templates/*.txt`)
+
+10 templates, one per `AlertKind` (defensive + degraded share one body):
+
+- `archival_failure.txt`, `quorum_disagreement.txt`,
+  `post_condition_violation.txt`, `prover_network_down.txt`,
+  `security_event.txt` — Page class.
+- `defensive_mode_entered.txt`, `oracle_deviation.txt`,
+  `consensus_disagreement_spike.txt`, `source_quarantine.txt` —
+  Notify class.
+- `digest_daily.txt` — Digest class, includes the 7 capital efficiency
+  fields.
+
+Templates are inlined via `include_str!` so a missing file fails the
+build, and each template is parsed by `template_fields()` in the test
+suite (verifies balanced braces).
+
+### Runbooks (`ops/runbooks/*.md`)
+
+7 runbooks, one per `FailureClass` category, with triage steps,
+decision trees, and explicit anti-pattern lists:
+
+- `ingestion.md` (1xxx), `oracle.md` (2xxx), `inference.md` (3xxx),
+  `proof.md` (4xxx), `execution.md` (5xxx), `archival.md` (6xxx),
+  `adversarial.md` (7xxx). `README.md` indexes them. Every page-class
+  alert template references the relevant runbook so oncall lands on the
+  right page in a single click.
+
+### `ops/secrets/` layout
+
+- `.gitignore` excludes everything except itself and `README.md`.
+- README documents the 5 file-name convention used by the orchestrator
+  (`pagerduty.url`, `slack.url`, `discord.url`, `digest.url`,
+  `maintenance.json`) and the rotation procedure.
+
+### Test coverage
+
+- atlas-alert: 11/11 (kinds, render, dedup, maintenance, auto-resolve).
+- atlas-capital: 13/13 (idle share, expected APY, MWRR positive +
+  drawdown + infeasible, yield efficiency clamps, rebalance cost +
+  efficiency, defensive share, full rollup).
+- Workspace total: **358 tests** green (24 new vs Phase 5 §1–§3).
+
+## Unreleased — Phase 5.0 (2026-05-05) — Directive 05 §1–§3 (Forensic / Failure / Black Box)
+
+### Three new crates
+
+- **`atlas-forensic`** — on-chain forensic engine (directive §1).
+  - `signal::ForensicSignal` enum: 5 variants — `LargeStableExit`,
+    `WhaleEntry`, `LiquidationCascade`, `SmartMoneyMigration`,
+    `AbnormalWithdrawal`. Each carries protocol/wallet/amount/slot. Stable
+    `signal_id` = blake3(canonical bytes) for content-addressed dedup.
+  - `heuristics`: `ProtocolFlowTracker` (large exit / whale entry threshold),
+    `LiquidationCascadeTracker` (rolling 1-min window, default 8 events),
+    `SmartMoneyMigrationTracker` (≥50% wallet-fraction shift), and
+    `AbnormalWithdrawalTracker` driven by `WelfordOnline` mean+variance.
+    Default config: 5σ threshold, 32-sample minimum.
+  - `engine::ForensicEngine` composes the four trackers with `observe_*`
+    methods. Emits `Vec<ForensicSignal>` per event. Tests pin all five
+    signal kinds firing under their canonical conditions.
+
+- **`atlas-failure`** — pipeline failure taxonomy (directive §2).
+  - `class::FailureClass` enum — 24 variants across 7 categories:
+    Ingestion (1xxx), Oracle (2xxx), Inference (3xxx), Proof (4xxx),
+    Execution (5xxx), Archival (6xxx), Adversarial (7xxx). `VariantTag`
+    carries stable u16 codes; `category_prefix()` yields the directive
+    category number.
+  - `remediation::remediation_for(&FailureClass) -> Remediation` —
+    `pub const fn` exhaustive match. 15 `Remediation` variants
+    (`HaltAndPage`, `FailoverAndRetry`, `Defensive`,
+    `RejectAndSecurityEvent`, etc.) with stable `RemediationId` strings
+    like `rem.archival.failed.abort`. 25 unique IDs pinned by test.
+    Compile-time exhaustiveness — adding a class without a remediation
+    fails to build.
+  - `log::FailureLogEntry { slot, vault_id, stage, class, variant_tag,
+    remediation_id, message_hash, recovered_at_slot }`. `message_hash`
+    is `blake3(error.to_string())` for content dedup; `mark_recovered`
+    sets the recovery slot.
+
+- **`atlas-blackbox`** — rebalance forensic recording (directive §3).
+  - `record::BlackBoxRecord` schema (§3.1) — 26 fields, every required
+    surface present. `validate()` enforces: schema == `atlas.blackbox.v1`;
+    landed → `after_state_hash` + `balances_after` + `tx_signature` +
+    `landed_slot` present and `failure_class` absent; aborted/rejected →
+    no `after_state_hash` and `failure_class` present;
+    `balances_before`/`after` equal length; cpi_trace step indices 1-based
+    monotonic; no failed post-conditions; `public_input_hex` exactly
+    536 chars. **Anti-pattern §7 enforced**: silent null substitution
+    rejects.
+  - `write::write_record(&dyn WarehouseClient, &BlackBoxRecord)` — async
+    write path. Validates first, converts to `RebalanceRow` (allocation
+    bps derived from balances_after totals), then inserts. Invalid
+    records are rejected before the DB.
+  - `bin/atlas-inspect` CLI — `atlas-inspect --hash <PUBLIC_INPUT_HASH>`
+    emits a single JSON document with `balances_diff`,
+    `cpi_trace_summary`, `failed_invariants`, timings, status,
+    explanation/proof URIs, and a Bubblegum-proof status placeholder
+    (Phase 6 wires the live Merkle path). Optional `--fixture <path>` for
+    offline testing of the JSON contract.
+
+### Phase 05 telemetry (directive §6)
+
+- `atlas-telemetry` adds 5 metrics:
+  - `atlas_forensic_signal_lag_slots{kind}` (Histogram, p99 SLO ≤ 8 slots)
+  - `atlas_failure_uncategorized_total{stage}` (Counter, hard alert any)
+  - `atlas_alerts_page_per_day{category}` (Gauge, SLO ≤ 5/day)
+  - `atlas_blackbox_record_completeness_violations_total{reason}`
+    (Counter, hard alert any)
+  - `atlas_capital_idle_share_bps{vault_id, replay}` (Gauge, p95 SLO ≤ 2_000)
+
+### Test coverage
+
+- atlas-forensic: 16/16. atlas-failure: 10/10. atlas-blackbox: 13/13.
+  Remediation IDs are unique (25); every FailureClass maps to a
+  Remediation; pages-oncall and security-event predicates pinned;
+  Welford matches textbook variance to 1e-9.
+- Workspace total: **334 tests** green.
+
 ## Unreleased — Phase 4.1 (2026-05-06) — Directive 04 closeout (§3.4–§5)
 
 ### Bridge: exposure topology hash → public input

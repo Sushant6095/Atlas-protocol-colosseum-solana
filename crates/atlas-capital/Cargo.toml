@@ -1,0 +1,17 @@
+[package]
+name = "atlas-capital"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas capital efficiency engine — idle share, MWRR, yield/rebalance efficiency, defensive share. Implements directive 05 §5."
+
+[lib]
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

@@ -1,0 +1,20 @@
+[package]
+name = "atlas-forensic"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Forensic engine — protocol fund flows, whale watch, liquidation cascade, smart-money migration, abnormal-withdrawal detection. Implements directive 05 §1."
+
+[lib]
+
+[dependencies]
+atlas-bus = { path = "../atlas-bus" }
+atlas-telemetry = { path = "../atlas-telemetry" }
+serde = { workspace = true, features = ["derive"] }
+thiserror.workspace = true
+tracing.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full", "macros"] }
+proptest = "1.5"

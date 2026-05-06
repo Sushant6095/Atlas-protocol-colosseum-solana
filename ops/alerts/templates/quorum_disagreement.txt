@@ -1,0 +1,5 @@
+PAGE — HARD QUORUM DISAGREEMENT — vault {vault_id} slot {slot}
+RPC providers diverged on account hash; ingestion halted.
+Disagreeing sources: {sources}. Match rate (1h): {match_rate_bps} bps.
+Remediation: {remediation_id} — failover and quarantine offending source.
+Runbook: ops/runbooks/ingestion.md

@@ -1,0 +1,6 @@
+PAGE — SECURITY EVENT — vault {vault_id} slot {slot}
+Adversarial input detected: {failure_class} ({variant_tag}).
+Public input hash: {public_input_hash}.
+Action: rebalance REJECTED, security event emitted, source {source} flagged.
+Remediation: {remediation_id} — never retry; investigate forensic signal.
+Runbook: ops/runbooks/adversarial.md

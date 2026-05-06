@@ -20,6 +20,9 @@ pub mod replay;
 pub mod feature_store;
 pub mod views;
 pub mod migrations;
+pub mod write_path;
+pub mod flusher;
+pub mod forensic;
 
 pub use schema::{
     AccountStateRow, AgentProposalRow, EventRow, FailureClassificationRow, OracleTickRow,
@@ -30,3 +33,9 @@ pub use mock::MockWarehouse;
 pub use bubblegum::{BubblegumAnchorKeeper, BubblegumAnchorReceipt, MerkleProof};
 pub use feature_store::{FeatureStoreClient, FeatureStoreError, PointInTimeQuery};
 pub use replay::{ReplayQuery, ReplayResponse};
+pub use write_path::{archive_then_submit, ArchivedSubmitReceipt, SubmitOutcome, WritePathError};
+pub use flusher::{BubblegumFlusher, FlusherConfig, FlusherHandle, PendingReceipt};
+pub use forensic::{
+    AgentDisagreementBucket, FailureClassRateRow, ForensicQuery, InMemoryForensic,
+    ProtocolExposureRow, RebalanceSummaryDailyRow, SlotRange,
+};

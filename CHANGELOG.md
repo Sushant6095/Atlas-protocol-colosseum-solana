@@ -1,5 +1,105 @@
 # Atlas Changelog
 
+## Unreleased — Phase 3.1 (2026-05-06) — Write-path gate, Bubblegum flusher, forensic queries, replay bin
+
+### atlas-warehouse — write path (directive §3)
+
+- `write_path::archive_then_submit` — canonical I-8 enforcement helper.
+  Runs `WarehouseClient::insert_rebalance` first; the submit closure is
+  invoked **only** after the archive returns a receipt. On archive failure
+  the helper returns `WritePathError::ArchiveFailed`, bumps both
+  `atlas_archival_failures_total` (cross-pipeline I-8 alarm) and
+  `atlas_warehouse_archive_failure_total{table="rebalances"}` (warehouse
+  signal), and the submit closure does not run. Asserted by a unit test
+  using a `FailingArchive` impl.
+- Write-lag is observed on `atlas_warehouse_write_lag_ms{table="rebalances"}`.
+
+### atlas-warehouse — Bubblegum flusher process (directive §3)
+
+- `flusher::BubblegumFlusher` — long-running tokio task. Receives
+  `PendingReceipt`s on an mpsc channel and flushes when:
+  1. leaf threshold reached (`flush_every_n_leaves`, default 256), OR
+  2. slot threshold reached (`flush_every_n_slots`, default 600), OR
+  3. `max_pending_leaves` safety valve fires (default 4096).
+- `FlusherHandle::enqueue` is the producer interface — pipeline writers
+  feed receipts after a successful archive write.
+- Anchor receipts (`BubblegumAnchorReceipt`) are emitted on a dedicated
+  channel ready for the on-chain CPI keeper (Phase 4).
+- `atlas_warehouse_bubblegum_anchor_lag_slots` observed on every flush.
+- Final flush on channel close ensures no leaves are lost on shutdown.
+- The slot threshold is anchored to the first receipt seen, not zero, so
+  the very first event does not unconditionally force a flush.
+
+### atlas-warehouse — forensic query helpers (directive §4)
+
+- Typed row structs for the 4 named materialized views:
+  `RebalanceSummaryDailyRow`, `AgentDisagreementBucket`,
+  `FailureClassRateRow`, `ProtocolExposureRow`.
+- `ForensicQuery` trait with the 4 query methods used by analyst code.
+- `InMemoryForensic` reference impl for tests + dev (real ClickHouse
+  driver lands in Phase 4).
+- `day_anchor_slot` / `hour_anchor_slot` — anchor a slot to UTC day/hour
+  boundaries (216_000 / 9_000 slots respectively at 400 ms cadence).
+
+### atlas-warehouse — feature store extensions (directive §4)
+
+- `FeatureVector { vault_id, as_of_slot, features }` typed return for
+  sandbox backtests (Phase 06 consumer).
+- `FeatureVector::validate` — pure leakage gate; rejects any element
+  with `observed_at_slot > as_of_slot` and bumps the leakage counter.
+- `FeatureStoreClient::read_feature_vector_at` — sandbox-mode read that
+  validates the returned vector before handing it back. Phase 4 wires
+  the ClickHouse predicate; today the typed contract + leakage gate are
+  exercised via tests.
+
+### atlas-warehouse-replay binary (directive §4)
+
+- New CLI: `atlas-warehouse-replay --slot S0..S1 [--vault HEX]`.
+- Reads events for the slot range from the warehouse and emits one
+  JSONL line per event on stdout (`{slot, source, event_id, canonical_hex}`)
+  followed by a footer line (`{slot_lo, slot_hi, event_count, elapsed_ms}`).
+- Phase 02's `atlas-bus replay --archive` consumes this stream end-to-end.
+- Replay query latency observed on `atlas_warehouse_replay_query_ms`.
+
+### Tests added (15)
+
+| Module | Tests |
+|---|---|
+| write_path | 3 (archive failure blocks submit, archive success invokes submit, submit failure after archive) |
+| flusher | 3 (leaf threshold flush, slot threshold flush, final flush on channel close) |
+| forensic | 3 (trait impl smoke, day anchor 216k boundary, hour anchor 9k boundary) |
+| feature_store (extra) | 3 (vector validate rejects leakage, vector validate passes clean, read_feature_vector_at returns validated vector) |
+| replay bin | 3 (parse_slot_range round-trip, parse_slot_range rejects inverted, parse_vault round-trip) |
+
+### Test counts
+
+| Crate | Tests |
+|---|---|
+| atlas-public-input | 5 |
+| atlas-pipeline | 82 |
+| atlas-telemetry | 3 |
+| atlas-replay | 20 |
+| atlas-bus | 59 |
+| atlas-warehouse | 30 (was 18) |
+| atlas-invariants-tests | 6 |
+| atlas-adversarial-tests | 10 |
+| **Total** | **218** (was 203) |
+
+### Directive 03 §3-§4 coverage delta
+
+| § | Item | Status |
+|---|---|---|
+| §3 | Single `WarehouseClient`; no stage talks to CH/TS/S3 directly | ✓ Phase 3 |
+| §3 | Idempotency on `(slot, vault_id, public_input_hash)` for rebalances | ✓ Phase 3 |
+| §3 | Idempotency on `event_id` for raw events | ✓ Phase 3 |
+| §3 | Receipt returned; rebalance ix gated on archive success | ✓ `archive_then_submit` |
+| §3 | Bubblegum anchoring as separate flusher process (every N slots) | ✓ `BubblegumFlusher` |
+| §4 | Forensic SQL — typed access to 4 named MVs | ✓ trait surface |
+| §4 | Replay API — `atlas-warehouse-replay --slot S0..S1 --vault V` | ✓ |
+| §4 | Feature store API — point-in-time, no leakage | ✓ `FeatureVector::validate` |
+
+---
+
 ## Unreleased — Phase 3 (2026-05-06) — Intelligence Warehouse (directive 03)
 
 ### atlas-warehouse crate

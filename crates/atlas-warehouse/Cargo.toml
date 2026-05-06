@@ -11,6 +11,10 @@ description = "Atlas intelligence warehouse — typed schemas, WarehouseClient t
 name = "atlas-warehouse-api"
 path = "src/bin/api.rs"
 
+[[bin]]
+name = "atlas-warehouse-replay"
+path = "src/bin/replay.rs"
+
 [dependencies]
 atlas-public-input = { path = "../atlas-public-input" }
 atlas-bus = { path = "../atlas-bus" }

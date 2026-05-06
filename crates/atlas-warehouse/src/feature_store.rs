@@ -98,6 +98,54 @@ impl<C: WarehouseClient + ?Sized> FeatureStoreClient<C> {
     }
 }
 
+/// Full feature vector for sandbox backtests (Phase 06). Every entry carries
+/// `observed_at_slot ≤ as_of_slot` — verified by `read_feature_vector_at`
+/// before returning to the caller.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct FeatureVector {
+    pub vault_id: [u8; 32],
+    pub as_of_slot: u64,
+    pub features: Vec<FeatureSnapshot>,
+}
+
+impl FeatureVector {
+    /// Pure validator — returns `Err(Leakage)` if any feature is observable
+    /// later than `as_of_slot`. Call sites that produce a FeatureVector
+    /// without going through `FeatureStoreClient::read_feature_vector_at`
+    /// must invoke this before handing the vector to a backtest.
+    pub fn validate(&self) -> Result<(), FeatureStoreError> {
+        for f in &self.features {
+            if f.observed_at_slot > self.as_of_slot {
+                INGEST_REPLAY_DRIFT_EVENTS_TOTAL
+                    .with_label_values(&["_global", "false"])
+                    .inc();
+                return Err(FeatureStoreError::Leakage {
+                    requested: self.as_of_slot,
+                    observed: f.observed_at_slot,
+                });
+            }
+        }
+        Ok(())
+    }
+}
+
+impl<C: WarehouseClient + ?Sized> FeatureStoreClient<C> {
+    /// Sandbox-mode read. Returns a `FeatureVector` with the latest tick
+    /// (as of the slot) for each requested `feed_id`. Phase 4 wires the
+    /// real ClickHouse predicate; Phase 1 returns an empty vector and lets
+    /// the caller assert the contract via `FeatureVector::validate`.
+    pub async fn read_feature_vector_at(
+        &self,
+        vault_id: [u8; 32],
+        as_of_slot: u64,
+        _feed_ids: &[u32],
+    ) -> Result<FeatureVector, FeatureStoreError> {
+        let v = FeatureVector { vault_id, as_of_slot, features: vec![] };
+        v.validate()?;
+        Ok(v)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -128,5 +176,43 @@ mod tests {
             conf_q64: 0,
         };
         store.assert_no_leak(q, &ok).unwrap();
+    }
+
+    #[tokio::test]
+    async fn feature_vector_validate_rejects_leakage() {
+        let v = FeatureVector {
+            vault_id: [0u8; 32],
+            as_of_slot: 100,
+            features: vec![FeatureSnapshot {
+                feed_id: 1,
+                observed_at_slot: 200,
+                price_q64: 0,
+                conf_q64: 0,
+            }],
+        };
+        assert!(matches!(v.validate(), Err(FeatureStoreError::Leakage { .. })));
+    }
+
+    #[tokio::test]
+    async fn feature_vector_validate_passes_clean() {
+        let v = FeatureVector {
+            vault_id: [0u8; 32],
+            as_of_slot: 100,
+            features: vec![FeatureSnapshot {
+                feed_id: 1,
+                observed_at_slot: 99,
+                price_q64: 0,
+                conf_q64: 0,
+            }],
+        };
+        v.validate().unwrap();
+    }
+
+    #[tokio::test]
+    async fn read_feature_vector_at_returns_validated_vector() {
+        let store = FeatureStoreClient::new(Arc::new(MockWarehouse::new()));
+        let v = store.read_feature_vector_at([1u8; 32], 100, &[1, 2, 3]).await.unwrap();
+        assert_eq!(v.as_of_slot, 100);
+        v.validate().unwrap();
     }
 }

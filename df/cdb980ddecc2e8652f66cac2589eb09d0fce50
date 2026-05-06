@@ -1,0 +1,62 @@
+CHANGELOG.md
+  s_c3576656714da0::t_398cf59c6e4c13 3-75
+crates/atlas-rs/src/client.rs
+  s_c3576656714da0::t_79b328024db2d7 204-252
+CONFIDENTIAL-TREASURY.md
+  s_c3576656714da0::t_381eaae25d0965 1-135
+crates/atlas-confidential/src/compliance.rs
+  s_c3576656714da0::t_ebe087efc0de3b 1-145
+crates/atlas-confidential/src/disclosure.rs
+  s_c3576656714da0::t_859864f8b14f5b 1-11,13-377
+  s_c3576656714da0::t_fe4b65d2a5cea5 12
+crates/atlas-confidential/src/pattern.rs
+  s_c3576656714da0::t_ec24c4bbe064eb 1-96
+crates/atlas-confidential/Cargo.toml
+  s_c3576656714da0::t_6f0d61ffd95aeb 1-25
+crates/atlas-confidential/src/public_input_v3.rs
+  s_c3576656714da0::t_49e517bf4cdaa0 1-131
+crates/atlas-confidential/src/audit_log.rs
+  s_c3576656714da0::t_5ceae8ab81e675 1-203
+crates/atlas-cpi-guard/src/allowlist.rs
+  s_c3576656714da0::t_c433164e84f3a1 27-28
+  s_c3576656714da0::t_4cfbab1751db96 104-106
+  s_c3576656714da0::t_7c4dfe702adf4a 54
+sdk/playground/confidential.html
+  s_c3576656714da0::t_061bd87e3cad5b 1-174
+crates/atlas-telemetry/src/lib.rs
+  s_c3576656714da0::t_9edd2e2bedd6e2 1125-1203
+Cargo.toml
+  s_c3576656714da0::t_ef3ac6b8dccc2d 50
+crates/atlas-confidential/src/lib.rs
+  s_c3576656714da0::t_9a45aacc555dc3 1-72
+crates/atlas-confidential/src/commitment.rs
+  s_c3576656714da0::t_adf46420e8af12 1-118
+crates/atlas-rs/Cargo.toml
+  s_c3576656714da0::t_f462139e190d12 19
+crates/atlas-public-api/src/endpoints.rs
+  s_c3576656714da0::t_14349346ec6041 103-106
+  s_c3576656714da0::t_8b58e9629af559 78-82
+  s_c3576656714da0::t_a4c47e489fd776 133,140-141
+crates/atlas-confidential/src/payroll.rs
+  s_c3576656714da0::t_550de58105cde8 1-157
+crates/atlas-confidential/src/surface.rs
+  s_c3576656714da0::t_0b656411b4222f 1-136
+crates/atlas-runtime/src/lints.rs
+  s_c3576656714da0::t_e229c2bb6c1e5a 120-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "dfcdb980ddecc2e8652f66cac2589eb09d0fce50",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

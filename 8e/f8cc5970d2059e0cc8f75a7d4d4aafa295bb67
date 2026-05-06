@@ -1,0 +1,82 @@
+CHANGELOG.md
+  s_c3576656714da0::t_38e52088b9c184 3-76
+crates/atlas-public-api/src/endpoints.rs
+  s_c3576656714da0::t_3524d67d714dd5 86-88
+  s_c3576656714da0::t_7c70136259eaf6 107-113,115-120
+  s_c3576656714da0::t_adb2b3bfad6315 63-68
+crates/atlas-trigger-gate/src/order_type.rs
+  s_c3576656714da0::t_80ea3a095b5b5a 1-102
+JUPITER-EXECUTION.md
+  s_c3576656714da0::t_791a806551ced2 1-131
+crates/atlas-rs/Cargo.toml
+  s_c3576656714da0::t_14b66eca61ba67 16-17
+crates/atlas-jupiter/src/programs.rs
+  s_c3576656714da0::t_f073c00b814b2c 1-71
+crates/atlas-recurring-plan/src/plan.rs
+  s_c3576656714da0::t_44b3339444c30c 1-187
+crates/atlas-jupiter/src/lend.rs
+  s_c3576656714da0::t_c30da304665886 1-62
+Cargo.toml
+  s_c3576656714da0::t_2552f35a81672b 46-48
+crates/atlas-trigger-gate/src/lib.rs
+  s_c3576656714da0::t_e6b8ee90ce38b8 1-50
+crates/atlas-cpi-guard/src/allowlist.rs
+  s_c3576656714da0::t_d6ac3e22177a53 48-51
+  s_c3576656714da0::t_f8ace5709a18ff 98-115
+  s_c3576656714da0::t_5030c96ed0ee3e 22-26
+crates/atlas-trigger-gate/src/gate.rs
+  s_c3576656714da0::t_a585acaeb4f9b2 1-131
+crates/atlas-recurring-plan/src/cadence.rs
+  s_c3576656714da0::t_d0ee2558846c20 1-131
+crates/atlas-jupiter/src/lib.rs
+  s_c3576656714da0::t_db5cc33c17773a 1-15
+sdk/playground/recurring.html
+  s_c3576656714da0::t_464fe6cbf8a0f8 1-130
+crates/atlas-trigger-gate/src/attestation.rs
+  s_c3576656714da0::t_e85a3ec370ed00 1-135
+crates/atlas-trigger-gate/Cargo.toml
+  s_c3576656714da0::t_924d1adebb76bb 1-19
+crates/atlas-jupiter/Cargo.toml
+  s_c3576656714da0::t_80b6e5f8ee392d 1-18
+crates/atlas-trigger-gate/src/pda.rs
+  s_c3576656714da0::t_f20a81600cb9ea 1-93
+crates/atlas-rs/src/client.rs
+  s_c3576656714da0::t_fd540c78b83fad 146-174
+crates/atlas-recurring-plan/src/lib.rs
+  s_c3576656714da0::t_60f42bbbff4f9e 1-21
+crates/atlas-recurring-plan/Cargo.toml
+  s_c3576656714da0::t_426ebdffeddba7 1-19
+crates/atlas-trigger-gate/src/conditions.rs
+  s_c3576656714da0::t_9d77bbdec09d05 1-169
+crates/atlas-vault-templates/src/lib.rs
+  s_c3576656714da0::t_fae5c7388e3465 417-427
+  s_c3576656714da0::t_8b731aa04dbdf3 374,377,382
+  s_c3576656714da0::t_c712c70410e97e 45-47
+  s_c3576656714da0::t_738facc2cee648 274-306
+sdk/playground/triggers.html
+  s_c3576656714da0::t_ffd5fdcf69a0b1 1-150
+crates/atlas-execution-routes/src/predictive.rs
+  s_c3576656714da0::t_214b79ea92fa23 1-114
+crates/atlas-telemetry/src/lib.rs
+  s_c3576656714da0::t_4e3a6c91489212 877-966
+crates/atlas-execution-routes/src/lib.rs
+  s_c3576656714da0::t_1535baa184653f 17,22-24
+crates/atlas-jupiter/src/hedge.rs
+  s_c3576656714da0::t_f8bce68c1e925f 1-183
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "8ef8cc5970d2059e0cc8f75a7d4d4aafa295bb67",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

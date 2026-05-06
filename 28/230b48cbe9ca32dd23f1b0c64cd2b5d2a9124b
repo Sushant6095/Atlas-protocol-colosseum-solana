@@ -1,0 +1,81 @@
+web/app/(governance)/governance/models/page.tsx
+  s_c3576656714da0::t_189271212e4386 1-3,5-35,39-83
+web/components/intel/CapitalFlowHeatmap.tsx
+  s_c3576656714da0::t_2b9b75d00002c5 1-147
+web/app/(intel)/intelligence/page.tsx
+  s_c3576656714da0::t_1108464efa8449 1,3-4,12-19,22-29
+web/components/decision/DecisionList.tsx
+  s_c3576656714da0::t_d7feebae586357 1-117
+web/components/infra/InfraGrid.tsx
+  s_c3576656714da0::t_bab12ac8e40125 1-337
+web/components/narrative/ProvenancePill.tsx
+  s_c3576656714da0::t_385ba3416eb1b4 1-50
+web/components/narrative/RegimeBadge.tsx
+  s_c3576656714da0::t_f725f95ee6ea93 1-46
+web/app/(docs)/playground/page.tsx
+  s_c3576656714da0::t_df9e7832054ee3 1-37,39-75,77-189,192-202
+web/components/proofs/VerifyInBrowser.tsx
+  s_c3576656714da0::t_d30c9cc2c2f142 1-121
+FRONTEND.md
+  s_c3576656714da0::t_d09e71363df05d 253-326
+CHANGELOG.md
+  s_c3576656714da0::t_d525be7129bfd4 3-70
+web/components/narrative/HeroLattice.tsx
+  s_c3576656714da0::t_b4580d77781769 1-120
+web/components/narrative/ProofLifecycle.tsx
+  s_c3576656714da0::t_abf3b8a52040d9 1-125
+web/app/(intel)/risk/page.tsx
+  s_c3576656714da0::t_26bc0bdbcf4cf0 1,3-5,7-22,24-31,34-39,43-44,46,48-176,180-266
+web/app/(marketing)/page.tsx
+  s_c3576656714da0::t_e85d65cdd8a6ce 1-310
+web/components/decision/AgentEnsemblePanel.tsx
+  s_c3576656714da0::t_6a8bf76f6ab85e 1-110
+web/app/layout.tsx
+  s_c3576656714da0::t_0499a7ab817b21 14,17-19
+web/app/(public)/decision-engine/page.tsx
+  s_c3576656714da0::t_e42b4d9a6b2e53 1,4-8,12-42,45-144,146-154
+web/app/(intel)/wallet-intelligence/page.tsx
+  s_c3576656714da0::t_dc98f2296b6752 1,3-7,9-13,15-28,31-46,50-60,63,65-100,102-103,107-257
+web/app/(governance)/governance/page.tsx
+  s_c3576656714da0::t_0b2f41f91b9cc5 1-3,5-15,19-77
+web/components/narrative/LiveRebalanceFeed.tsx
+  s_c3576656714da0::t_210601b1951b67 1-126
+web/app/(public)/proofs/live/page.tsx
+  s_c3576656714da0::t_b7a404fd6068f5 1-4,6-9,11-16,18-55,58-59,61-77,79-102,104-203
+web/app/(public)/infra/page.tsx
+  s_c3576656714da0::t_cbe992f5b87830 1-3,5,11-27
+web/app/(marketing)/security/page.tsx
+  s_c3576656714da0::t_11bf8f05c1bc3b 1-2,5-6,12-15,17-23,25-160,163-208
+web/components/narrative/index.ts
+  s_c3576656714da0::t_71ded3dccd718b 1-6
+web/components/intel/ExposureGraph.tsx
+  s_c3576656714da0::t_412d2bbf976125 1-160
+web/app/(governance)/governance/agents/page.tsx
+  s_c3576656714da0::t_d1f547dd7831ca 1-2,4-27,31-94
+web/components/architecture/SystemDiagram.tsx
+  s_c3576656714da0::t_6c95762a0e67b3 1-248
+web/components/narrative/LiveCounter.tsx
+  s_c3576656714da0::t_4118e2cf519afa 1-82
+web/components/architecture/nodes.ts
+  s_c3576656714da0::t_83add2d4bc208b 1-157
+web/app/(intel)/market/page.tsx
+  s_c3576656714da0::t_5c30b842918282 1,4-32,40-41,43,45-133,135-149
+web/app/(marketing)/architecture/page.tsx
+  s_c3576656714da0::t_ac6457f3e0bb9d 1,3,9-12,14-20,22-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "28230b48cbe9ca32dd23f1b0c64cd2b5d2a9124b",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

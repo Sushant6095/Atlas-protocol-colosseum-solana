@@ -1,0 +1,57 @@
+crates/atlas-ovl/src/keeper.rs
+  c3576656714da0ca 1-160
+crates/atlas-ovl/src/freshness.rs
+  c3576656714da0ca 1-30
+crates/atlas-lie/src/toxicity.rs
+  c3576656714da0ca 1-241
+crates/atlas-lie/src/lib.rs
+  c3576656714da0ca 1-20
+crates/atlas-exposure/src/graph.rs
+  c3576656714da0ca 1-348
+crates/atlas-lie/src/metrics.rs
+  c3576656714da0ca 1-150
+crates/atlas-ovl/Cargo.toml
+  c3576656714da0ca 1-19
+crates/atlas-lie/Cargo.toml
+  c3576656714da0ca 1-21
+crates/atlas-ovl/src/consensus.rs
+  c3576656714da0ca 1-255
+crates/atlas-telemetry/src/lib.rs
+  c3576656714da0ca 298-376
+crates/atlas-exposure/src/lib.rs
+  c3576656714da0ca 1-19
+crates/atlas-lie/src/depth.rs
+  c3576656714da0ca 1-69
+crates/atlas-exposure/src/scenarios.rs
+  c3576656714da0ca 1-142
+Cargo.toml
+  c3576656714da0ca 15-17
+crates/atlas-exposure/Cargo.toml
+  c3576656714da0ca 1-16
+CHANGELOG.md
+  c3576656714da0ca 3-115
+crates/atlas-ovl/src/lib.rs
+  c3576656714da0ca 1-21
+crates/atlas-lie/src/fragmentation.rs
+  c3576656714da0ca 1-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "cefdd38db4ced233de197a3a0d6b26a22731b784",
+  "prompts": {
+    "c3576656714da0ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095",
+      "messages": [],
+      "total_additions": 1802,
+      "total_deletions": 7,
+      "accepted_lines": 1795,
+      "overriden_lines": 0
+    }
+  }
+}

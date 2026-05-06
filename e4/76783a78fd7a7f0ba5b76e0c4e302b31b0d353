@@ -1,0 +1,76 @@
+sdk/qvac/src/explainer.ts
+  s_c3576656714da0::t_b4452f014384e1 1-98
+crates/atlas-qvac/Cargo.toml
+  s_c3576656714da0::t_20e9ed24b3748e 1-18
+crates/atlas-public-api/src/endpoints.rs
+  s_c3576656714da0::t_226e9aa93aa028 133-136
+  s_c3576656714da0::t_a74a410daaf3fd 163-166
+  s_c3576656714da0::t_124eeebc147d5a 97-103
+crates/atlas-rs/Cargo.toml
+  s_c3576656714da0::t_dba705b0b42fa5 23
+sdk/qvac/src/analyst.ts
+  s_c3576656714da0::t_f09dea52f82acb 1-81
+crates/atlas-qvac/src/lib.rs
+  s_c3576656714da0::t_fd8978fb8f299a 1-48
+crates/atlas-qvac/src/translation.rs
+  s_c3576656714da0::t_9d46d824213361 1-229
+crates/atlas-rs/src/client.rs
+  s_c3576656714da0::t_39d56ed8b6ec89 384-421
+sdk/qvac/package.json
+  s_c3576656714da0::t_e5526a4b31c7dd 1-33
+QVAC.md
+  s_c3576656714da0::t_738d0ab57c348c 1-173
+sdk/playground/qvac.html
+  s_c3576656714da0::t_fd416ed96fda53 1-337
+Cargo.toml
+  s_c3576656714da0::t_184811c4210436 54
+sdk/qvac/src/ocr.ts
+  s_c3576656714da0::t_993ee0e32391bf 1-104
+crates/atlas-runtime/src/lints.rs
+  s_c3576656714da0::t_bbce9f0bf20090 399-443
+  s_c3576656714da0::t_ec9b826f34c966 204-251
+sdk/qvac/src/translation.ts
+  s_c3576656714da0::t_afea69dd40f30d 1-100
+CHANGELOG.md
+  s_c3576656714da0::t_677ea264a986cf 3-75
+crates/atlas-telemetry/src/lib.rs
+  s_c3576656714da0::t_5dd896f350702c 1474-1556
+crates/atlas-qvac/src/surface.rs
+  s_c3576656714da0::t_c899615b6c6feb 1-76
+sdk/qvac/src/index.ts
+  s_c3576656714da0::t_392b441ec335b6 1-33
+crates/atlas-qvac/src/analyst.rs
+  s_c3576656714da0::t_6f4ff6e0d7c3d2 1-28,30-146,148-156,158-225
+  s_c3576656714da0::t_fd7bb0b884331e 147,157
+  s_c3576656714da0::t_b9919ffe6a154c 29
+crates/atlas-qvac/src/explainer.rs
+  s_c3576656714da0::t_1d3d7dffb7fed7 1-298
+sdk/ts/src/platform.ts
+  s_c3576656714da0::t_a4e8a47dc69680 227-291
+  s_c3576656714da0::t_37814c4f9fb8f9 411-430
+crates/atlas-qvac/src/ocr.rs
+  s_c3576656714da0::t_b3ac133435519a 199-215
+  s_c3576656714da0::t_e7e60da81d9a90 1-67,76,80-82,89-130,134-198,216-265,267,279-281
+  s_c3576656714da0::t_d4912657b61959 68-75,77-79
+  s_c3576656714da0::t_3168288b7432da 131-133
+  s_c3576656714da0::t_d8f7ec4d71f4a1 266,268-278
+  s_c3576656714da0::t_a80eb8d4fb4ba3 83-88
+sdk/qvac/tsconfig.json
+  s_c3576656714da0::t_4f30139cfacda9 1-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "e476783a78fd7a7f0ba5b76e0c4e302b31b0d353",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "unknown"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

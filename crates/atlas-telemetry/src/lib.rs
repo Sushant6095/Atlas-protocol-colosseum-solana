@@ -488,6 +488,96 @@ pub static REGISTRY_DRIFT_FLAGGED_MODELS_TOTAL: Lazy<GaugeVec> = Lazy::new(|| {
     v
 });
 
+// ─── Phase 07 — Solana Runtime SLOs (directive 07 §10) ───────────────────
+
+pub static RUNTIME_CU_USED: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_runtime_cu_used",
+        "Compute units consumed per rebalance bundle. p99 SLO ≤ 1.2M; hard cap 1.4M.",
+        vec![400_000.0, 600_000.0, 800_000.0, 1_000_000.0, 1_200_000.0, 1_400_000.0]
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static RUNTIME_CU_PREDICTED_VS_USED_DRIFT_BPS: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_runtime_cu_predicted_vs_used_drift_bps",
+        "Drift between predicted and used CU per rebalance, in bps. SLO ±1500.",
+        vec![100.0, 250.0, 500.0, 1_000.0, 1_500.0, 2_500.0, 5_000.0]
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static RUNTIME_TX_SIZE_BYTES: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_runtime_tx_size_bytes",
+        "Transaction size per Atlas tx. p99 SLO ≤ 1180 bytes (hard cap 1232).",
+        vec![400.0, 600.0, 800.0, 1_000.0, 1_180.0, 1_232.0]
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
+pub static RUNTIME_BUNDLE_ATOMICITY_VIOLATIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_runtime_bundle_atomicity_violations_total",
+        "Bundle atomicity guard tripped. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static RUNTIME_CPI_POST_CONDITION_VIOLATIONS_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_runtime_cpi_post_condition_violations_total",
+        "CPI snapshot diff caught an unauthorized account mutation. Hard alert on any.",
+        &["pubkey", "violation_kind"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static RUNTIME_ALT_MISSES_TOTAL: Lazy<CounterVec> = Lazy::new(|| {
+    let v = register_counter_vec!(
+        "atlas_runtime_alt_misses_total",
+        "Bundle accounts not found in any declared ALT. Hard alert on any.",
+        LABELS
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static RUNTIME_BUNDLE_LANDED_RATE_BPS: Lazy<GaugeVec> = Lazy::new(|| {
+    let v = register_gauge_vec!(
+        "atlas_runtime_bundle_landed_rate_bps",
+        "Rolling 24h bundle landed rate in bps. SLO ≥ 9_500.",
+        &["route"]
+    )
+    .expect("register");
+    REGISTRY.register(Box::new(v.clone())).ok();
+    v
+});
+
+pub static RUNTIME_WRITABLE_ACCOUNTS_PER_BUNDLE: Lazy<HistogramVec> = Lazy::new(|| {
+    let opts = prometheus::histogram_opts!(
+        "atlas_runtime_writable_accounts_per_bundle",
+        "Writable account count per bundle. p99 SLO ≤ 64.",
+        vec![8.0, 16.0, 32.0, 48.0, 64.0, 96.0, 128.0]
+    );
+    let h = HistogramVec::new(opts, LABELS).expect("static metric def");
+    REGISTRY.register(Box::new(h.clone())).expect("register");
+    h
+});
+
 // ─── Span helpers ─────────────────────────────────────────────────────────
 
 /// Wrap any synchronous block in an Atlas pipeline span. Adds the mandatory

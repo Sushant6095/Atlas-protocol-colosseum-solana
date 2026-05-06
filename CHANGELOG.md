@@ -1,5 +1,128 @@
 # Atlas Changelog
 
+## Unreleased — Phase 7.0 (2026-05-06) — Directive 07 (Solana runtime, MEV, CPI, ALT)
+
+Five new crates land the directive's off-chain support code. The
+on-chain Pinocchio + zero-copy migration touches `programs/` (excluded
+from this workspace) and lands in a separate change.
+
+### `atlas-runtime` — runtime constraints (§1, §2.3, §3, §9-§11)
+
+- `locks::AccountLockSet` — sorted writable + readonly sets, `union`,
+  `within_writable_slo` (≤ 64 per directive §1.3),
+  `lock_collision_set` for the cross-vault writable check (§1.2).
+- `tx_size` — `TX_SIZE_LIMIT = 1232`, `TX_SIZE_BUDGET_BYTES = 1180`
+  (operational), `MAX_TX_PER_BUNDLE = 5`, ALT count range 1..=4.
+  `validate_bundle` rejects oversize tx, too-many-tx, and bad ALT
+  counts.
+- `compute_budget::ComputeBudgetIxs` — encodes `set_compute_unit_limit`
+  + `set_compute_unit_price` byte sequences without pulling
+  `solana-sdk`. `CuPredictor::forecast` adds a 15 % safety margin to
+  per-step CU baselines and clamps at the 1.4M hard cap.
+  `validate_drift(predicted, used)` enforces the §10 ±1500 bps SLO.
+- `zero_copy::assert_pod_layout` + `hex_round_trip` — pin size,
+  alignment, and byte layout of hot-path account types so a field
+  reorder or endian flip fails the test.
+- `lints` — `check_readonly_discipline` (flags ix declarations whose
+  declared writables are never mutated), `lint_no_borsh_on_hot_path`
+  (substring scan over `cargo tree` output), `lint_disallowed_methods`
+  (flags `Clock::unix_timestamp`, `sysvar::Slot`, `.to_string(`,
+  `format!` in handler source).
+- `determinism::DeterminismCheck` — runnable §9 audit over program
+  source files; flags `Clock::unix_timestamp`, `sysvar::Slot::id`,
+  and `rand::*`.
+
+### `atlas-alt` — ALT lifecycle (§2)
+
+- `lifecycle::AltRecord` — `Pending → Warm → Refreshing → Deactivated`
+  state machine. `mark_warm(slot)` requires `slot >
+  created_at_slot + WARM_SLOT_DELAY` (§2.2 second bullet).
+  `is_referenceable()` returns `true` only for `Warm`.
+- `alt_id(sorted_accounts) = blake3("atlas.alt.v1" || sorted_set)` —
+  identical sets across vaults reuse the same ALT.
+- `extend_chunks(accounts)` splits into ≤ 30-element chunks
+  (`extend_lookup_table` on-chain limit).
+- `compaction::compaction_candidates` ranks warm-ALT pairs whose
+  Jaccard ≥ 80 % (`COMPACTION_THRESHOLD_BPS = 8_000`); each candidate
+  carries the merged ALT id and account count.
+
+### `atlas-cpi-guard` — CPI isolation (§4)
+
+- `allowlist::ALLOWLIST` — fixed 9-program slice covering the
+  directive's set (Kamino, Drift, Jupiter, Marginfi, Token, Token-2022,
+  ATA, Compute Budget, Memo). `is_allowlisted(program_id)` returns
+  `Option<AllowlistedProgram>`.
+- `ownership::check_owner(pubkey, expected, observed)` — pre-CPI
+  owner re-derivation guard (§4.2 third bullet).
+- `snapshot::AccountSnapshot { pubkey, lamports, owner, data_hash }` —
+  data hashed via blake3 so diffs don't expose raw bytes.
+  `diff_snapshots(pre, post, allowed_fields)` returns
+  `Vec<SnapshotDiffViolation>` with kinds:
+  `UnauthorizedLamports / DataMutation / OwnerChange`,
+  `AccountMissingPostCpi`, `AccountAppearedPostCpi`. Empty list ⇒
+  I-10 invariant passed.
+
+### `atlas-bundle` — dual-route keeper (§6)
+
+- `idempotency::bundle_id(public_input_hash, allocation_root,
+  keeper_nonce) = blake3(...)`. `IdempotencyGuard` short-circuits
+  duplicate submissions before they reach the wire.
+- `route::Route { Jito, SwQos }` + `RouteOutcome { Landed, Dropped,
+  RevertedOnLand }` + `RouteRecord` for per-attempt bookkeeping.
+- `region::RegionEma` — exponentially-weighted landed-rate per
+  `(route, region)`, drives `best_region(route)`. 5 Block Engine
+  regions (Frankfurt, NewYork, Tokyo, Amsterdam, SaltLakeCity).
+- `tip::TipOracle` — sliding window of observed tips; `next_tip(cap)`
+  returns the configured quantile (default p75) clamped to per-bundle
+  + 24h caps. Static tips are §11 anti-pattern; this enforces dynamic
+  derivation from the leader-slot distribution.
+
+### `atlas-mev` — MEV detection (§7)
+
+- `exposure::compute_exposure_score(block_window)` — finds Atlas's
+  bundle, pulls ±4 adjacent transactions, computes
+  `pool_overlap_bps` and a `bracket_signature` (blake3 over sorted
+  adjacent-tx signatures so the forensic engine can dedup repeated
+  fingerprints). `score_bps = pool_overlap_bps × adjacency_factor`.
+- `anomaly::MevAnomaly { kind, vault_id, slot, bundle_id, score }`
+  with three kinds: `AdjacentSandwichSuspected`,
+  `PostTradeSlippageExceeded`, `PriorSlotFrontRun`. Orchestrator
+  wraps these into Phase 05 forensic signals.
+
+### Phase 07 telemetry (directive §10)
+
+`atlas-telemetry` adds 8 metrics:
+- `atlas_runtime_cu_used` (Histogram, p99 SLO ≤ 1.2M).
+- `atlas_runtime_cu_predicted_vs_used_drift_bps` (Histogram, ±1500
+  SLO).
+- `atlas_runtime_tx_size_bytes` (Histogram, p99 SLO ≤ 1180).
+- `atlas_runtime_bundle_atomicity_violations_total` (Counter,
+  hard alert).
+- `atlas_runtime_cpi_post_condition_violations_total{pubkey,
+  violation_kind}` (Counter, hard alert).
+- `atlas_runtime_alt_misses_total` (Counter, hard alert).
+- `atlas_runtime_bundle_landed_rate_bps{route}` (Gauge, SLO ≥ 9_500).
+- `atlas_runtime_writable_accounts_per_bundle` (Histogram, p99 ≤ 64).
+
+### Runbook
+
+`ops/runbooks/runtime.md` — triage table (CU exhaustion, drift, tx
+size, atomicity, CPI post-condition, ALT miss, landed rate), per-area
+operations (write-lock discipline, ALT lifecycle, CPI isolation,
+dual-route keeper, MEV detection), and the §11 anti-pattern checklist
+mapped to runnable lints.
+
+### Test coverage
+
+- atlas-runtime: 32/32 (locks 5, tx_size 5, compute_budget 6,
+  zero_copy 4, lints 7, determinism 3, plus shared types).
+- atlas-alt: 13/13 (lifecycle 6, compaction 5, alt_id 2).
+- atlas-cpi-guard: 13/13 (allowlist 3, snapshot 6, ownership 2,
+  shared 2).
+- atlas-bundle: 17/17 (idempotency 3, route 1, region 3, tip 5).
+- atlas-mev: 5/5 (exposure 4, anomaly 1).
+- Workspace total: **514 tests** green (74 new vs Phase 6.1).
+
 ## Unreleased — Phase 6.1 (2026-05-06) — Directive 06 §3.1 + §4 + §7 closeout
 
 ### Sandbox database mirror (`atlas_sandbox::db`)

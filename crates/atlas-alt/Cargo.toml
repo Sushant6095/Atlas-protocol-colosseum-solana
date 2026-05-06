@@ -1,0 +1,18 @@
+[package]
+name = "atlas-alt"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Atlas ALT (Address Lookup Table) lifecycle — content addressing, chunk-of-30 extension, compaction, deactivation. Implements directive 07 §2."
+
+[lib]
+
+[dependencies]
+atlas-runtime = { path = "../atlas-runtime" }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+proptest = "1.5"

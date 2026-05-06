@@ -1,7 +1,7 @@
-// /intelligence — capital flow heatmap + exposure graph (Phase 11).
-// Phase 22 wires the heatmap + force-directed exposure graph.
+// /intelligence — capital flow heatmap + exposure graph (Phase 22 §9).
 
-import { Panel } from "@/components/primitives/Panel";
+import { CapitalFlowHeatmap } from "@/components/intel/CapitalFlowHeatmap";
+import { ExposureGraph } from "@/components/intel/ExposureGraph";
 
 export const metadata = { title: "Intelligence · Atlas" };
 
@@ -9,14 +9,24 @@ export default function Page() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-display text-[28px]">Intelligence</h1>
-        <p className="text-[13px] text-[color:var(--color-ink-secondary)] mt-1">
-          24h capital flow heatmap + wallet → protocol → asset exposure graph.
+        <p className="text-[10px] uppercase tracking-[0.08em] text-[color:var(--color-ink-tertiary)]">
+          intelligence · 24h rolling
+        </p>
+        <h1 className="text-display text-[28px] mt-2">Capital flow + cross-protocol exposure</h1>
+        <p className="mt-1 text-[13px] text-[color:var(--color-ink-secondary)] max-w-[760px]">
+          Inflows and outflows by asset × protocol, with provenance on every cell.
+          The exposure graph below path-decays your effective risk: hover any node
+          to see what would change if it vanished.
         </p>
       </header>
-      <Panel surface="raised" density="default">
-        <p className="font-mono text-[12px]">/api/v1/intelligence/heatmap</p>
-      </Panel>
+
+      <section id="heatmap">
+        <CapitalFlowHeatmap />
+      </section>
+
+      <section id="exposure">
+        <ExposureGraph />
+      </section>
     </div>
   );
 }

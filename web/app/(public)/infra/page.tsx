@@ -1,31 +1,30 @@
-// /infra — Public Observatory (Phase 17 → wired surface in Phase 22).
-//
-// The 12-panel observatory: RPC latency by source × role × region,
-// quorum match rate, slot lag, attribution heatmap, TPS, Jito
-// landed rate, validator latency, CU consumption, proof gen,
-// rebalance e2e, Pyth post latency, slot freshness budget.
+// /infra — Public Observatory (Phase 22 §5).
+// Wired to /api/v1/infra; refetches every 5s. Embeddable widgets live
+// at /infra/widget/* (Phase 22 §5.3).
 
-import { Panel } from "@/components/primitives/Panel";
+import { InfraGrid } from "@/components/infra/InfraGrid";
 
 export const metadata = { title: "/infra · Atlas Public Observatory" };
 
 export default function Page() {
   return (
-    <div>
-      <h1 className="text-display text-[40px] leading-[48px] mb-4">
-        Public Observatory
-      </h1>
-      <p className="text-[14px] text-[color:var(--color-ink-secondary)] mb-8">
-        Live infrastructure posture — zero auth, rate-limited per IP. RPC
-        latency, slot drift, TPS, validator health, proof gen, bundle
-        landing, freshness budget. Phase 22 wires the live panels.
-      </p>
-      <Panel surface="raised" density="default">
-        <p className="text-[12px] uppercase tracking-[0.08em] text-[color:var(--color-ink-tertiary)]">
-          backed by
-        </p>
-        <p className="mt-1 font-mono text-[12px]">/api/v1/infra · /api/v1/infra/attribution · /api/v1/freshness</p>
-      </Panel>
+    <div className="space-y-6">
+      <header className="flex items-end justify-between gap-6 flex-wrap">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.08em] text-[color:var(--color-ink-tertiary)]">
+            public observatory · zero auth · rate-limited per IP
+          </p>
+          <h1 className="text-display text-[40px] leading-[48px] mt-2">
+            Plumbing as a public surface.
+          </h1>
+        </div>
+        <div className="text-right">
+          <p className="font-mono text-[11px] text-[color:var(--color-ink-tertiary)]">
+            /api/v1/infra · /infra/attribution · /freshness
+          </p>
+        </div>
+      </header>
+      <InfraGrid />
     </div>
   );
 }

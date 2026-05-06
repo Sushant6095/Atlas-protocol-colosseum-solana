@@ -250,3 +250,77 @@ Raw `fetch("/api/v1/*")` blocked outside `app/api/**`,
 `lib/sdk/client.ts`, `lib/realtime/**`, `lib/auth/siws.ts`, and
 `app/providers.tsx`. Phase 20's token + state library blocks remain
 in force.
+
+---
+
+# Frontend Part 3 — Marketing, Public Observability, Intelligence (Phase 22)
+
+Phase 21 wired the spine; Phase 22 fills the surfaces a first-time
+visitor sees. Each one establishes credibility before login.
+
+## Owned routes
+
+| Surface | What it ships |
+|---|---|
+| `/` | Hero + lattice · live counters · 8-stage proof lifecycle · trust columns (I-1…I-25) · live rebalance feed · protocols · architecture teaser · API CTA |
+| `/architecture` | Interactive blueprint (`SystemDiagram`) — 26 nodes, 24 edges, hover surfaces files + invariants, "play story" walks one rebalance |
+| `/security` | Research-paper layout: invariants, primitives, public input layouts, 8 chaos game days, audit history, bug bounty |
+| `/legal` | Custody, privacy, compliance, disclosure — plain language |
+| `/infra` | 12-panel observatory wired to `/api/v1/infra` (5s refetch): tier-A/B latency, quorum match, slot lag, attribution heatmap, TPS, Jito, validator latency, CU, proof gen, rebalance e2e, Pyth post, freshness budget |
+| `/proofs/live` | Active sessions carousel + recent verifications table + drilldown with "verify in browser" |
+| `/decision-engine` | Featured rebalance (Why · Who · How) + filterable list (regime / veto / defensive) |
+| `/wallet-intelligence` | Paste address → 700 ms report (balances, exposure, behaviour, risk score, three recommendations); QVAC privacy-mode toggle |
+| `/intelligence` | Capital flow heatmap (asset × protocol × direction with provenance pills) + exposure graph (wallet → protocol → asset, weighted) |
+| `/market` | Stablecoin flows · yield spreads · smart-money cohorts · live signal stream |
+| `/risk` | Risk topology · vault risk radar · liquidity-collapse simulator · oracle deviation · vol surface |
+| `/docs` | Getting started · concepts · cookbook · references |
+| `/playground` | Three-pane interactive console (catalog · request · response) with replay-mode toggle and TS / Rust / curl snippets |
+| `/governance` | Pending votes + KPIs |
+| `/governance/models` | Model registry with status pills + lineage |
+| `/governance/agents` | Phase 15 keeper roster with ratcheted-usage progress + Squads renew CTA |
+
+## Narrative primitives
+
+`web/components/narrative/` ships the shared building blocks every
+public surface reaches for:
+
+- `LiveCounter` — RAF-tweened mono numeric.
+- `ProofLifecycle` — 8-stage SVG diagram with autoplay or focused
+  highlight; tooltip surfaces each stage's SLO budget.
+- `LiveRebalanceFeed` — auto-scrolling ticker reading from
+  `stream.vault.*.rebalance`; falls back to a synthetic seed when no
+  WebSocket is configured.
+- `ProvenancePill` — every cell in `/intelligence` and `/market`
+  ships one of these (warehouse / dune / rpc-fast / synth).
+- `RegimeBadge` — `risk_on / neutral / defensive / crisis`.
+- `HeroLattice` — pure-CSS / SVG proof lattice for the landing hero
+  (Phase 24 swaps in the r3f globe).
+
+## Surface-specific components
+
+- `architecture/SystemDiagram` + `nodes.ts` — hand-laid blueprint;
+  hover panel + play-story.
+- `infra/InfraGrid` — TanStack-Query backed 12-panel grid.
+- `proofs/VerifyInBrowser` — the credibility-moment widget.
+- `decision/DecisionList` + `decision/AgentEnsemblePanel` — filter
+  + 7-agent side-by-side.
+- `intel/CapitalFlowHeatmap` — asset × protocol matrix with
+  per-cell provenance pills.
+- `intel/ExposureGraph` — weighted SVG graph with counterfactual
+  delta.
+
+## Demo moments wired
+
+| Moment | Where it lives |
+|---|---|
+| Hero pulses + counters tick | `/` (HeroLattice + LiveCounter; Phase 24 swaps lattice for r3f globe) |
+| Verify in browser → PASS | `/proofs/live` |
+| /infra heatmap lights up under chaos lag | `/infra` (AttributionHeatmap component) |
+| Defensive-mode rebalance with veto | `/decision-engine` featured rebalance |
+| Paste-and-recommend flow | `/wallet-intelligence` |
+| Hidden cross-protocol concentration | `/intelligence` exposure graph counterfactual |
+| Architecture play-story | `/architecture` SystemDiagram |
+| Playground first call → response → verify | `/playground` |
+
+The legacy root-level `<Navbar />` retired in Phase 22 — every new
+surface routes through one of the five Phase 21 shells.

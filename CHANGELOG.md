@@ -1,5 +1,73 @@
 # Atlas Changelog
 
+## Unreleased — Phase 22.0 (2026-05-07) — Directive 22 (Frontend Part 3 — Marketing, Public Observability, Intelligence)
+
+Phase 21 wired the spine. Phase 22 populates the surfaces a
+first-time visitor sees: marketing, public observability, and the
+intelligence dashboards that establish credibility before login.
+
+Narrative primitives (`web/components/narrative/`):
+- `LiveCounter` — RAF-tweened mono numeric (linear, no bouncy
+  springs per Phase 20 §2.5)
+- `ProofLifecycle` — 8-stage SVG diagram with autoplay + per-stage
+  SLO tooltip
+- `LiveRebalanceFeed` — auto-scrolling ticker on
+  `stream.vault.*.rebalance`; synthetic seed when no WS attached
+- `ProvenancePill` — warehouse / dune / rpc-fast / synth
+- `RegimeBadge` — risk_on / neutral / defensive / crisis
+- `HeroLattice` — pure-CSS proof-lattice gated by the Phase 20
+  scene supervisor (FPS throttle + low-end freeze)
+
+Marketing (`web/app/(marketing)/`):
+- `/` landing rebuilt: hero + lattice + live counters → proof
+  lifecycle → trust columns (I-1, I-3, I-4, I-5, I-7, I-8, I-18,
+  I-20, I-23) → live rebalance feed → protocols → architecture
+  teaser → developer-platform CTA → final CTA
+- `/architecture` ships `SystemDiagram` (26 nodes, 24 edges,
+  hand-laid 1100×620 viewBox) with hover side-panel + play-story
+- `/security` research-paper layout: 18 invariants table, primitives,
+  public-input layouts (v2/v3/v4), 8 chaos game days, audit history
+- `/legal` custody / privacy / compliance / disclosure four-card grid
+
+Public observability (`web/app/(public)/`):
+- `/infra` 12-panel `InfraGrid` wired to `/api/v1/infra` via
+  TanStack Query (5s refetch); per-panel SLO budget surfaced inline
+- `/proofs/live` active sessions carousel + recent verifications
+  table + drilldown with `VerifyInBrowser` (the credibility-moment
+  button)
+- `/decision-engine` featured defensive-mode rebalance:
+  structured drivers + 7-agent ensemble panel + CPI trace +
+  filterable list
+
+Intelligence (`web/app/(intel)/`):
+- `/wallet-intelligence` paste-and-analyse with synthetic numbers +
+  Phase 19 QVAC privacy-mode toggle + three routed recommendations
+- `/intelligence` `CapitalFlowHeatmap` (asset × protocol × direction
+  with per-cell provenance pills) + `ExposureGraph` (weighted
+  wallet → protocol → asset SVG with counterfactual delta)
+- `/market` stablecoin flows · yield spreads · smart-money cohorts ·
+  live forensic signal stream
+- `/risk` topology + vault risk radar + liquidity-collapse simulator
+  (asset selector + −shock slider) + oracle deviation + vol surface
+
+Docs + governance:
+- `/docs` rewrites with Getting Started + Concepts + Cookbook + refs
+- `/playground` three-pane console (catalog · request builder · live
+  response) wired to `useAtlas()`; replay-mode toggle; TS / Rust /
+  curl snippet selector
+- `/governance` overview with KPIs + pending-votes table
+- `/governance/models` registry table with status pills + lineage
+- `/governance/agents` Phase-15 keeper roster with ratcheted usage
+  progress + Squads renew CTA
+
+Cleanup:
+- Legacy `app/page.tsx` retired (replaced by
+  `(marketing)/page.tsx`)
+- Legacy `<Navbar />` removed from root layout — every new surface
+  routes through one of the five Phase 21 shells
+
+FRONTEND.md extended with the Phase 22 section + demo-moment table.
+
 ## Unreleased — Phase 21.0 (2026-05-07) — Directive 21 (Frontend Part 2 — Application Shell, Routing, Auth, State Architecture)
 
 Wires the route map, five shells, SIWS auth, the data plane, and

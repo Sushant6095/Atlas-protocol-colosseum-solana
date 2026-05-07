@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Panel } from "@/components/primitives/Panel";
 import { IdentifierMono } from "@/components/primitives/IdentifierMono";
@@ -39,11 +39,43 @@ const SAMPLE_PROOF: ProofShape = {
   merkleProofPath: ["b2".repeat(32), "c3".repeat(32), "d4".repeat(32)],
 };
 
-const ACTIVE_SAMPLES: ActiveSession[] = [
-  { vault_id: "ab12cdef" + "0".repeat(56), prover_id: "prover.iad.01", started_at_ms: Date.now() - 18_000, current_stage: "prove" },
-  { vault_id: "01a02b03" + "0".repeat(56), prover_id: "prover.fra.07", started_at_ms: Date.now() - 6_000,  current_stage: "explain" },
-  { vault_id: "ff10ee20" + "0".repeat(56), prover_id: "prover.sfo.03", started_at_ms: Date.now() - 32_000, current_stage: "verify" },
+// Active sessions are derived from the live wall clock, so building
+// them at module scope drifts between SSR and hydration. Build the
+// list on the client after mount via `useActiveSamples()`.
+const ACTIVE_AGES_S: { vault_id: string; prover_id: string; offsetSeconds: number; current_stage: StageId }[] = [
+  { vault_id: "ab12cdef" + "0".repeat(56), prover_id: "prover.iad.01", offsetSeconds: 18, current_stage: "prove" },
+  { vault_id: "01a02b03" + "0".repeat(56), prover_id: "prover.fra.07", offsetSeconds:  6, current_stage: "explain" },
+  { vault_id: "ff10ee20" + "0".repeat(56), prover_id: "prover.sfo.03", offsetSeconds: 32, current_stage: "verify" },
 ];
+
+function useActiveSamples(): ActiveSession[] | null {
+  const [samples, setSamples] = useState<ActiveSession[] | null>(null);
+
+  useEffect(() => {
+    // Pin started_at on first paint.
+    const now = Date.now();
+    setSamples(ACTIVE_AGES_S.map((s) => ({
+      vault_id: s.vault_id,
+      prover_id: s.prover_id,
+      current_stage: s.current_stage,
+      started_at_ms: now - s.offsetSeconds * 1000,
+    })));
+  }, []);
+
+  return samples;
+}
+
+function useElapsedSeconds(startedAtMs: number | null): number | null {
+  // 1Hz tick — keeps the elapsed counter live without RAF.
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 1_000);
+    return () => clearInterval(t);
+  }, []);
+  if (startedAtMs == null || now == null) return null;
+  return Math.max(0, Math.floor((now - startedAtMs) / 1000));
+}
 
 const RECENT_SAMPLES: RecentVerification[] = Array.from({ length: 8 }).map((_, i) => ({
   vault_id: ["ab12cdef", "01a02b03", "ff10ee20", "deadbeef"][i % 4] + "0".repeat(56),
@@ -56,6 +88,7 @@ const RECENT_SAMPLES: RecentVerification[] = Array.from({ length: 8 }).map((_, i
 
 export default function Page() {
   const [selected, setSelected] = useState<RecentVerification | null>(null);
+  const activeSamples = useActiveSamples();
 
   return (
     <div className="space-y-6">
@@ -78,26 +111,15 @@ export default function Page() {
       <Panel surface="raised" density="default">
         <header className="mb-3">
           <p className="text-[10px] uppercase tracking-[0.08em] text-[color:var(--color-ink-tertiary)]">
-            active sessions · {ACTIVE_SAMPLES.length} running
+            active sessions · {ACTIVE_AGES_S.length} running
           </p>
         </header>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {ACTIVE_SAMPLES.map((s) => (
-            <div
-              key={s.vault_id + s.prover_id}
-              className="rounded-[var(--radius-sm)] border border-[color:var(--color-line-soft)] bg-[color:var(--color-surface-base)] p-3"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <IdentifierMono value={s.vault_id} size="xs" />
-                <AlertPill severity="zk">{s.current_stage}</AlertPill>
-              </div>
-              <p className="font-mono text-[10px] text-[color:var(--color-ink-tertiary)]">
-                prover · {s.prover_id} · {Math.floor((Date.now() - s.started_at_ms) / 1000)}s elapsed
-              </p>
-              <div className="mt-3">
-                <ProofLifecycle highlight={s.current_stage} autoplay={false} />
-              </div>
-            </div>
+          {(activeSamples ?? ACTIVE_AGES_S.map((a) => ({
+            vault_id: a.vault_id, prover_id: a.prover_id, current_stage: a.current_stage,
+            started_at_ms: null as unknown as number,
+          }))).map((s) => (
+            <ActiveSessionCard key={s.vault_id + s.prover_id} session={s} />
           ))}
         </div>
       </Panel>
@@ -175,10 +197,10 @@ export default function Page() {
               <div className="mt-4 flex items-center gap-3">
                 <VerifyInBrowser proof={SAMPLE_PROOF} />
                 <Link
-                  href={`/vault/${selected.vault_id}/rebalances/${selected.public_input_hash}`}
+                  href="/proofs"
                   className="text-[12px] text-[color:var(--color-ink-tertiary)] hover:text-[color:var(--color-ink-primary)]"
                 >
-                  open black box →
+                  open in proof explorer →
                 </Link>
               </div>
             </>
@@ -201,6 +223,32 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
         {label}
       </span>
       {value}
+    </div>
+  );
+}
+
+function ActiveSessionCard({ session }: { session: ActiveSession }) {
+  // `elapsed` reads from the live wall clock — we only render it
+  // after mount via `useElapsedSeconds`, otherwise SSR + hydration
+  // disagree on the rendered string. Until ready: show "—" so the
+  // layout stays stable.
+  const elapsed = useElapsedSeconds(session.started_at_ms ?? null);
+
+  return (
+    <div className="rounded-[var(--radius-sm)] border border-[color:var(--color-line-soft)] bg-[color:var(--color-surface-base)] p-3">
+      <div className="flex items-center justify-between mb-2">
+        <IdentifierMono value={session.vault_id} size="xs" />
+        <AlertPill severity="zk">{session.current_stage}</AlertPill>
+      </div>
+      <p
+        className="font-mono text-[10px] text-[color:var(--color-ink-tertiary)] tabular-nums"
+        suppressHydrationWarning
+      >
+        prover · {session.prover_id} · {elapsed == null ? "—" : `${elapsed}s`} elapsed
+      </p>
+      <div className="mt-3">
+        <ProofLifecycle highlight={session.current_stage} autoplay={false} />
+      </div>
     </div>
   );
 }

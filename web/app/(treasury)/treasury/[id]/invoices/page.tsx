@@ -29,11 +29,18 @@ const INVOICES: InvoiceRow[] = [
 
 interface DraftField<T> { value: T | null; confidence: "high" | "medium" | "low"; source: "local_ocr" | "operator"; }
 
-const EMPTY_DRAFT = {
-  vendor_name:  { value: null, confidence: "low" as const, source: "local_ocr" as const },
-  amount_q64:   { value: null, confidence: "low" as const, source: "local_ocr" as const },
-  mint:         { value: null, confidence: "low" as const, source: "local_ocr" as const },
-  due_at_unix:  { value: null, confidence: "low" as const, source: "local_ocr" as const },
+interface Draft {
+  vendor_name: DraftField<string>;
+  amount_q64:  DraftField<string>;
+  mint:        DraftField<string>;
+  due_at_unix: DraftField<string>;
+}
+
+const EMPTY_DRAFT: Draft = {
+  vendor_name:  { value: null, confidence: "low", source: "local_ocr" },
+  amount_q64:   { value: null, confidence: "low", source: "local_ocr" },
+  mint:         { value: null, confidence: "low", source: "local_ocr" },
+  due_at_unix:  { value: null, confidence: "low", source: "local_ocr" },
 };
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {

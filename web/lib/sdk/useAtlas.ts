@@ -17,6 +17,6 @@ export function useAtlas(): AtlasClient {
     const baseUrl =
       process.env.NEXT_PUBLIC_ATLAS_API_BASE_URL
       ?? (typeof window !== "undefined" ? window.location.origin : "https://atlas.example");
-    return new AtlasClient({ baseUrl, jwt });
+    return new AtlasClient({ baseUrl, jwt: jwt ?? undefined });
   }, [jwt]);
 }

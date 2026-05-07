@@ -12,7 +12,7 @@ import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 import { WalletPickerModal } from "@/components/WalletPickerModal";
 import { createQueryClient } from "@/lib/state";
-import { initRealtime } from "@/lib/realtime";
+import { initRealtime, startMockStream, stopMockStream } from "@/lib/realtime";
 import { CommandPalette, KeyboardShortcuts } from "@/components/command-palette";
 import { AlertCenter } from "@/components/system";
 import { useSessionStore } from "@/lib/auth";
@@ -36,8 +36,9 @@ export function Providers({ children }: { children: ReactNode }) {
       list.push(
         new WalletConnectWalletAdapter({
           network:
-            (process.env.NEXT_PUBLIC_CLUSTER as WalletAdapterNetwork) ??
-            WalletAdapterNetwork.Devnet,
+            (process.env.NEXT_PUBLIC_CLUSTER === "mainnet-beta"
+              ? WalletAdapterNetwork.Mainnet
+              : WalletAdapterNetwork.Devnet),
           options: {
             projectId: wcId,
             metadata: {
@@ -46,11 +47,11 @@ export function Providers({ children }: { children: ReactNode }) {
               url:
                 typeof window !== "undefined"
                   ? window.location.origin
-                  : "https://atlas.fyi",
+                  : "https://atlasfi.in",
               icons: [
                 typeof window !== "undefined"
                   ? `${window.location.origin}/favicon.ico`
-                  : "https://atlas.fyi/favicon.ico",
+                  : "https://atlasfi.in/favicon.ico",
               ],
             },
           },
@@ -61,14 +62,21 @@ export function Providers({ children }: { children: ReactNode }) {
   }, []);
 
   // Bootstrap realtime + session on mount.
+  //
+  // The Rust WS multiplex is not part of the hackathon scope, so we
+  // route the realtime store through `startMockStream` whenever
+  // `NEXT_PUBLIC_ATLAS_WS_URL` is unset. Components don't know the
+  // difference — same store, same topics, same shape. When the real
+  // backend lands, set the env var and the mock falls away.
   useEffect(() => {
     void hydrateSession();
-    const wsUrl =
-      process.env.NEXT_PUBLIC_ATLAS_WS_URL
-      ?? (typeof window !== "undefined"
-            ? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/api/v1/stream`
-            : null);
-    if (wsUrl) initRealtime({ url: wsUrl });
+    const wsUrl = process.env.NEXT_PUBLIC_ATLAS_WS_URL;
+    if (wsUrl) {
+      initRealtime({ url: wsUrl });
+      return;
+    }
+    const teardown = startMockStream();
+    return () => { teardown?.(); stopMockStream(); };
   }, []);
 
   return (

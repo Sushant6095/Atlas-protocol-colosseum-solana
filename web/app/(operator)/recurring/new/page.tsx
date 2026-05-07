@@ -54,7 +54,7 @@ export default function Page() {
             <p className="text-[10px] uppercase tracking-[0.08em] text-[color:var(--color-ink-tertiary)]">
               strategy_commitment
             </p>
-            <IdentifierMono value="0xa1b2" + "0".repeat(60)} copy size="sm" />
+            <IdentifierMono value={"0xa1b2" + "0".repeat(60)} copy size="sm" />
             <AlertPill severity="ok" className="mt-3">within bounds</AlertPill>
           </div>
           <div className="mt-3">

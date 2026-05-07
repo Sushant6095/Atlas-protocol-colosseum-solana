@@ -102,10 +102,14 @@ export async function addKey(input: {
 }): Promise<StoredViewingKey> {
   if (!cryptoKey) throw new Error("vault locked");
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  // TS 5.7 narrows Uint8Array's buffer to ArrayBufferLike; the
+  // SubtleCrypto signature wants BufferSource (ArrayBuffer-backed).
+  // The cast is sound — getRandomValues + the caller-supplied
+  // plaintext are always ArrayBuffer-backed here.
   const ciphertext = await window.crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
+    { name: "AES-GCM", iv: iv as BufferSource },
     cryptoKey,
-    input.plaintext,
+    input.plaintext as BufferSource,
   );
   const stored: StoredViewingKey = {
     ...input.meta,
@@ -173,7 +177,11 @@ async function loadAll(): Promise<Map<string, UnlockedKey>> {
       const iv = b64ToBuf(stored.iv_b64);
       const ct = b64ToBuf(stored.ciphertext_b64);
       const pt = new Uint8Array(
-        await window.crypto.subtle.decrypt({ name: "AES-GCM", iv }, cryptoKey, ct),
+        await window.crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: iv as BufferSource },
+          cryptoKey,
+          ct as BufferSource,
+        ),
       );
       out.set(stored.id, { ...stored, plaintext: pt });
     } catch {
@@ -216,7 +224,7 @@ async function deriveKey(
   seedBytes.set(enc.encode(UNLOCK_DOMAIN), walletSignature.length + passphrase.length);
   const baseKey = await window.crypto.subtle.importKey(
     "raw",
-    seedBytes,
+    seedBytes as BufferSource,
     "PBKDF2",
     false,
     ["deriveKey"],
@@ -226,7 +234,7 @@ async function deriveKey(
       name: "PBKDF2",
       hash: "SHA-256",
       iterations: 250_000,
-      salt,
+      salt: salt as BufferSource,
     },
     baseKey,
     { name: "AES-GCM", length: 256 },

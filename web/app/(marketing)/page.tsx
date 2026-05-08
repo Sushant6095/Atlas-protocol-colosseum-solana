@@ -612,6 +612,19 @@ const ROUTES_THROUGH: readonly ProtocolSlug[] = [
   "solana", "kamino", "drift", "marginfi", "jupiter", "pyth", "jito", "squads",
 ];
 
+// Click-out URLs for the "routes through" row. Each icon links to
+// the partner's official site in a new tab.
+const PROTOCOL_SITES: Record<string, string> = {
+  solana:   "https://solana.com",
+  kamino:   "https://kamino.finance",
+  drift:    "https://drift.trade",
+  marginfi: "https://marginfi.com",
+  jupiter:  "https://jup.ag",
+  pyth:     "https://pyth.network",
+  jito:     "https://jito.network",
+  squads:   "https://squads.so",
+};
+
 function ProductSurfacesSection(): JSX.Element {
   return (
     <Section variant="default">
@@ -620,7 +633,9 @@ function ProductSurfacesSection(): JSX.Element {
         title="One protocol. Two operator surfaces. One promise."
       />
 
-      {/* Real protocol marks — Atlas integrates everywhere. */}
+      {/* Real protocol marks — each links to the partner's official
+          site in a new tab. Icons render at 80px (largest) for crisp
+          retina display. */}
       <div className="mt-12 mb-12 flex items-center gap-8 flex-wrap">
         <span className="font-mono text-xs uppercase tracking-[0.22em] text-[color:var(--color-ink-tertiary)]">
           routes through
@@ -628,12 +643,38 @@ function ProductSurfacesSection(): JSX.Element {
         <ul className="flex items-center gap-5 flex-wrap">
           {ROUTES_THROUGH.map((slug) => (
             <li key={slug}>
-              <ProtocolIcon slug={slug} size={56} surface="disc" glow />
+              <a
+                href={PROTOCOL_SITES[slug] ?? "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${slug} — open official site in new tab`}
+                title={slug}
+                className="inline-flex transition-transform duration-200 ease-[var(--ease-glide)] hover:scale-110"
+              >
+                <ProtocolIcon slug={slug} size={80} surface="disc" glow />
+              </a>
             </li>
           ))}
         </ul>
         <span className="font-mono text-xs text-[color:var(--color-ink-tertiary)]">
-          + sp1 zkVM · pyth pull oracles
+          +{" "}
+          <a
+            href="https://succinct.xyz"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[color:var(--color-accent-proof)] underline-offset-2 hover:underline"
+          >
+            sp1 zkVM
+          </a>
+          {" "}·{" "}
+          <a
+            href="https://pyth.network"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[color:var(--color-accent-electric)] underline-offset-2 hover:underline"
+          >
+            pyth pull oracles
+          </a>
         </span>
       </div>
 

@@ -1,0 +1,23 @@
+web/components/shells/MarketingShell.tsx
+  s_c3576656714da0::t_3ee09ca501ae6d 13,33-41
+web/app/(marketing)/page.tsx
+  s_c3576656714da0::t_82d85f93b95f01 121-124
+web/components/marquee/LiveStrip.tsx
+  s_c3576656714da0::t_886b8ce4b23f01 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "5930e16093911a97d4834b6fede26104b93141b3",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

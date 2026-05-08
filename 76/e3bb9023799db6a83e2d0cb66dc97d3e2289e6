@@ -1,0 +1,22 @@
+web/tsconfig.json
+  s_c3576656714da0::t_7ba2f25dfe0dab 5-6
+  s_c3576656714da0::t_1f7dc69f810b03 24
+web/next.config.mjs
+  s_c3576656714da0::t_8790af9cd2cc9c 10-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "76e3bb9023799db6a83e2d0cb66dc97d3e2289e6",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

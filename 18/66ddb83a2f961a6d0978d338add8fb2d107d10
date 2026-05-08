@@ -1,0 +1,149 @@
+web/app/(docs)/docs/protocol/verifier-cpi/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/philosophy/the-26-invariants/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/vault/deposit-withdraw/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/vault/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/integrations/pyth/page.tsx
+  ai_agent 1-15
+.gitignore
+  s_c3576656714da0::t_186f64fe4f2b1b 41
+web/app/(docs)/docs/protocol/invariants/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/integrations/magicblock/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/layout.tsx
+  ai_agent 1-51
+web/components/docs/DocStub.tsx
+  ai_agent 1-91
+web/app/(docs)/docs/philosophy/engineering-discipline/page.tsx
+  ai_agent 1-15
+web/components/docs/DocPage.tsx
+  ai_agent 1-101
+web/app/(docs)/docs/api/page.tsx
+  ai_agent 1-62
+web/app/(docs)/docs/page.tsx
+  ai_agent 1-242
+web/app/(docs)/docs/shortcuts/page.tsx
+  ai_agent 1-55
+web/app/(docs)/docs/treasury/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/treasury/treasury-entity/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/treasury/unified-ledger/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/widgets/page.tsx
+  ai_agent 1-194
+web/app/(docs)/docs/philosophy/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/integrations/switchboard/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/treasury/runway-forecast/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/webhooks/page.tsx
+  ai_agent 1-59
+web/components/docs/DocsTopNav.tsx
+  ai_agent 1-132
+web/app/(docs)/docs/integrations/rpc-fast/page.tsx
+  ai_agent 1-15
+web/components/docs/DocsSearch.tsx
+  ai_agent 1-183
+web/app/(docs)/docs/quickstart/page.tsx
+  ai_agent 1-172
+web/app/(docs)/docs/integrations/triton/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/integrations/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/philosophy/why-we-built-this/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/integrations/succinct-sp1/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/protocol/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/protocol/threat-model/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/integrations/cloak/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/integrations/jito/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/vault/confidential-mode/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/protocol/public-input/page.tsx
+  ai_agent 1-15
+web/components/docs/AskQuestionBar.tsx
+  ai_agent 1-81
+web/app/(docs)/docs/integrations/solana/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/integrations/quicknode/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/sdk/page.tsx
+  ai_agent 1-65
+web/components/docs/index.ts
+  ai_agent 1-21
+web/app/(docs)/docs/integrations/helius/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/sdk/rust/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/vault/private-execution/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/integrations/pusd/page.tsx
+  ai_agent 1-15
+web/components/docs/CopyPageButton.tsx
+  ai_agent 1-50
+web/app/(docs)/docs/integrations/kamino/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/integrations/marginfi/page.tsx
+  ai_agent 1-15
+web/components/docs/DocsTocRail.tsx
+  ai_agent 1-108
+web/app/(docs)/docs/integrations/drift/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/playground/page.tsx
+  ai_agent 1-225
+web/app/(docs)/docs/how-it-works/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/treasury/invoices/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/treasury/payment-prewarm/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/vault/rebalance-flow/page.tsx
+  ai_agent 1-15
+web/components/docs/DocsSidebar.tsx
+  ai_agent 1-141
+web/app/(docs)/docs/integrations/dodo/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/integrations/jupiter/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/sdk/typescript/page.tsx
+  ai_agent 1-15
+web/app/(docs)/docs/philosophy/what-we-refused-to-build/page.tsx
+  ai_agent 1-15
+web/components/docs/MobileSidebar.tsx
+  ai_agent 1-91
+web/components/docs/AskAiDrawer.tsx
+  ai_agent 1-114
+web/app/(docs)/docs/vault/proof-verification/page.tsx
+  ai_agent 1-15
+web/components/docs/nav.ts
+  ai_agent 1-198
+web/app/(docs)/docs/sdk/verify-proof/page.tsx
+  ai_agent 1-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "1866ddb83a2f961a6d0978d338add8fb2d107d10",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

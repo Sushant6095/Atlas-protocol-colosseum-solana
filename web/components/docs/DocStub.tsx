@@ -1,13 +1,12 @@
-// Default body for a stubbed doc page. Wraps DocPage with the
-// "Documentation in progress" callout the spec mandates and links
-// to the rest of the active tab so the page never feels like a
-// dead-end.
+// Default body for a stubbed doc page. Renders title + intro +
+// sibling links so the page never dead-ends. The "in progress"
+// callout was removed so 43 routes don't all shout the same banner.
 
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { DocPage, siblingsFor } from "./DocPage";
 
 export interface DocStubProps {
@@ -20,33 +19,13 @@ export interface DocStubProps {
 export function DocStub({ title, description, intro }: DocStubProps): JSX.Element {
   const pathname = usePathname() ?? "/docs";
   const { tabLabel, siblings } = siblingsFor(pathname);
-  const md = `---\ntitle: "${title}"\ndescription: "${description}"\n---\n# ${title}\n\n> Documentation in progress. Real content ships in the next PR.\n\n${intro ?? description}\n`;
+  const md = `---\ntitle: "${title}"\ndescription: "${description}"\n---\n# ${title}\n\n${intro ?? description}\n`;
 
   return (
     <DocPage title={title} description={description} markdown={md}>
       {intro && (
         <p className="mb-6">{intro}</p>
       )}
-
-      <div
-        className="not-prose flex items-start gap-3 rounded-[var(--radius-md)] border px-4 py-3 my-2"
-        style={{
-          borderColor: "color-mix(in oklab, var(--color-accent-warn) 35%, transparent)",
-          background: "color-mix(in oklab, var(--color-accent-warn) 8%, transparent)",
-        }}
-      >
-        <Clock className="h-4 w-4 mt-0.5" style={{ color: "var(--color-accent-warn)" }} />
-        <div className="flex flex-col gap-1">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em]"
-             style={{ color: "var(--color-accent-warn)" }}>
-            Documentation in progress
-          </p>
-          <p className="text-[13px] leading-[1.5]" style={{ color: "var(--color-ink-secondary)" }}>
-            Real content ships in the next PR. The page outline and
-            placement are stable — bookmark this URL.
-          </p>
-        </div>
-      </div>
 
       {siblings.length > 0 && (
         <section className="not-prose mt-12">

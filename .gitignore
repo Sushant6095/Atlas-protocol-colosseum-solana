@@ -38,7 +38,7 @@ prover/zkvm-program/proofs/
 *-keypair.json
 
 # Docs (exclude all md except root README.md)
-docs/
+/docs/
 
 
 # Claude Code session transcripts (private)

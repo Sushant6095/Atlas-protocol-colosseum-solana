@@ -1,0 +1,19 @@
+web/components/shells/MarketingShell.tsx
+  s_c3576656714da0::t_ca9d1fbcaba928 21-23,25-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "ec1d8c9653c7ee707e4ee5555d0af9ec133d29da",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "unknown"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

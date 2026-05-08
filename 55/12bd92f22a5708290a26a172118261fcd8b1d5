@@ -1,0 +1,23 @@
+web/components/effects/ElectricBorder.d.ts
+  s_c3576656714da0::t_d31db25dca816f 1-17
+web/components/effects/PillNav.d.ts
+  s_c3576656714da0::t_c30d9cf6cce8d4 1-28
+web/components/r3f/LiquidEther.d.ts
+  s_c3576656714da0::t_d5f3023bfca79c 1-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "5512bd92f22a5708290a26a172118261fcd8b1d5",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "unknown"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

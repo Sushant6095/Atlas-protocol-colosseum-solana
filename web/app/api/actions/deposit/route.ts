@@ -8,7 +8,7 @@ import {
   ACTIONS_CORS_HEADERS,
 } from "@solana/actions";
 
-const ICON = "https://atlas.fyi/icon.png";
+const ICON = "https://atlasfi.in/icon.png";
 
 export async function GET(): Promise<Response> {
   const payload: ActionGetResponse = {

@@ -1,0 +1,18 @@
+{
+  "nav.docs": "ドキュメント",
+  "nav.dashboard": "ダッシュボード",
+  "nav.intel": "インテリジェンス",
+  "nav.infra": "/infra",
+  "presign.title": "署名前に確認",
+  "presign.subtitle": "Atlasはウォレットが署名を求める前にトランザクションを説明します。",
+  "presign.approve": "承認",
+  "presign.approveAnyway": "それでも承認",
+  "presign.reject": "拒否",
+  "presign.localLLM": "ローカルLLM",
+  "presign.template": "検証済みテンプレート",
+  "rt.live": "ライブ",
+  "rt.degraded": "劣化",
+  "rt.paused": "ライブ更新を一時停止",
+  "alerts.empty": "アラートはありません。",
+  "alerts.acknowledge": "確認"
+}

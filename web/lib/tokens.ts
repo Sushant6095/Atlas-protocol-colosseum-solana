@@ -17,18 +17,21 @@
 
 export const color = {
   surface: {
-    base:    "#06070A",
-    raised:  "#0B0D12",
-    sunken:  "#04050A",
-    inset:   "#03040A",
-    glass:   "rgba(11,13,18,0.55)",
-    glass_t: "rgba(11,13,18,0.30)",
+    // "Premium light black" — Linear/Vercel-grade dark with a faint
+    // cool tint. Lifted off the previous near-pitch tokens so cards,
+    // borders, and glass layers actually have room to read.
+    base:    "#0F1117",
+    raised:  "#161A21",
+    sunken:  "#0B0D12",
+    inset:   "#08090D",
+    glass:   "rgba(22,26,33,0.60)",
+    glass_t: "rgba(22,26,33,0.32)",
   },
   ink: {
     primary:   "#E6EAF2",
     secondary: "#9AA3B5",
     tertiary:  "#5D6577",
-    inverted:  "#06070A",
+    inverted:  "#0F1117",
     accent:    "#7DB7FF",
   },
   line: {
@@ -44,6 +47,14 @@ export const color = {
     execute:  "#3CE39A", // execution success
     warn:     "#F7B955",
     danger:   "#FF6166",
+  },
+  // Solana brand. Use ONLY for explicit Solana surfaces (mainnet
+  // pills, validator chrome, network-status). Never as the primary
+  // palette — Atlas's palette is the `accent` set above.
+  solana: {
+    violet: "#9945FF",
+    cyan:   "#19B5FE",
+    green:  "#14F195",
   },
   glow: {
     electric: "0 0 24px rgba(63,140,255,0.35)",
@@ -152,12 +163,15 @@ export const shadow = {
  * in PR. `expressive` is for sparing success moments; abuse turns the
  * UI into a toy.
  */
+// Framer Motion 11 rejects "cubic-bezier(...)" strings; the runtime
+// expects a numeric `[x1, y1, x2, y2]` tuple. CSS still gets the
+// string form via the `--ease-*` custom properties in globals.css.
 export const ease = {
-  glide:      "cubic-bezier(0.20, 0.80, 0.20, 1.00)", // entrance, hover settle
-  precise:    "cubic-bezier(0.40, 0.00, 0.20, 1.00)", // disclosure, dropdown
-  expressive: "cubic-bezier(0.34, 1.56, 0.64, 1.00)", // sparingly: success
-  inertial:   "cubic-bezier(0.10, 0.00, 0.00, 1.00)", // drag release
-} as const;
+  glide:      [0.20, 0.80, 0.20, 1.00], // entrance, hover settle
+  precise:    [0.40, 0.00, 0.20, 1.00], // disclosure, dropdown
+  expressive: [0.34, 1.56, 0.64, 1.00], // sparingly: success
+  inertial:   [0.10, 0.00, 0.00, 1.00], // drag release
+} as const satisfies Record<string, readonly [number, number, number, number]>;
 
 /**
  * Duration tokens in milliseconds. Anything > 400ms goes through PR

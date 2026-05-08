@@ -13,7 +13,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useShallow } from "zustand/react/shallow";
 import type { AtlasRealtimeEvent } from "./topics";
 import {
   subscribeTopic,
@@ -41,8 +40,12 @@ export function useRealtimeSnapshot<T = unknown>(
   topic: string,
 ): AtlasRealtimeEvent<T> | undefined {
   useEffect(() => subscribeTopic(topic), [topic]);
+  // The selector returns the snapshot reference itself; Zustand's
+  // default identity check is sufficient and avoids the
+  // `useShallow` wrapper which can trip React 19's getSnapshot
+  // cache when the wrapper allocates per-call.
   return useRealtimeStore(
-    useShallow((s) => s.topics[topic]?.snapshot as AtlasRealtimeEvent<T> | undefined),
+    (s) => s.topics[topic]?.snapshot as AtlasRealtimeEvent<T> | undefined,
   );
 }
 

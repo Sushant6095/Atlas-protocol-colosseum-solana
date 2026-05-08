@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Atlas — Pleiades constellation mark">
+  <title>Atlas</title>
+  <desc>Seven-star constellation in the form of a capital A. Each star is one of the seven Atlas agents; the central star is consensus; the apex is the verification point; the base is the foundation. Atlas's daughters were the Pleiades.</desc>
+
+  <defs>
+    <linearGradient id="atlasLine" x1="8" y1="56" x2="56" y2="8" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A682FF"/>
+      <stop offset="0.55" stop-color="#5B8CFF"/>
+      <stop offset="1" stop-color="#3F8CFF"/>
+    </linearGradient>
+    <radialGradient id="consensusGlow" cx="32" cy="38" r="10" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.35" stop-color="#3F8CFF"/>
+      <stop offset="0.7" stop-color="#A682FF" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#A682FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="apexGlow" cx="32" cy="8" r="5" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.5" stop-color="#3F8CFF"/>
+      <stop offset="1" stop-color="#3F8CFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- constellation lines (the A skeleton) -->
+  <g stroke="url(#atlasLine)" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.85">
+    <!-- left leg: apex → upper-left → lower-left -->
+    <line x1="32" y1="8"  x2="22" y2="27"/>
+    <line x1="22" y1="27" x2="14" y2="48"/>
+    <!-- right leg: apex → upper-right → lower-right -->
+    <line x1="32" y1="8"  x2="42" y2="27"/>
+    <line x1="42" y1="27" x2="50" y2="48"/>
+    <!-- crossbar through consensus star -->
+    <line x1="22" y1="27" x2="32" y2="38"/>
+    <line x1="32" y1="38" x2="42" y2="27"/>
+  </g>
+
+  <!-- consensus halo (center of constellation) -->
+  <circle cx="32" cy="38" r="9" fill="url(#consensusGlow)"/>
+
+  <!-- apex halo (verification point) -->
+  <circle cx="32" cy="8" r="4" fill="url(#apexGlow)" opacity="0.8"/>
+
+  <!-- the seven stars -->
+  <!-- 1. apex (verification) -->
+  <circle cx="32" cy="8"  r="2.4" fill="#3F8CFF"/>
+  <circle cx="32" cy="8"  r="1.0" fill="#FFFFFF"/>
+  <!-- 2. upper-left arm -->
+  <circle cx="22" cy="27" r="1.8" fill="#A682FF"/>
+  <circle cx="22" cy="27" r="0.7" fill="#FFFFFF"/>
+  <!-- 3. upper-right arm -->
+  <circle cx="42" cy="27" r="1.8" fill="#A682FF"/>
+  <circle cx="42" cy="27" r="0.7" fill="#FFFFFF"/>
+  <!-- 4. consensus (the brightest, crossbar center) -->
+  <circle cx="32" cy="38" r="3.2" fill="#FFFFFF"/>
+  <circle cx="32" cy="38" r="2.0" fill="#3F8CFF"/>
+  <circle cx="32" cy="38" r="0.9" fill="#FFFFFF"/>
+  <!-- 5. lower-left arm -->
+  <circle cx="14" cy="48" r="1.8" fill="#F478C6"/>
+  <circle cx="14" cy="48" r="0.7" fill="#FFFFFF"/>
+  <!-- 6. lower-right arm -->
+  <circle cx="50" cy="48" r="1.8" fill="#F478C6"/>
+  <circle cx="50" cy="48" r="0.7" fill="#FFFFFF"/>
+  <!-- 7. base (foundation, fainter) -->
+  <circle cx="32" cy="56" r="1.4" fill="#3CE39A" opacity="0.85"/>
+  <circle cx="32" cy="56" r="0.5" fill="#FFFFFF"/>
+
+  <!-- foundation tick line (subtle horizon) -->
+  <line x1="14" y1="56" x2="50" y2="56" stroke="#3F8CFF" stroke-width="0.4" stroke-dasharray="0.5 1.5" opacity="0.35"/>
+</svg>

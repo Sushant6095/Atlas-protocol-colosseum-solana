@@ -5,12 +5,16 @@
 "use client";
 
 import Link from "next/link";
-import { memo, useEffect, useState } from "react";
-import { useShallow } from "zustand/react/shallow";
+import { memo, useMemo, useState } from "react";
 import { useRealtimeStore } from "@/lib/realtime";
-import { cn } from "@/components/primitives";
+import { cn, ProtocolIcon, type ProtocolSlug } from "@/components/primitives";
 import { IdentifierMono } from "@/components/primitives/IdentifierMono";
 import { AlertPill } from "@/components/primitives/AlertPill";
+
+const PROTOCOL_SLUGS: Record<string, ProtocolSlug> = {
+  kamino: "kamino", drift: "drift", marginfi: "marginfi", jupiter: "jupiter",
+  pyth: "pyth", jito: "jito", squads: "squads", solana: "solana",
+};
 
 interface RebalancePayload {
   vault_id: string;
@@ -21,21 +25,25 @@ interface RebalancePayload {
 }
 
 function LiveRebalanceFeedImpl({ limit = 8 }: { limit?: number }) {
-  const events = useRealtimeStore(
-    useShallow((s) => {
-      const items: { topic: string; ts: number; payload: RebalancePayload }[] = [];
-      for (const [topic, t] of Object.entries(s.topics)) {
-        if (!topic.startsWith("stream.vault.") || !topic.endsWith(".rebalance")) continue;
-        if (!t.snapshot) continue;
-        items.push({
-          topic,
-          ts: t.snapshot.emitted_at_ms ?? 0,
-          payload: t.snapshot.payload as RebalancePayload,
-        });
-      }
-      return items.sort((a, b) => b.ts - a.ts).slice(0, limit);
-    }),
-  );
+  // Read the stable `topics` reference (only changes when the store
+  // mutates) and derive synchronously. Synthesizing fresh objects
+  // inside the selector itself fights React 19's getSnapshot cache
+  // and triggers an infinite re-render loop.
+  const topics = useRealtimeStore((s) => s.topics);
+
+  const events = useMemo(() => {
+    const items: { topic: string; ts: number; payload: RebalancePayload }[] = [];
+    for (const [topic, t] of Object.entries(topics)) {
+      if (!topic.startsWith("stream.vault.") || !topic.endsWith(".rebalance")) continue;
+      if (!t.snapshot) continue;
+      items.push({
+        topic,
+        ts: t.snapshot.emitted_at_ms ?? 0,
+        payload: t.snapshot.payload as RebalancePayload,
+      });
+    }
+    return items.sort((a, b) => b.ts - a.ts).slice(0, limit);
+  }, [topics, limit]);
 
   // Synthetic seed when no realtime data is configured. Demo-only;
   // disappears the moment a real WS frame lands.
@@ -70,10 +78,26 @@ function LiveRebalanceFeedImpl({ limit = 8 }: { limit?: number }) {
               <span className="col-span-2">
                 <IdentifierMono value={e.payload.vault_id} size="xs" />
               </span>
-              <span className="col-span-6 text-[12px] text-[color:var(--color-ink-secondary)] font-mono truncate">
-                {e.payload.shifts?.map(
-                  (s) => `${s.protocol} ${s.bps_delta >= 0 ? "+" : ""}${(s.bps_delta / 100).toFixed(1)}%`,
-                ).join(" · ") ?? "—"}
+              <span className="col-span-6 flex items-center gap-3 text-[12px] text-[color:var(--color-ink-secondary)] font-mono truncate">
+                {e.payload.shifts?.length
+                  ? e.payload.shifts.map((s, i) => (
+                      <span key={`${s.protocol}-${i}`} className="inline-flex items-center gap-1.5">
+                        {PROTOCOL_SLUGS[s.protocol.toLowerCase()] && (
+                          <ProtocolIcon
+                            slug={PROTOCOL_SLUGS[s.protocol.toLowerCase()]}
+                            size={16}
+                            surface="disc"
+                          />
+                        )}
+                        <span>
+                          {s.protocol}{" "}
+                          <span style={{ color: s.bps_delta >= 0 ? "var(--color-accent-execute)" : "var(--color-accent-danger)" }}>
+                            {s.bps_delta >= 0 ? "+" : ""}{(s.bps_delta / 100).toFixed(1)}%
+                          </span>
+                        </span>
+                      </span>
+                    ))
+                  : <span>—</span>}
               </span>
               <span className="col-span-2 flex justify-end">
                 {e.payload.proof_status === "verified"

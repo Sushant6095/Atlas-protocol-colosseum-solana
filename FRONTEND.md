@@ -372,3 +372,125 @@ Phase 23 retired the legacy flat routes (`vaults/`, `markets/`,
 `proofs/`, `how-it-works/`); every operator surface now routes
 through `(operator) / (treasury) / (governance)` route groups + the
 Phase 21 `TerminalShell`.
+
+---
+
+# Frontend Part 5 — Custom Visualizations, Realtime Engine, Distribution Surfaces, Accessibility, Ship Discipline (Phase 24)
+
+Phase 23 won the operator's day. Phase 24 ships Atlas everywhere
+the operator already lives — embeds, browser, iOS — and locks in
+the accessibility and performance ratchets that keep it shippable.
+
+## `@atlas/viz` — 11 custom visualizations
+
+`sdk/viz/`. Workspace package; named exports:
+
+- `RadialLiquidityMap` — concentric protocol rings (≤ 8 ms @ 200 segments)
+- `SankeyFlow` — multi-stage capital flow (≤ 16 ms @ 1k nodes / 2k edges)
+- `ProofPipeline` — 8-stage timeline w/ per-stage SLOs + observed overlay
+- `DependencyGraph` — SVG fallback ≤ 300 nodes; WebGL path ≤ 5k / 10k edges
+- `SlotDriftHeatmap` — RPC × hour grid (≤ 4 ms @ 24×N)
+- `RiskRadar` — 6-axis radar w/ tween transitions
+- `ZkLattice` — recursive lattice, RAF-driven, freezes under reduced-motion
+- `Globe` — equirectangular fallback w/ pulse markers; r3f globe for production
+- `MerkleTreeViewer` — click-expandable leaf → root path
+- `RebalanceTicker` — auto-scrolling mono ticker w/ hover-pause
+- `KpiTile` / `DeltaTile` / `MonoNumber` — dense metric primitives
+
+Every component carries a documented perf budget, a `useVizA11y()`
+hook for `aria-describedby` + "show data table" affordance (WCAG 2.2
+AA), and resolves theme through CSS variables published by the host's
+`tokens.ts`.
+
+## Realtime engine — background-tab discipline
+
+`web/lib/realtime/background-tab.ts` augments the Phase 20 transport
+with a `visibilitychange` gate. While the tab is hidden, default-
+priority events are parked into a per-topic ring (latest-wins by
+slot) and skipped from the RAF flush; critical topics (alerts,
+rebalance, PER) still flow through. On return-to-visible, the parked
+snapshots replay in slot order so the UI re-syncs in one render
+instead of 200. Exposed via `isRealtimeHidden()` + `getSkippedWhileHiddenTotal()`.
+
+## `@atlas/widgets` — 7 named embeds
+
+`sdk/widgets/`. Each renders into a host element + accepts a
+`refreshIntervalMs` + dark/light theme. Two delivery modes:
+
+- **JS module** — `renderXWidget(host, config)` returns `{refresh,
+  destroy}`.
+- **Web component** — `<atlas-widget kind="…" base-url="…" vault-id="…"
+  theme="dark" refresh-ms="5000">`. Registered automatically when
+  `@atlas/widgets/web-component` is imported.
+
+Catalog: `slot-freshness`, `rpc-latency`, `proof-gen-latency`,
+`bundle-landed-rate`, `tps`, `last-rebalance`, `proof-of-reserve`.
+
+Live previews + ready-to-paste embed snippets at `/docs/widgets`.
+
+## Browser extension — `sdk/extension/`
+
+WXT (Chrome MV3 + Firefox MV3). Surfaces:
+
+- **Toolbar popup** — compact freshness tile + open-inspector CTA.
+- **Side panel** — pre-sign overlay (hosted by `PreSignOverlay`) +
+  allowlist editor.
+- **Content overlay** — minimal "Atlas is reviewing…" gate injected
+  on allowlisted origins while the side panel resolves the
+  explanation.
+
+Storage schema lives in `lib/storage.ts` (`atlas.allowlist.v1`,
+`atlas.settings.v1`). Wallet bridge contract: pages emit
+`atlas:wallet-intercept` with `{method, payloadB64}`; Atlas never
+touches keys.
+
+## iOS app — `sdk/ios/`
+
+SwiftUI, iOS 17+. Five tabs (Treasury, Activity, Alerts, Approvals,
+Discover). MWA-delegated signing via `Signing/MWASigner.swift` —
+Atlas never holds private keys. Biometric gate
+(`Signing/BiometricGate.swift`) on launch + after backgrounding
+> 30 s. Submission record at `sdk/ios/APP_STORE_NOTES.md`.
+
+## QVAC overlays — `web/components/qvac/`
+
+Tier-A surfaces from Phase 19, now wired to the web app:
+
+- `PreSignExplainerModal` — local LLM explanation w/ numeric-token
+  guard + always-on template fallback.
+- `InvoiceOcrModal` — local OCR draft + per-field operator
+  confirmation. Image never leaves the device.
+- `TranslationToggle` — per-alert switch between canonical English
+  and a locally-rendered translation. Identifier-preservation guard
+  surfaces the canonical template if the model alters a vault id /
+  tx hash.
+- `SecondOpinionAnalyst` — second-pass rebalance review. Surfaces
+  `AnalystSummary` (recommendation + concerns matched against the
+  failure-class catalog + fields-to-double-check). Atlas never
+  auto-signs even on a clean recommendation.
+
+## i18n + RTL
+
+`web/lib/i18n/` + `web/messages/{en,ja,es,ar}.json`. Type-safe
+`MessageCatalog` interface enforces parity. `useLocale()` hook +
+`<LocalePicker />`. RTL is applied via `<html dir="rtl">` for Arabic;
+component-level `dir` overrides used in `TranslationToggle` to
+preview a translated alert in its native direction. ICU-grade
+inflection routes through `@atlas/qvac` so locally-rendered text
+inherits the verifiable identifier guard.
+
+## Ship discipline
+
+- **Playwright** (`playwright.config.ts`) — three projects (`e2e`,
+  `perf`, `mobile`). The `e2e` golden-path spec asserts a clean
+  `axe-core` scan with `wcag2a + wcag2aa + wcag22aa` tags on every
+  public route.
+- **Lighthouse CI** (`lighthouserc.json`) — desktop preset, 3 runs
+  per route, hard floors: perf ≥ 0.85, a11y ≥ 0.95, best-practices
+  ≥ 0.92, FCP ≤ 1.5 s, LCP ≤ 2.5 s, CLS ≤ 0.05, TBT ≤ 200 ms.
+- **Bundle gate** — `landing.perf.spec.ts` asserts the landing
+  initial JS stays under 220 KB and ≥ 50 fps for 5 s.
+- **CI** — `.github/workflows/frontend-ci.yml` fans out type-check
+  + ESLint, Playwright + axe, and Lighthouse autorun. All three
+  must pass for a frontend-touching PR to merge.
+

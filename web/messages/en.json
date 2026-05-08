@@ -1,0 +1,18 @@
+{
+  "nav.docs": "Docs",
+  "nav.dashboard": "Dashboard",
+  "nav.intel": "Intelligence",
+  "nav.infra": "/infra",
+  "presign.title": "Confirm before signing",
+  "presign.subtitle": "Atlas explains every transaction before your wallet asks for a signature.",
+  "presign.approve": "Approve",
+  "presign.approveAnyway": "Approve anyway",
+  "presign.reject": "Reject",
+  "presign.localLLM": "local LLM",
+  "presign.template": "verified template",
+  "rt.live": "Live",
+  "rt.degraded": "Degraded",
+  "rt.paused": "Live updates paused",
+  "alerts.empty": "All clear.",
+  "alerts.acknowledge": "Acknowledge"
+}

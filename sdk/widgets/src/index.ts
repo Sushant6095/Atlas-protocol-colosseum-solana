@@ -8,7 +8,12 @@
 export { renderFreshnessWidget } from "./freshness.js";
 export { renderRpcLatencyWidget } from "./rpc-latency.js";
 export { renderProofGenWidget } from "./proof-gen.js";
+export { renderBundleLandedWidget } from "./bundle-landed.js";
+export { renderTpsWidget } from "./tps.js";
+export { renderLastRebalanceWidget } from "./last-rebalance.js";
+export { renderProofOfReserveWidget } from "./proof-of-reserve.js";
 export { iframeUrl } from "./iframe.js";
+export { defineAtlasWidget, type AtlasWidgetKind } from "./web-component.js";
 
 export type WidgetTheme = "dark" | "light";
 

@@ -10,6 +10,11 @@
     "./freshness": "./dist/freshness.js",
     "./rpc-latency": "./dist/rpc-latency.js",
     "./proof-gen": "./dist/proof-gen.js",
+    "./bundle-landed": "./dist/bundle-landed.js",
+    "./tps": "./dist/tps.js",
+    "./last-rebalance": "./dist/last-rebalance.js",
+    "./proof-of-reserve": "./dist/proof-of-reserve.js",
+    "./web-component": "./dist/web-component.js",
     "./iframe": "./dist/iframe.js"
   },
   "scripts": {

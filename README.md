@@ -35,7 +35,7 @@ AI manages allocations across audited DeFi venues. Every rebalance ships a Groth
 
 <br/>
 
-[**🌐 atlas.fyi**](https://atlas.fyi) · [**📦 SDK (npm)**](sdk/ts) · [**📦 SDK (crates.io)**](sdk/rust) · [**🧪 Playground**](sdk/playground) · [**🧠 Architecture**](#system-architecture) · [**🛡 Security**](#trust-model)
+[**🌐 atlasfi.in**](https://atlasfi.in) · [**📦 SDK (npm)**](sdk/ts) · [**📦 SDK (crates.io)**](sdk/rust) · [**🧪 Playground**](sdk/playground) · [**🧠 Architecture**](#system-architecture) · [**🛡 Security**](#trust-model)
 
 </div>
 
@@ -80,7 +80,7 @@ Three product surfaces, one repo:
 ```mermaid
 flowchart TB
     subgraph CLIENT["🌐 Client surfaces"]
-        WEB[Next.js 15 · atlas.fyi]
+        WEB[Next.js 15 · atlasfi.in]
         EXT[Browser extension<br/>pre-sign overlay]
         IOS[iOS app · MWA]
         WC[Phantom · Solflare · Backpack<br/>via wallet-standard]
@@ -184,7 +184,7 @@ flowchart TB
 sequenceDiagram
     autonumber
     participant U as User
-    participant W as atlas.fyi
+    participant W as atlasfi.in
     participant V as atlas_vault
     participant O as Orchestrator
     participant Q as gRPC quorum
@@ -509,7 +509,7 @@ atlas/
 │   ├── rust/                       atlas-rs SDK
 │   ├── ts/                         @atlas/sdk (npm) · Codama-generated
 │   └── playground/                 interactive API console
-├── web/                            ← Next.js 15 app at atlas.fyi
+├── web/                            ← Next.js 15 app at atlasfi.in
 │   └── (marketing) · (public) · (intel) · (operator) · (treasury) · (governance) · (docs) · (account)
 ├── tests/
 │   ├── litesvm/                      fast Anchor unit tests
@@ -581,7 +581,7 @@ cd prover/model && pip install -r requirements.txt && python train.py
 # 4. Build SP1 guest + run an end-to-end proof locally
 cd ../zkvm-program && cargo prove build
 
-# 5. Web app — atlas.fyi
+# 5. Web app — atlasfi.in
 cd ../../web && pnpm install && pnpm dev
 # → http://localhost:3000
 ```

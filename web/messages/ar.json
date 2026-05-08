@@ -1,0 +1,18 @@
+{
+  "nav.docs": "الوثائق",
+  "nav.dashboard": "لوحة المعلومات",
+  "nav.intel": "الاستخبارات",
+  "nav.infra": "/infra",
+  "presign.title": "التأكيد قبل التوقيع",
+  "presign.subtitle": "تشرح Atlas كل معاملة قبل أن تطلب محفظتك توقيعًا.",
+  "presign.approve": "موافقة",
+  "presign.approveAnyway": "الموافقة على أي حال",
+  "presign.reject": "رفض",
+  "presign.localLLM": "نموذج محلي",
+  "presign.template": "قالب موثق",
+  "rt.live": "مباشر",
+  "rt.degraded": "متراجع",
+  "rt.paused": "تم إيقاف التحديثات المباشرة",
+  "alerts.empty": "لا توجد تنبيهات.",
+  "alerts.acknowledge": "تأكيد"
+}

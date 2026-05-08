@@ -6,7 +6,16 @@
 "use client";
 
 import { memo } from "react";
-import { cn } from "@/components/primitives";
+import { cn, ProtocolIcon, type ProtocolSlug } from "@/components/primitives";
+
+const PROTO_SLUGS: Record<string, ProtocolSlug> = {
+  kamino: "kamino", drift: "drift", marginfi: "marginfi", jupiter: "jupiter",
+  pyth: "pyth", jito: "jito", squads: "squads", solana: "solana",
+};
+
+function slugFor(name: string): ProtocolSlug | null {
+  return PROTO_SLUGS[name.toLowerCase()] ?? null;
+}
 
 export interface AllocationLeg {
   protocol: string;
@@ -58,10 +67,14 @@ function AllocationBarImpl({ legs, showNotional }: AllocationBarProps) {
                 !l.in_universe && "opacity-40",
               )}>
             <span className="inline-flex items-center gap-2 truncate">
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ background: l.color ?? PALETTE[i % PALETTE.length] }}
-              />
+              {slugFor(l.protocol) ? (
+                <ProtocolIcon slug={slugFor(l.protocol)!} size={20} surface="disc" />
+              ) : (
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ background: l.color ?? PALETTE[i % PALETTE.length] }}
+                />
+              )}
               <span className="text-[color:var(--color-ink-primary)] truncate">
                 {l.protocol}
               </span>

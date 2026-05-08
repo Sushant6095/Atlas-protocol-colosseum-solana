@@ -1,0 +1,512 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 384" fill="none" role="img" aria-label="Atlas — heroic Titan bearing the digital celestial sphere">
+  <title>Atlas</title>
+  <desc>Cinematic mark: heroic, sculpted Titan in asymmetric kneeling pose bearing a digital celestial sphere. Marble figure with anatomical definition (deltoids, pectorals, abdominals, quadriceps), classical Hellenistic proportions. Globe is a wireframe sphere with Solana-gradient grid, three orbital rings, and decentralized network nodes. Cosmic dark background with stars and rim lighting from above.</desc>
+
+  <defs>
+    <linearGradient id="solanaGrad" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#9945FF"/>
+      <stop offset="0.5" stop-color="#19B5FE"/>
+      <stop offset="1" stop-color="#14F195"/>
+    </linearGradient>
+
+    <linearGradient id="marbleMain" x1="0.15" y1="0.05" x2="0.85" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#F2F4F8"/>
+      <stop offset="0.18" stop-color="#D5DCE8"/>
+      <stop offset="0.45" stop-color="#9AA3B5"/>
+      <stop offset="0.72" stop-color="#4D5468"/>
+      <stop offset="1" stop-color="#1A1F30"/>
+    </linearGradient>
+
+    <linearGradient id="marbleArmLit" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#F5F8FC"/>
+      <stop offset="0.4" stop-color="#C0C7D6"/>
+      <stop offset="0.8" stop-color="#5A6275"/>
+      <stop offset="1" stop-color="#2A3045"/>
+    </linearGradient>
+
+    <linearGradient id="marbleArmShadow" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#9AA3B5"/>
+      <stop offset="0.5" stop-color="#5A6275"/>
+      <stop offset="1" stop-color="#1A1F30"/>
+    </linearGradient>
+
+    <radialGradient id="rimLight" cx="0.5" cy="0.2" r="0.7">
+      <stop offset="0" stop-color="#19B5FE" stop-opacity="0.6"/>
+      <stop offset="0.55" stop-color="#9945FF" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#9945FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="cosmos" cx="0.5" cy="0.32" r="0.85">
+      <stop offset="0" stop-color="#0A0F2A"/>
+      <stop offset="0.55" stop-color="#070920"/>
+      <stop offset="1" stop-color="#03040A"/>
+    </radialGradient>
+
+    <radialGradient id="globeCore" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#19B5FE" stop-opacity="0.4"/>
+      <stop offset="0.5" stop-color="#9945FF" stop-opacity="0.22"/>
+      <stop offset="0.85" stop-color="#9945FF" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#9945FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="energyVein" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#19B5FE"/>
+      <stop offset="0.5" stop-color="#9945FF"/>
+      <stop offset="1" stop-color="#19B5FE" stop-opacity="0.2"/>
+    </linearGradient>
+
+    <radialGradient id="northStar" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#19B5FE"/>
+      <stop offset="1" stop-color="#19B5FE" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="rimEdge" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#19B5FE" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#19B5FE" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="softGlow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="1.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="strongGlow" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="3.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="figureShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="0.6" result="b"/>
+      <feOffset in="b" dx="0" dy="1" result="o"/>
+      <feMerge><feMergeNode in="o"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ============ COSMIC BACKGROUND ============ -->
+  <rect width="320" height="384" fill="url(#cosmos)"/>
+
+  <g fill="#E6EAF2">
+    <circle cx="22"  cy="40"  r="0.6" opacity="0.7"/>
+    <circle cx="48"  cy="18"  r="0.4" opacity="0.5"/>
+    <circle cx="72"  cy="56"  r="0.5" opacity="0.6"/>
+    <circle cx="96"  cy="28"  r="0.7" opacity="0.85"/>
+    <circle cx="124" cy="14"  r="0.4" opacity="0.5"/>
+    <circle cx="150" cy="44"  r="0.5" opacity="0.6"/>
+    <circle cx="176" cy="22"  r="0.6" opacity="0.7"/>
+    <circle cx="208" cy="50"  r="0.4" opacity="0.5"/>
+    <circle cx="240" cy="20"  r="0.7" opacity="0.85"/>
+    <circle cx="268" cy="42"  r="0.5" opacity="0.6"/>
+    <circle cx="294" cy="12"  r="0.5" opacity="0.7"/>
+    <circle cx="14"  cy="92"  r="0.4" opacity="0.5"/>
+    <circle cx="36"  cy="118" r="0.5" opacity="0.6"/>
+    <circle cx="64"  cy="150" r="0.4" opacity="0.5"/>
+    <circle cx="248" cy="120" r="0.5" opacity="0.6"/>
+    <circle cx="280" cy="160" r="0.4" opacity="0.5"/>
+    <circle cx="306" cy="200" r="0.5" opacity="0.55"/>
+    <circle cx="18"  cy="240" r="0.4" opacity="0.5"/>
+    <circle cx="40"  cy="280" r="0.5" opacity="0.55"/>
+    <circle cx="288" cy="248" r="0.5" opacity="0.6"/>
+    <circle cx="304" cy="300" r="0.4" opacity="0.5"/>
+    <circle cx="60"  cy="340" r="0.5" opacity="0.5"/>
+    <circle cx="270" cy="356" r="0.5" opacity="0.55"/>
+  </g>
+
+  <rect width="320" height="384" fill="url(#rimLight)" opacity="0.85"/>
+
+  <!-- ============ DIGITAL GLOBE ============ -->
+  <g transform="translate(160 92)">
+    <circle r="68" fill="url(#globeCore)" filter="url(#strongGlow)"/>
+    <ellipse rx="62" ry="22" stroke="url(#solanaGrad)" stroke-width="0.7" fill="none" opacity="0.55" filter="url(#softGlow)" transform="rotate(-22)"/>
+    <ellipse rx="58" ry="18" stroke="url(#solanaGrad)" stroke-width="0.7" fill="none" opacity="0.45" filter="url(#softGlow)" transform="rotate(20)"/>
+    <ellipse rx="54" ry="9"  stroke="#19B5FE"          stroke-width="0.5" fill="none" opacity="0.35" transform="rotate(-60)"/>
+
+    <circle r="46" stroke="url(#solanaGrad)" stroke-width="1.2" fill="none" opacity="0.95"/>
+    <ellipse rx="46" ry="12" stroke="url(#solanaGrad)" stroke-width="0.8" fill="none" opacity="0.85"/>
+    <ellipse rx="12" ry="46" stroke="url(#solanaGrad)" stroke-width="0.8" fill="none" opacity="0.85"/>
+    <ellipse rx="22" ry="46" stroke="#9945FF" stroke-width="0.5" fill="none" opacity="0.45"/>
+    <ellipse rx="32" ry="46" stroke="#9945FF" stroke-width="0.5" fill="none" opacity="0.35"/>
+    <ellipse rx="46" ry="22" stroke="#19B5FE" stroke-width="0.5" fill="none" opacity="0.45"/>
+    <ellipse rx="46" ry="32" stroke="#19B5FE" stroke-width="0.5" fill="none" opacity="0.35"/>
+    <ellipse rx="46" ry="20" stroke="#14F195" stroke-width="0.6" fill="none" opacity="0.55" transform="rotate(28)"/>
+
+    <g fill="#FFFFFF">
+      <circle cx="-32" cy="-22" r="1.2"/>
+      <circle cx="20"  cy="-30" r="1.2"/>
+      <circle cx="36"  cy="-6"  r="1.4"/>
+      <circle cx="28"  cy="22"  r="1.2"/>
+      <circle cx="-12" cy="32"  r="1.4"/>
+      <circle cx="-38" cy="8"   r="1.2"/>
+      <circle cx="6"   cy="-6"  r="1.6"/>
+      <circle cx="-20" cy="-4"  r="1.0"/>
+      <circle cx="14"  cy="14"  r="1.0"/>
+    </g>
+    <g fill="#19B5FE">
+      <circle cx="-32" cy="-22" r="0.5"/>
+      <circle cx="20"  cy="-30" r="0.5"/>
+      <circle cx="36"  cy="-6"  r="0.6"/>
+      <circle cx="28"  cy="22"  r="0.5"/>
+      <circle cx="-12" cy="32"  r="0.6"/>
+      <circle cx="-38" cy="8"   r="0.5"/>
+      <circle cx="6"   cy="-6"  r="0.7"/>
+      <circle cx="-20" cy="-4"  r="0.4"/>
+      <circle cx="14"  cy="14"  r="0.4"/>
+    </g>
+
+    <g stroke="#19B5FE" stroke-width="0.35" opacity="0.6">
+      <line x1="-32" y1="-22" x2="6"   y2="-6"/>
+      <line x1="20"  y1="-30" x2="36"  y2="-6"/>
+      <line x1="36"  y1="-6"  x2="28"  y2="22"/>
+      <line x1="6"   y1="-6"  x2="-20" y2="-4"/>
+      <line x1="-20" y1="-4"  x2="-38" y2="8"/>
+      <line x1="-12" y1="32"  x2="14"  y2="14"/>
+      <line x1="14"  y1="14"  x2="6"   y2="-6"/>
+    </g>
+
+    <circle cx="0" cy="-58" r="7" fill="url(#northStar)" opacity="0.9"/>
+    <circle cx="0" cy="-58" r="2" fill="#FFFFFF"/>
+  </g>
+
+  <!-- ============ ATLAS — HEROIC TITAN ============ -->
+  <!-- Asymmetric kneeling pose: figure's left leg forward (knee up), figure's right leg kneeling.
+       Slight 3/4 body rotation toward viewer's left. Both arms raised symmetrically supporting globe. -->
+
+  <g filter="url(#figureShadow)">
+
+    <!-- ============ BACK LEG (figure's right, kneeling on ground) — drawn first, in shadow ============ -->
+    <!-- Right thigh (the kneeling one — knee on ground, more compressed) -->
+    <path d="M 178 286
+             Q 198 292 210 304
+             Q 220 314 222 326
+             Q 222 334 216 338
+             L 196 338
+             Q 188 332 184 320
+             Q 178 308 174 296
+             Q 174 290 178 286 Z"
+          fill="url(#marbleArmShadow)"/>
+    <!-- Right knee (rounded mass touching ground) -->
+    <path d="M 196 332
+             Q 218 332 224 340
+             Q 226 348 218 352
+             L 198 352
+             Q 192 344 196 332 Z"
+          fill="url(#marbleArmShadow)"/>
+    <!-- Right shin/lower-leg lying flat behind (suggested as a foreshortened mass) -->
+    <path d="M 218 348
+             Q 240 348 248 354
+             Q 252 360 246 362
+             L 220 362
+             Q 212 358 218 348 Z"
+          fill="#3D4358"/>
+    <!-- Right calf shadow line -->
+    <path d="M 220 350 Q 234 350 244 356" stroke="#1A1F30" stroke-width="0.5" fill="none" opacity="0.6"/>
+
+    <!-- ============ FRONT LEG (figure's left, knee up, foot planted forward) ============ -->
+    <!-- Left thigh — massive quadriceps, knee bent, raised forward -->
+    <path d="M 142 286
+             Q 134 296 130 312
+             Q 128 326 132 338
+             L 120 350
+             Q 110 340 108 322
+             Q 110 304 122 290
+             Q 132 282 142 286 Z"
+          fill="url(#marbleMain)"/>
+    <!-- Left quad inner-shadow (vastus medialis line) -->
+    <path d="M 138 290 Q 132 308 132 332" stroke="#3D4358" stroke-width="0.7" fill="none" opacity="0.65"/>
+    <!-- Left quad outer-shadow (vastus lateralis line) -->
+    <path d="M 124 296 Q 118 314 116 336" stroke="#3D4358" stroke-width="0.6" fill="none" opacity="0.55"/>
+    <!-- Left rim-light highlight on top of quad -->
+    <path d="M 134 290 Q 128 306 124 328" stroke="#E6EAF2" stroke-width="0.7" fill="none" opacity="0.55"/>
+
+    <!-- Left knee (rounded patella) -->
+    <ellipse cx="118" cy="346" rx="9" ry="8" fill="url(#marbleMain)"/>
+    <ellipse cx="116" cy="344" rx="3" ry="2" fill="#F5F8FC" opacity="0.55"/>
+
+    <!-- Left shin (calf in profile, going down from knee to foot) -->
+    <path d="M 114 348
+             Q 108 360 104 372
+             L 116 374
+             Q 122 360 124 350
+             Z"
+          fill="url(#marbleMain)"/>
+    <!-- Left calf muscle definition -->
+    <path d="M 112 354 Q 110 364 108 372" stroke="#3D4358" stroke-width="0.6" fill="none" opacity="0.6"/>
+
+    <!-- Left foot (planted) -->
+    <path d="M 100 372
+             Q 94 374 92 378
+             Q 96 382 116 380
+             Q 124 378 124 374
+             L 116 372
+             Z"
+          fill="url(#marbleArmShadow)"/>
+
+    <!-- ============ HIPS / PELVIS / GLUTES ============ -->
+    <!-- Pelvis mass — connects torso to legs, narrow waist above wider hips -->
+    <path d="M 134 274
+             Q 130 282 130 290
+             L 142 290
+             Q 146 282 146 274
+             Z"
+          fill="url(#marbleMain)"/>
+    <path d="M 174 274
+             Q 174 282 178 290
+             L 190 290
+             Q 190 282 186 274
+             Z"
+          fill="url(#marbleArmShadow)"/>
+
+    <!-- Iliac crest / hip-V-line (the "Adonis lines" — one of the most recognizable Greek-god markers) -->
+    <path d="M 144 268 Q 152 282 156 290" stroke="#1A1F30" stroke-width="0.7" fill="none" opacity="0.7"/>
+    <path d="M 176 268 Q 168 282 164 290" stroke="#1A1F30" stroke-width="0.7" fill="none" opacity="0.7"/>
+
+    <!-- ============ TORSO (chest + abs + obliques) ============ -->
+    <!-- V-taper torso: broad at chest, narrowing to waist -->
+    <path d="M 122 200
+             Q 116 220 120 244
+             Q 124 264 134 274
+             L 186 274
+             Q 196 264 200 244
+             Q 204 220 198 200
+             Q 188 196 160 196
+             Q 132 196 122 200 Z"
+          fill="url(#marbleMain)"/>
+
+    <!-- Lat (latissimus dorsi) flare — left side, in shadow -->
+    <path d="M 122 204
+             Q 114 218 116 234
+             Q 118 244 124 250
+             L 124 234
+             Q 122 218 124 204 Z"
+          fill="url(#marbleArmShadow)"/>
+    <!-- Lat flare — right side -->
+    <path d="M 198 204
+             Q 206 218 204 234
+             Q 202 244 196 250
+             L 196 234
+             Q 198 218 196 204 Z"
+          fill="#3D4358" opacity="0.85"/>
+
+    <!-- ============ PECTORALS ============ -->
+    <!-- Left pec (figure's left, viewer's right) — main mass with rim light on top -->
+    <path d="M 162 196
+             Q 184 198 198 206
+             Q 200 220 196 230
+             Q 184 234 168 230
+             Q 162 222 162 210 Z"
+          fill="url(#marbleArmLit)"/>
+    <!-- Right pec — slight shadow side -->
+    <path d="M 158 196
+             Q 136 198 122 206
+             Q 120 220 124 230
+             Q 136 234 152 230
+             Q 158 222 158 210 Z"
+          fill="url(#marbleMain)"/>
+
+    <!-- Pec cleavage / sternum line -->
+    <path d="M 160 200 L 160 232" stroke="#1A1F30" stroke-width="0.9" opacity="0.75"/>
+    <!-- Pec lower edge (the "chest shelf" shadow) -->
+    <path d="M 124 230 Q 160 240 196 230" stroke="#1A1F30" stroke-width="0.7" fill="none" opacity="0.55"/>
+    <!-- Pec upper highlight -->
+    <path d="M 130 204 Q 160 200 190 204" stroke="#F5F8FC" stroke-width="0.8" fill="none" opacity="0.5"/>
+
+    <!-- ============ ABDOMINALS (the six-pack) ============ -->
+    <!-- Linea alba (vertical center) -->
+    <path d="M 160 234 L 160 274" stroke="#1A1F30" stroke-width="0.7" opacity="0.7"/>
+    <!-- Top row of abs -->
+    <path d="M 144 240 L 176 240" stroke="#1A1F30" stroke-width="0.5" opacity="0.6"/>
+    <!-- Mid row of abs -->
+    <path d="M 142 252 L 178 252" stroke="#1A1F30" stroke-width="0.5" opacity="0.6"/>
+    <!-- Lower row of abs -->
+    <path d="M 142 264 L 178 264" stroke="#1A1F30" stroke-width="0.5" opacity="0.6"/>
+    <!-- Outer edge of abs (left + right rectus abdominis margins) -->
+    <path d="M 144 234 Q 146 254 148 270" stroke="#1A1F30" stroke-width="0.5" fill="none" opacity="0.5"/>
+    <path d="M 176 234 Q 174 254 172 270" stroke="#1A1F30" stroke-width="0.5" fill="none" opacity="0.5"/>
+
+    <!-- Ab highlights (top of each pair, catching rim light) -->
+    <path d="M 148 236 L 156 236" stroke="#E6EAF2" stroke-width="0.5" opacity="0.4"/>
+    <path d="M 164 236 L 172 236" stroke="#E6EAF2" stroke-width="0.5" opacity="0.4"/>
+    <path d="M 148 248 L 156 248" stroke="#E6EAF2" stroke-width="0.5" opacity="0.35"/>
+    <path d="M 164 248 L 172 248" stroke="#E6EAF2" stroke-width="0.5" opacity="0.35"/>
+
+    <!-- Serratus anterior (the finger-like muscles on the side, classical statue marker) -->
+    <path d="M 126 222 Q 134 226 136 234" stroke="#3D4358" stroke-width="0.5" fill="none" opacity="0.65"/>
+    <path d="M 124 234 Q 132 238 136 246" stroke="#3D4358" stroke-width="0.5" fill="none" opacity="0.6"/>
+    <path d="M 126 246 Q 132 250 138 256" stroke="#3D4358" stroke-width="0.5" fill="none" opacity="0.55"/>
+
+    <!-- ============ ARMS (raised, gripping globe) ============ -->
+    <!-- LEFT ARM (figure's left, viewer's right) — rim-lit side -->
+    <!-- Deltoid (shoulder cap) -->
+    <path d="M 188 196
+             Q 200 192 210 196
+             Q 214 204 210 212
+             Q 200 214 192 210
+             Q 188 204 188 196 Z"
+          fill="url(#marbleArmLit)"/>
+    <!-- Upper arm (bicep + tricep silhouette) — tapers up to elbow -->
+    <path d="M 198 198
+             Q 208 178 206 162
+             Q 200 152 192 152
+             Q 188 168 192 184
+             Q 194 192 198 198 Z"
+          fill="url(#marbleArmLit)"/>
+    <!-- Bicep peak highlight -->
+    <path d="M 196 162 Q 199 172 200 182" stroke="#F5F8FC" stroke-width="0.7" fill="none" opacity="0.55"/>
+    <!-- Bicep-tricep separation shadow -->
+    <path d="M 192 158 Q 192 174 194 188" stroke="#3D4358" stroke-width="0.5" fill="none" opacity="0.55"/>
+    <!-- Forearm -->
+    <path d="M 196 152
+             Q 192 144 192 138
+             L 200 138
+             Q 204 144 204 152 Z"
+          fill="url(#marbleArmLit)"/>
+    <!-- Left hand gripping globe (small but defined) -->
+    <path d="M 192 132
+             Q 188 134 188 138
+             L 188 142
+             Q 196 144 204 142
+             Q 206 138 204 134
+             Q 198 132 192 132 Z"
+          fill="url(#marbleArmLit)"/>
+    <!-- Knuckle hints -->
+    <line x1="194" y1="134" x2="194" y2="140" stroke="#3D4358" stroke-width="0.3" opacity="0.7"/>
+    <line x1="198" y1="134" x2="198" y2="141" stroke="#3D4358" stroke-width="0.3" opacity="0.7"/>
+    <line x1="202" y1="134" x2="202" y2="140" stroke="#3D4358" stroke-width="0.3" opacity="0.7"/>
+
+    <!-- RIGHT ARM (figure's right, viewer's left) — slightly more shadow side -->
+    <path d="M 132 196
+             Q 120 192 110 196
+             Q 106 204 110 212
+             Q 120 214 128 210
+             Q 132 204 132 196 Z"
+          fill="url(#marbleMain)"/>
+    <path d="M 122 198
+             Q 112 178 114 162
+             Q 120 152 128 152
+             Q 132 168 128 184
+             Q 126 192 122 198 Z"
+          fill="url(#marbleMain)"/>
+    <path d="M 124 162 Q 121 172 120 182" stroke="#F5F8FC" stroke-width="0.6" fill="none" opacity="0.45"/>
+    <path d="M 128 158 Q 128 174 126 188" stroke="#3D4358" stroke-width="0.5" fill="none" opacity="0.55"/>
+    <path d="M 124 152
+             Q 128 144 128 138
+             L 120 138
+             Q 116 144 116 152 Z"
+          fill="url(#marbleMain)"/>
+    <path d="M 128 132
+             Q 132 134 132 138
+             L 132 142
+             Q 124 144 116 142
+             Q 114 138 116 134
+             Q 122 132 128 132 Z"
+          fill="url(#marbleMain)"/>
+    <line x1="126" y1="134" x2="126" y2="140" stroke="#3D4358" stroke-width="0.3" opacity="0.6"/>
+    <line x1="122" y1="134" x2="122" y2="141" stroke="#3D4358" stroke-width="0.3" opacity="0.6"/>
+    <line x1="118" y1="134" x2="118" y2="140" stroke="#3D4358" stroke-width="0.3" opacity="0.6"/>
+
+    <!-- ============ NECK + TRAPS ============ -->
+    <!-- Trapezius (rises from base of neck to shoulders) -->
+    <path d="M 148 192
+             Q 138 188 132 196
+             L 148 200
+             Z"
+          fill="#3D4358"/>
+    <path d="M 172 192
+             Q 182 188 188 196
+             L 172 200
+             Z"
+          fill="url(#marbleArmLit)"/>
+    <!-- Neck -->
+    <path d="M 152 178
+             Q 150 188 152 196
+             L 168 196
+             Q 170 188 168 178
+             Z"
+          fill="url(#marbleMain)"/>
+    <!-- Sternocleidomastoid line (the diagonal neck muscle) -->
+    <path d="M 156 180 Q 158 188 162 194" stroke="#3D4358" stroke-width="0.5" fill="none" opacity="0.6"/>
+    <path d="M 164 180 Q 162 188 158 194" stroke="#3D4358" stroke-width="0.4" fill="none" opacity="0.5"/>
+    <!-- Adam's apple suggestion -->
+    <ellipse cx="160" cy="188" rx="1.2" ry="2" fill="#3D4358" opacity="0.6"/>
+
+    <!-- ============ HEAD (bowed forward, tucked between arms) ============ -->
+    <!-- Skull mass -->
+    <path d="M 148 162
+             Q 146 152 152 146
+             Q 160 142 168 146
+             Q 174 152 172 162
+             Q 174 174 168 178
+             Q 160 180 152 178
+             Q 146 174 148 162 Z"
+          fill="url(#marbleMain)"/>
+    <!-- Hair (classical curls, suggested as wavy mass on top) -->
+    <path d="M 150 152
+             Q 148 144 156 142
+             Q 160 140 164 142
+             Q 172 144 170 152
+             Q 168 150 164 150
+             Q 160 148 156 150
+             Q 152 150 150 152 Z"
+          fill="#3D4358"/>
+    <!-- Brow ridge shadow -->
+    <path d="M 152 158 Q 160 156 168 158" stroke="#3D4358" stroke-width="0.8" fill="none" opacity="0.7"/>
+    <!-- Eye sockets (in classical-statue shadow, no detail) -->
+    <ellipse cx="155" cy="162" rx="2" ry="1.2" fill="#3D4358" opacity="0.55"/>
+    <ellipse cx="165" cy="162" rx="2" ry="1.2" fill="#3D4358" opacity="0.55"/>
+    <!-- Nose ridge -->
+    <path d="M 160 162 Q 159 168 160 172" stroke="#3D4358" stroke-width="0.5" opacity="0.6"/>
+    <!-- Mouth line -->
+    <path d="M 156 174 L 164 174" stroke="#3D4358" stroke-width="0.5" opacity="0.55"/>
+    <!-- Forehead rim highlight (catching globe light) -->
+    <path d="M 154 152 Q 160 150 166 152" stroke="#F5F8FC" stroke-width="0.7" fill="none" opacity="0.6"/>
+
+  </g>
+
+  <!-- ============ RIM-LIGHT ACCENTS (cyan glow from globe) ============ -->
+  <!-- Top of head -->
+  <path d="M 152 144 Q 160 142 168 144" stroke="url(#rimEdge)" stroke-width="1.0" fill="none" opacity="0.7" filter="url(#softGlow)"/>
+  <!-- Top of left deltoid -->
+  <path d="M 196 196 Q 204 194 210 198" stroke="url(#rimEdge)" stroke-width="1.0" fill="none" opacity="0.7" filter="url(#softGlow)"/>
+  <!-- Top of right deltoid -->
+  <path d="M 124 196 Q 116 194 110 198" stroke="url(#rimEdge)" stroke-width="1.0" fill="none" opacity="0.55" filter="url(#softGlow)"/>
+  <!-- Top of left bicep -->
+  <path d="M 198 178 Q 200 168 198 154" stroke="url(#rimEdge)" stroke-width="0.9" fill="none" opacity="0.6" filter="url(#softGlow)"/>
+  <!-- Top of left pec -->
+  <path d="M 168 200 Q 184 200 196 206" stroke="url(#rimEdge)" stroke-width="0.7" fill="none" opacity="0.5" filter="url(#softGlow)"/>
+  <!-- Top of left thigh -->
+  <path d="M 130 296 Q 124 308 122 322" stroke="url(#rimEdge)" stroke-width="0.7" fill="none" opacity="0.45" filter="url(#softGlow)"/>
+
+  <!-- ============ ENERGY VEINS (cyan circuits running along muscles) ============ -->
+  <g stroke="url(#energyVein)" stroke-width="0.6" fill="none" opacity="0.85" filter="url(#softGlow)" stroke-linecap="round">
+    <!-- left arm vein from hand → shoulder -->
+    <path d="M 196 138 Q 200 156 204 178 Q 206 192 200 200"/>
+    <!-- right arm vein -->
+    <path d="M 124 138 Q 120 156 116 178 Q 114 192 120 200"/>
+    <!-- chest centerline vein -->
+    <path d="M 160 200 L 160 232"/>
+    <!-- chest cross veins -->
+    <path d="M 142 214 Q 160 220 178 214"/>
+    <!-- left torso oblique vein -->
+    <path d="M 128 232 Q 134 254 138 270"/>
+    <!-- right torso oblique vein -->
+    <path d="M 192 232 Q 186 254 182 270"/>
+    <!-- left thigh vein (front leg) -->
+    <path d="M 134 290 Q 124 312 118 340"/>
+    <!-- right thigh vein (kneeling leg) -->
+    <path d="M 188 290 Q 200 308 212 326"/>
+  </g>
+
+  <!-- vein nodes (bright accent points where energy concentrates) -->
+  <g fill="#19B5FE" filter="url(#softGlow)">
+    <circle cx="160" cy="222" r="1.4"/>
+    <circle cx="142" cy="214" r="1.0"/>
+    <circle cx="178" cy="214" r="1.0"/>
+    <circle cx="160" cy="200" r="1.2"/>
+    <circle cx="200" cy="178" r="0.9"/>
+    <circle cx="120" cy="178" r="0.9"/>
+  </g>
+
+  <!-- ============ FOUNDATION ============ -->
+  <line x1="60" y1="376" x2="260" y2="376" stroke="#19B5FE" stroke-width="0.4" stroke-dasharray="1 2" opacity="0.45"/>
+  <ellipse cx="160" cy="378" rx="110" ry="3" fill="#19B5FE" opacity="0.18" filter="url(#softGlow)"/>
+</svg>

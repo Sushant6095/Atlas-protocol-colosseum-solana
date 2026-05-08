@@ -1,0 +1,18 @@
+<!--
+  Generic colored-disc fallback per the Globe spec. Solana's
+  signature violet is widely associated with the brand; this is
+  an approximate placeholder — replace with the official Solana
+  brand mark from https://solana.com/branding before any external
+  marketing push.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="g-solana" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#C77BFF"/>
+      <stop offset="100%" stop-color="#9945FF"/>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#g-solana)"/>
+  <circle cx="32" cy="32" r="30" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="1"/>
+  <text x="32" y="41" font-family="Inter, system-ui, sans-serif" font-size="26" font-weight="700" fill="#FFFFFF" text-anchor="middle">S</text>
+</svg>

@@ -1,42 +1,47 @@
-// MarketingShell (Phase 21 §4.1).
+// MarketingShell.
 //
-// Sticky transparent → solid header on scroll, hero canvas optional,
-// footer. No sidebar. Cinema density.
+// PillNav (GSAP-animated) replaces the old HeaderBar on every
+// (marketing) route — landing, architecture, security, legal —
+// keeping the comprehensive footer untouched.
 
+"use client";
+
+import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import type { ShellProps } from "./types";
-import { HeaderBar } from "./HeaderBar";
+import { Footer } from "@/components/footer/Footer";
+
+// PillNav is a client component (gsap + ResizeObserver). Lazy-load
+// with ssr:false so the SSR pass doesn't try to instantiate it.
+const PillNav = dynamic(() => import("@/components/effects/PillNav"), {
+  ssr: false,
+});
+
+const PILL_NAV_ITEMS = [
+  { label: "Home",            href: "/" },
+  { label: "Architecture",    href: "/architecture" },
+  { label: "Security",        href: "/security" },
+  { label: "Decision Engine", href: "/decision-engine" },
+  { label: "Docs",            href: "/docs" },
+];
 
 export function MarketingShell({ children }: ShellProps) {
+  const pathname = usePathname() ?? "/";
   return (
     <div className="min-h-screen bg-[color:var(--color-surface-base)]">
-      <HeaderBar
-        nav={[
-          { label: "Architecture",   href: "/architecture" },
-          { label: "Security",       href: "/security" },
-          { label: "Decision Engine", href: "/decision-engine" },
-          { label: "Docs",           href: "/docs" },
-        ]}
+      <PillNav
+        logo="/brand/atlas-mark.svg"
+        logoAlt="Atlas"
+        items={PILL_NAV_ITEMS}
+        activeHref={pathname}
+        baseColor="#0F1117"
+        pillColor="#E6EAF2"
+        pillTextColor="#0F1117"
+        hoveredPillTextColor="#E6EAF2"
+        ease="power3.easeOut"
       />
       <main>{children}</main>
-      <footer className="border-t border-[color:var(--color-line-soft)] mt-32 px-20 py-16">
-        <div className="max-w-[1440px] mx-auto flex flex-wrap items-end justify-between gap-6">
-          <div>
-            <p className="text-[12px] uppercase tracking-[0.08em] text-[color:var(--color-ink-tertiary)]">
-              atlas — verifiable AI treasury OS for Solana
-            </p>
-            <p className="text-[12px] text-[color:var(--color-ink-tertiary)] mt-1">
-              every claim is publicly observable. every commitment is proof-bound.
-            </p>
-          </div>
-          <nav className="flex flex-wrap gap-x-6 gap-y-2 text-[12px] text-[color:var(--color-ink-secondary)]">
-            <a href="/legal">legal</a>
-            <a href="/security">security</a>
-            <a href="/docs">docs</a>
-            <a href="/infra">infra</a>
-            <a href="/proofs/live">proofs</a>
-          </nav>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

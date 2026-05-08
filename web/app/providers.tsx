@@ -16,6 +16,7 @@ import { initRealtime, startMockStream, stopMockStream } from "@/lib/realtime";
 import { CommandPalette, KeyboardShortcuts } from "@/components/command-palette";
 import { AlertCenter } from "@/components/system";
 import { useSessionStore } from "@/lib/auth";
+import { ToastProvider } from "@/components/primitives/Toast";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [qc] = useState(() => createQueryClient());
@@ -87,11 +88,13 @@ export function Providers({ children }: { children: ReactNode }) {
           autoConnect={false}
           onError={(e) => console.warn("[wallet]", e?.message ?? e)}
         >
-          {children}
-          <WalletPickerModal />
-          <CommandPalette />
-          <AlertCenter />
-          <KeyboardShortcuts />
+          <ToastProvider>
+            {children}
+            <WalletPickerModal />
+            <CommandPalette />
+            <AlertCenter />
+            <KeyboardShortcuts />
+          </ToastProvider>
         </WalletProvider>
       </ConnectionProvider>
     </QueryClientProvider>

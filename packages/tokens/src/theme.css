@@ -1,0 +1,82 @@
+/* @atlas/tokens · CSS variables.
+ *
+ * Import once from any consumer app:
+ *   @import "@atlas/tokens/theme.css";
+ *
+ * Variable names mirror atlas/web/app/globals.css so existing styles
+ * keep working when an app is migrated. Light mode override is in
+ * the same file so theme switches stay together.
+ */
+
+@theme {
+  --color-surface-base:    #06070A;
+  --color-surface-raised:  #0B0D12;
+  --color-surface-sunken:  #04050A;
+  --color-surface-inset:   #03040A;
+  --color-surface-glass:   rgba(11,13,18,0.55);
+
+  --color-ink-primary:   #E6EAF2;
+  --color-ink-secondary: #9AA3B5;
+  --color-ink-tertiary:  #5D6577;
+  --color-ink-inverted:  #06070A;
+  --color-ink-accent:    #7DB7FF;
+
+  --color-line-soft:   rgba(255,255,255,0.04);
+  --color-line-medium: rgba(255,255,255,0.08);
+  --color-line-strong: rgba(255,255,255,0.16);
+  --color-line-grid:   rgba(110,140,200,0.08);
+
+  --color-accent-electric: #3F8CFF;
+  --color-accent-zk:       #A682FF;
+  --color-accent-proof:    #F478C6;
+  --color-accent-execute:  #3CE39A;
+  --color-accent-warn:     #F7B955;
+  --color-accent-danger:   #FF6166;
+
+  --color-solana-violet: #9945FF;
+  --color-solana-cyan:   #19B5FE;
+  --color-solana-green:  #14F195;
+
+  --shadow-glow-electric: 0 0 24px rgba(63,140,255,0.35);
+  --shadow-glow-zk:       0 0 24px rgba(166,130,255,0.35);
+  --shadow-glow-proof:    0 0 24px rgba(244,120,198,0.30);
+  --shadow-glow-execute:  0 0 24px rgba(60,227,154,0.30);
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+
+  --ease-glide:      cubic-bezier(0.20, 0.80, 0.20, 1.00);
+  --ease-precise:    cubic-bezier(0.40, 0.00, 0.20, 1.00);
+  --ease-expressive: cubic-bezier(0.34, 1.56, 0.64, 1.00);
+  --ease-inertial:   cubic-bezier(0.10, 0.00, 0.00, 1.00);
+
+  --duration-instant: 60ms;
+  --duration-quick:   140ms;
+  --duration-medium:  220ms;
+  --duration-slow:    340ms;
+  --duration-cinema:  720ms;
+
+  --font-display: "Cabinet Grotesk", "General Sans", "Neue Montreal", system-ui, sans-serif;
+  --font-body:    "Geist", "Satoshi", "Inter Tight", system-ui, sans-serif;
+  --font-mono:    "IBM Plex Mono", "Geist Mono", ui-monospace, monospace;
+  --font-serif:   "Newsreader", "Source Serif Pro", "GT Sectra", Georgia, serif;
+}
+
+html[data-theme="light"] {
+  --color-surface-base:    #FAFAF7;
+  --color-surface-raised:  #FFFFFF;
+  --color-surface-sunken:  #F2F2EE;
+  --color-surface-glass:   rgba(255,255,255,0.65);
+
+  --color-ink-primary:     #06070A;
+  --color-ink-secondary:   #4A5160;
+  --color-ink-tertiary:    #767E8E;
+  --color-ink-inverted:    #FFFFFF;
+
+  --color-line-soft:       rgba(0,0,0,0.05);
+  --color-line-medium:     rgba(0,0,0,0.10);
+  --color-line-strong:     rgba(0,0,0,0.18);
+}

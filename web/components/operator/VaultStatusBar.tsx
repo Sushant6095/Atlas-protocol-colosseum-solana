@@ -8,7 +8,6 @@
 import { memo } from "react";
 import { Bell, Lock, ShieldAlert, Wifi } from "lucide-react";
 import { useRealtimeStatus, useRealtimeStore } from "@/lib/realtime";
-import { useShallow } from "zustand/react/shallow";
 import { cn } from "@/components/primitives";
 import { IdentifierMono } from "@/components/primitives/IdentifierMono";
 
@@ -27,22 +26,25 @@ function VaultStatusBarImpl({
   confidentialMode,
   privateExecution,
 }: VaultStatusBarProps) {
+  // Selectors return primitives — Zustand's default identity check
+  // is correct here. `useShallow` wraps the result in a fresh object
+  // each call which would itself trip React 19's getSnapshot cache.
   const status = useRealtimeStatus();
-  const slot = useRealtimeStore(useShallow((s) => {
+  const slot = useRealtimeStore((s) => {
     const t = s.topics["stream.network"];
     if (t?.snapshot) {
       const p = t.snapshot.payload as { slot?: number } | undefined;
       return p?.slot ?? t.snapshot.slot;
     }
     return undefined;
-  }));
-  const alertCount = useRealtimeStore(useShallow((s) => {
+  });
+  const alertCount = useRealtimeStore((s) => {
     let n = 0;
     for (const k of Object.keys(s.topics)) {
       if (k.endsWith(".alert") && s.topics[k]?.snapshot) n++;
     }
     return n;
-  }));
+  });
 
   return (
     <div className={cn(

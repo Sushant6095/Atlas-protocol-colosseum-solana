@@ -1,0 +1,13 @@
+/* Content overlay shell styles — kept minimal so the host page
+   theme cannot override them via specificity collisions. The overlay
+   uses inline styles for the holding card; this file only ships
+   reset rules in case future overlays move out of inline style. */
+
+#atlas-holding-overlay,
+#atlas-holding-overlay * {
+  box-sizing: border-box;
+}
+
+#atlas-holding-overlay {
+  font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
+}

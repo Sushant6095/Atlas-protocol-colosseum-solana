@@ -1,5 +1,93 @@
 # Atlas Changelog
 
+## Unreleased — Phase 24.0 (2026-05-07) — Directive 24 (Frontend Part 5 — Custom Visualizations, Realtime Engine, Distribution Surfaces, Accessibility, Ship Discipline)
+
+Phase 23 won the operator's day. Phase 24 ships Atlas everywhere
+the operator already lives — embeds, browser, iOS — and locks in
+the accessibility and performance ratchets that keep it shippable.
+
+### `@atlas/viz` — 11 custom visualizations
+- New workspace package `sdk/viz/`. Components: `RadialLiquidityMap`,
+  `SankeyFlow`, `ProofPipeline`, `DependencyGraph`, `SlotDriftHeatmap`,
+  `RiskRadar`, `ZkLattice`, `Globe`, `MerkleTreeViewer`,
+  `RebalanceTicker`, plus `KpiTile` / `DeltaTile` / `MonoNumber`
+  primitives in `tiles.ts`.
+- Every component exposes `useVizA11y()` for `aria-describedby` +
+  `dataTable` slot (WCAG 2.2 AA), a documented per-component perf
+  budget, and theme-by-CSS-variable resolution.
+
+### Realtime engine — background-tab discipline
+- New `web/lib/realtime/background-tab.ts`: `installBackgroundTabGate`
+  parks default-priority events while `document.visibilityState ===
+  "hidden"`; criticals (alerts, rebalance, PER) fall through. On
+  resume, parked snapshots replay in slot order in one render.
+- Wired into `store.ts`; barrel exports `isRealtimeHidden` +
+  `getSkippedWhileHiddenTotal` for the `/infra` "live updates
+  paused" pill.
+
+### `@atlas/widgets` — 7 named embeds + web-component
+- Added `bundle-landed.ts`, `tps.ts`, `last-rebalance.ts`,
+  `proof-of-reserve.ts` to bring the named-widget catalog to the
+  Phase 24 §3.1 set.
+- Added `web-component.ts` registering `<atlas-widget>` so any HTML
+  page can drop a single tag. Package exports + `package.json`
+  subpath exports updated.
+
+### Browser extension — `sdk/extension/`
+- New WXT-based MV3 extension targeting Chrome + Firefox. Toolbar
+  popup, side panel, content overlay, pre-sign overlay
+  (`PreSignOverlay`), and per-origin allowlist editor
+  (`AllowlistEditor`). Wallet bridge contract: pages emit
+  `atlas:wallet-intercept`; Atlas never touches keys.
+- Storage schema in `lib/storage.ts`; cross-context message types
+  in `lib/messaging.ts`.
+
+### iOS app — `sdk/ios/`
+- New SwiftUI app skeleton. Five tabs: Treasury, Activity, Alerts,
+  Approvals, Discover. `BiometricGate` locks on launch + after >30s
+  background. `MWASigner` protocol delegates signing to user-installed
+  wallets; Atlas never holds keys. `APP_STORE_NOTES.md` records the
+  submission profile.
+
+### QVAC overlays — web
+- Added `web/components/qvac/`: `PreSignExplainerModal`,
+  `InvoiceOcrModal`, `TranslationToggle`, `SecondOpinionAnalyst`.
+  Each binds to the @atlas/qvac adapters from Phase 19. Pre-sign
+  surfaces enforce numeric-token verification + always-on template
+  fallback; OCR keeps the image on-device; translation enforces
+  identifier preservation; analyst is advisory — operator must still
+  click.
+
+### `/docs/widgets`
+- New `(docs)/docs/widgets/page.tsx` renders live previews against
+  the demo deployment for all 7 named widgets, with web-component
+  + iframe embed snippets per card. `WidgetPreview` lives at
+  `web/components/qvac-docs/`.
+
+### i18n + RTL
+- New `web/lib/i18n/` + `web/messages/{en,ja,es,ar}.json`. Typed
+  `MessageCatalog` enforces parity at compile time; `useLocale()` +
+  `<LocalePicker />` persist via localStorage. Arabic flips
+  `<html dir="rtl">` automatically.
+
+### Ship discipline
+- `playwright.config.ts` — three projects (`e2e`, `perf`, `mobile`).
+  Golden-path spec asserts a clean axe-core scan
+  (`wcag2a + wcag2aa + wcag22aa`) on every public route. Perf spec
+  asserts ≤ 220 KB initial bundle + ≥ 50 fps for 5 s on the landing.
+- `lighthouserc.json` — desktop preset, 3 runs/route, hard floors:
+  perf ≥ 0.85 / a11y ≥ 0.95 / best-practices ≥ 0.92, FCP ≤ 1.5 s,
+  LCP ≤ 2.5 s, CLS ≤ 0.05, TBT ≤ 200 ms.
+- `.github/workflows/frontend-ci.yml` fans out type-check + ESLint,
+  Playwright + axe, and Lighthouse autorun. All three required.
+
+### Docs
+- `FRONTEND.md` — appended Phase 24 section covering @atlas/viz,
+  realtime tab discipline, widget catalog, extension, iOS, QVAC
+  overlays, i18n, ship discipline.
+
+---
+
 ## Unreleased — Phase 23.0 (2026-05-07) — Directive 23 (Frontend Part 4 — Operator Surfaces, Treasury OS, Confidential, Execution)
 
 Phase 22 wins the first 30 seconds; Phase 23 wins the next 30

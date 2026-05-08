@@ -8,6 +8,12 @@ import { memo, useEffect, useRef } from "react";
 import { useSceneSupervisor } from "@/lib/three/supervisor";
 import { cn } from "@/components/primitives";
 
+// SVG attribute hydration is byte-exact: the server stringifies a
+// number ("..78") and the client may serialize the same float as
+// ("..74"), drifting in the last decimal. Round to a fixed precision
+// before handing the value to React so both sides agree.
+const r4 = (n: number): number => Math.round(n * 10_000) / 10_000;
+
 function HeroLatticeImpl() {
   const ref = useRef<HTMLDivElement>(null);
   const { freeze, updateMultiplier } = useSceneSupervisor(ref, { surface: "landing" });
@@ -82,8 +88,8 @@ function HeroLatticeImpl() {
               key={i}
               x1={0}
               y1={0}
-              x2={Math.cos(a) * 88}
-              y2={Math.sin(a) * 88}
+              x2={r4(Math.cos(a) * 88)}
+              y2={r4(Math.sin(a) * 88)}
               stroke="url(#latticeGrad)"
               strokeOpacity={0.14}
               strokeWidth={0.4}
@@ -102,8 +108,8 @@ function HeroLatticeImpl() {
           return (
             <circle
               key={i}
-              cx={Math.cos(a) * 28}
-              cy={Math.sin(a) * 28}
+              cx={r4(Math.cos(a) * 28)}
+              cy={r4(Math.sin(a) * 28)}
               r={3}
               fill="#A682FF"
               fillOpacity={0.55}

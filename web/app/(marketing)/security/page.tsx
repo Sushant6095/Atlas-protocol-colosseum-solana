@@ -152,7 +152,7 @@ export default function Page() {
         body={
           <p className="text-[13px] text-[color:var(--color-ink-secondary)]">
             Disclosure scope follows the published threat model. Email{" "}
-            <code className="text-mono">security@atlas.fyi</code> with PoC + impact;
+            <code className="text-mono">security@atlasfi.in</code> with PoC + impact;
             timed-disclosure window 90 days. Public payout schedule lands with mainnet.
           </p>
         }

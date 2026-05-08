@@ -1,0 +1,37 @@
+{
+  "name": "@atlas/viz",
+  "version": "0.1.0",
+  "description": "Atlas custom visualization primitives — RadialLiquidityMap, SankeyFlow, ProofPipeline, DependencyGraph, SlotDriftHeatmap, RiskRadar, ZkLattice, Globe, MerkleTreeViewer, RebalanceTicker, plus tile primitives. Phase 24 §1.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./radial-liquidity-map": "./dist/RadialLiquidityMap.js",
+    "./sankey-flow":          "./dist/SankeyFlow.js",
+    "./proof-pipeline":       "./dist/ProofPipeline.js",
+    "./dependency-graph":     "./dist/DependencyGraph.js",
+    "./slot-drift-heatmap":   "./dist/SlotDriftHeatmap.js",
+    "./risk-radar":           "./dist/RiskRadar.js",
+    "./zk-lattice":           "./dist/ZkLattice.js",
+    "./globe":                "./dist/Globe.js",
+    "./merkle-tree-viewer":   "./dist/MerkleTreeViewer.js",
+    "./rebalance-ticker":     "./dist/RebalanceTicker.js",
+    "./tiles":                "./dist/tiles.js"
+  },
+  "scripts": {
+    "build": "tsc -p ."
+  },
+  "peerDependencies": {
+    "react":     "^19.0.0",
+    "react-dom": "^19.0.0",
+    "d3":        "^7.9.0"
+  },
+  "peerDependenciesMeta": {
+    "d3": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.6.0"
+  }
+}

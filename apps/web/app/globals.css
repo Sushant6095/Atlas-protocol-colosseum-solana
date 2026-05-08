@@ -1,0 +1,19 @@
+@import "tailwindcss";
+@import "@atlas/tokens/theme.css";
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  background: var(--color-surface-base);
+  color: var(--color-ink-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-accent-electric);
+  color: var(--color-ink-inverted);
+}

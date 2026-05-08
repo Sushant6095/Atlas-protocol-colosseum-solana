@@ -7,10 +7,13 @@
 
 import Link from "next/link";
 import { memo } from "react";
-import { Bell, Command, Sparkles } from "lucide-react";
-import { cn } from "@/components/primitives";
+import { Bell, Command } from "lucide-react";
+import { PleiadesIcon, cn } from "@/components/primitives";
 import { Button } from "@/components/primitives/Button";
-import { LiveStatusPill } from "@/components/system/LiveStatusPill";
+import { WalletStatusPill } from "@/components/system/WalletStatusPill";
+import { ConnectButton } from "@/components/ConnectButton";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { ProductButton } from "@/components/nav/ProductButton";
 import { useUiStore } from "@/lib/ui-store";
 
 interface HeaderBarProps {
@@ -31,24 +34,42 @@ function HeaderBarImpl({ nav, showRightRailToggle, compact }: HeaderBarProps) {
     <header
       className={cn(
         "sticky top-0 z-[var(--z-nav,100)] w-full",
-        "flex items-center gap-4 px-6",
+        "flex items-center gap-5 px-8",
         "border-b border-[color:var(--color-line-soft)]",
-        "bg-[color:var(--color-surface-base)]/80 backdrop-blur-xl",
-        compact ? "h-10" : "h-14",
+        "bg-[color:var(--color-surface-base)]/85 backdrop-blur-xl backdrop-saturate-150",
+        compact ? "h-10" : "h-20",
       )}
     >
-      <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight text-display">
-        <Sparkles className="h-4 w-4 text-[color:var(--color-accent-electric)]" />
-        <span className="text-[15px]">atlas</span>
+      <Link
+        href="/"
+        aria-label="Atlas — home"
+        className="group flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-electric)] rounded-[var(--radius-xs)]"
+      >
+        <PleiadesIcon
+          className={cn(
+            compact ? "h-6 w-6" : "h-9 w-9",
+            "transition-transform duration-[var(--duration-quick)] ease-[var(--ease-glide)] group-hover:scale-105",
+          )}
+        />
+        <span
+          className={cn(
+            "font-display font-semibold tracking-tight text-[color:var(--color-ink-primary)]",
+            compact ? "text-lg" : "text-2xl",
+          )}
+        >
+          Atlas
+        </span>
       </Link>
+      {!compact && <ProductButton />}
       {nav?.length ? (
-        <nav className="hidden md:flex items-center gap-1 ml-2">
+        <nav className="hidden md:flex items-center gap-1 ml-4">
           {nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "px-3 py-1.5 rounded-[var(--radius-sm)] text-[13px]",
+                "px-4 py-2 rounded-[var(--radius-sm)] font-medium",
+                compact ? "text-[13px]" : "text-[15px]",
                 "text-[color:var(--color-ink-secondary)]",
                 "hover:text-[color:var(--color-ink-primary)] hover:bg-[color:var(--color-line-soft)]",
                 "transition-colors duration-[var(--duration-quick)] ease-[var(--ease-precise)]",
@@ -62,7 +83,11 @@ function HeaderBarImpl({ nav, showRightRailToggle, compact }: HeaderBarProps) {
 
       <div className="flex-1" />
 
-      <LiveStatusPill />
+      {/* Wallet-keyed status pill — hidden when disconnected so the
+          chrome is silent until there's something worth saying. */}
+      <div className="hidden sm:flex items-center mx-3">
+        <WalletStatusPill />
+      </div>
 
       <button
         type="button"
@@ -89,11 +114,15 @@ function HeaderBarImpl({ nav, showRightRailToggle, compact }: HeaderBarProps) {
         <Bell className="h-4 w-4" />
       </button>
 
+      <ThemeToggle />
+
       {showRightRailToggle ? (
         <Button variant="ghost" size="sm" onClick={toggleRightRail}>
           Toggle rail
         </Button>
       ) : null}
+
+      <ConnectButton />
     </header>
   );
 }

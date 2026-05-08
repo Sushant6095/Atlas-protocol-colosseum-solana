@@ -15,6 +15,7 @@
 import { create } from "zustand";
 import { realtimeBudget } from "../tokens";
 import { BoundedLru } from "./lru";
+import { installBackgroundTabGate, shouldParkWhileHidden } from "./background-tab";
 import { RealtimeTransport, type TransportStatus } from "./transport";
 import { topicPriority, type AtlasRealtimeEvent } from "./topics";
 
@@ -49,6 +50,7 @@ export const useRealtimeStore = create<RealtimeState>(() => initialState);
 
 let transport: RealtimeTransport | null = null;
 let rafQueued = false;
+let teardownGate: (() => void) | null = null;
 const dedup = new BoundedLru<string>(realtimeBudget.dedupLruEntries);
 
 function ensureTopic(t: string): PerTopic {
@@ -87,6 +89,9 @@ function flushBuffersOnRaf(): void {
 function pushEvent(evt: AtlasRealtimeEvent): void {
   if (dedup.has(evt.event_id)) return;
   dedup.set(evt.event_id, true);
+
+  // Tab-hidden gate: park default-priority ticks; criticals fall through.
+  if (shouldParkWhileHidden(evt)) return;
 
   const topic = ensureTopic(evt.topic);
   const lagMs = Math.max(0, Date.now() - (evt.emitted_at_ms ?? Date.now()));
@@ -144,7 +149,24 @@ export function initRealtime(opts: InitTransportOptions): RealtimeTransport {
   transport.onStatus((s) => useRealtimeStore.setState({ status: s }));
   transport.onEvent((e) => pushEvent(e));
   transport.connect();
+  teardownGate = installBackgroundTabGate((events) => {
+    // Visible again — replay parked snapshots in slot order. The
+    // dedup LRU has already seen these ids; reset the entries we
+    // need so pushEvent doesn't drop them.
+    for (const e of events) {
+      dedup.set(e.event_id + ":resume", true);
+      pushEventBypass(e);
+    }
+  });
   return transport;
+}
+
+/** Internal — push without re-checking the hidden gate. */
+function pushEventBypass(evt: AtlasRealtimeEvent): void {
+  const topic = ensureTopic(evt.topic);
+  topic.buffer.push(evt);
+  for (const sub of topic.streamSubs) sub(evt);
+  flushBuffersOnRaf();
 }
 
 export function getTransport(): RealtimeTransport | null {
@@ -154,6 +176,8 @@ export function getTransport(): RealtimeTransport | null {
 export function disposeRealtime(): void {
   transport?.close();
   transport = null;
+  teardownGate?.();
+  teardownGate = null;
   useRealtimeStore.setState(initialState);
 }
 

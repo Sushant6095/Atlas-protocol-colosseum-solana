@@ -20,14 +20,14 @@ const sec = (ms: number) => ms / 1000;
 
 export const transitions = {
   instantGlide: { duration: sec(duration.instant), ease: ease.glide },
-  quickPress:   { duration: sec(duration.quick),   ease: ease.precise },
-  mediumReveal: { duration: sec(duration.medium),  ease: ease.precise },
-  slowPanel:    { duration: sec(duration.slow),    ease: ease.glide },
-  cinemaHero:   { duration: sec(duration.cinema),  ease: ease.glide },
+  quickPress:   { duration: sec(duration.quick),   ease: [...ease.precise] },
+  mediumReveal: { duration: sec(duration.medium),  ease: [...ease.precise] },
+  slowPanel:    { duration: sec(duration.slow),    ease: [...ease.glide] },
+  cinemaHero:   { duration: sec(duration.cinema),  ease: [...ease.glide] },
   /** Reserved for success moments only. */
-  expressive:   { duration: sec(duration.medium),  ease: ease.expressive },
+  expressive:   { duration: sec(duration.medium),  ease: [...ease.expressive] },
   /** Used by drag-release and fling primitives. */
-  inertial:     { duration: sec(duration.medium),  ease: ease.inertial },
+  inertial:     { duration: sec(duration.medium),  ease: [...ease.inertial] },
 } as const satisfies Record<string, Transition>;
 
 export type TransitionToken = keyof typeof transitions;

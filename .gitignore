@@ -40,3 +40,12 @@ prover/zkvm-program/proofs/
 # Docs (exclude all md except root README.md)
 docs/
 
+
+# Claude Code session transcripts (private)
+claude-session.jsonl
+*.session.jsonl
+
+# Swift / Xcode build artifacts
+**/.build/
+*.xcodeproj/xcuserdata/
+.swiftpm/

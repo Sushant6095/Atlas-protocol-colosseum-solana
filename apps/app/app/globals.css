@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "@atlas/tokens/theme.css";
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  background: var(--color-surface-base);
+  color: var(--color-ink-primary);
+  font-family: var(--font-body);
+}

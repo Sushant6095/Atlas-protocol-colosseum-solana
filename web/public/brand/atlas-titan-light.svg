@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80" fill="none" role="img" aria-label="Atlas — Titan bearing the celestial sphere (light surface)">
+  <title>Atlas</title>
+  <desc>Light-surface variant of the Titan mark — darker palette for contrast on white backgrounds.</desc>
+
+  <defs>
+    <linearGradient id="figureGradL" x1="32" y1="28" x2="32" y2="76" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5A2DDB"/>
+      <stop offset="0.55" stop-color="#1F5DD6"/>
+      <stop offset="1" stop-color="#0E50C7"/>
+    </linearGradient>
+    <linearGradient id="sphereGradL" x1="20" y1="6" x2="44" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5A2DDB"/>
+      <stop offset="1" stop-color="#0E50C7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- celestial sphere -->
+  <circle cx="32" cy="17" r="10" stroke="url(#sphereGradL)" stroke-width="1.6" fill="none"/>
+  <ellipse cx="32" cy="17" rx="10" ry="3" stroke="url(#sphereGradL)" stroke-width="1.0" fill="none" opacity="0.9"/>
+  <ellipse cx="32" cy="17" rx="3" ry="10" stroke="url(#sphereGradL)" stroke-width="1.0" fill="none" opacity="0.9"/>
+  <ellipse cx="32" cy="17" rx="10" ry="4.5" transform="rotate(28 32 17)" stroke="url(#sphereGradL)" stroke-width="0.8" fill="none" opacity="0.6"/>
+  <circle cx="32" cy="6.5" r="1.6" fill="#0E50C7"/>
+
+  <!-- titan figure -->
+  <g stroke="url(#figureGradL)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M 24.5 28 Q 21 32 22.5 36 Q 24.5 40 27 41" />
+    <path d="M 39.5 28 Q 43 32 41.5 36 Q 39.5 40 37 41" />
+    <path d="M 27 41 L 28 53" />
+    <path d="M 37 41 L 36 53" />
+    <path d="M 27 53 L 37 53" stroke-width="2.6"/>
+    <path d="M 28 53 Q 22 60 18 64 Q 14 68 12 72" />
+    <path d="M 36 53 Q 42 60 46 64 Q 50 68 52 72" />
+  </g>
+
+  <circle cx="32" cy="33" r="3.4" fill="url(#figureGradL)"/>
+  <circle cx="24.5" cy="28" r="1.6" fill="url(#figureGradL)"/>
+  <circle cx="39.5" cy="28" r="1.6" fill="url(#figureGradL)"/>
+  <circle cx="12" cy="72" r="1.6" fill="url(#figureGradL)"/>
+  <circle cx="52" cy="72" r="1.6" fill="url(#figureGradL)"/>
+
+  <line x1="6" y1="76" x2="58" y2="76" stroke="#0E50C7" stroke-width="0.5" stroke-dasharray="0.8 1.6" opacity="0.45"/>
+</svg>

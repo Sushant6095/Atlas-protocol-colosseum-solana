@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 40" fill="none" role="img" aria-label="Atlas">
+  <title>Atlas</title>
+
+  <defs>
+    <linearGradient id="favF" x1="16" y1="14" x2="16" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A682FF"/>
+      <stop offset="1" stop-color="#3F8CFF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Simplified sphere — single circle + cross (meridian/equator) -->
+  <circle cx="16" cy="9" r="5" stroke="url(#favF)" stroke-width="1.2" fill="none"/>
+  <line x1="11" y1="9"  x2="21" y2="9"  stroke="url(#favF)" stroke-width="0.8" opacity="0.85"/>
+  <line x1="16" y1="4"  x2="16" y2="14" stroke="url(#favF)" stroke-width="0.8" opacity="0.85"/>
+  <circle cx="16" cy="3.5" r="0.9" fill="#FFFFFF"/>
+
+  <!-- Simplified figure: two arms V, torso, two legs V -->
+  <g stroke="url(#favF)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- arms (V going up to sphere) -->
+    <path d="M 12.5 14 L 13.5 20"/>
+    <path d="M 19.5 14 L 18.5 20"/>
+    <!-- torso -->
+    <path d="M 13.5 20 L 18.5 20"/>
+    <path d="M 16 20 L 16 26"/>
+    <!-- legs (V splaying out) -->
+    <path d="M 16 26 L 8  35"/>
+    <path d="M 16 26 L 24 35"/>
+  </g>
+
+  <!-- head -->
+  <circle cx="16" cy="17" r="2" fill="url(#favF)"/>
+</svg>

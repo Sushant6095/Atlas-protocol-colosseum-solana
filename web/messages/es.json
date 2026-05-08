@@ -1,0 +1,18 @@
+{
+  "nav.docs": "Documentación",
+  "nav.dashboard": "Panel",
+  "nav.intel": "Inteligencia",
+  "nav.infra": "/infra",
+  "presign.title": "Confirmar antes de firmar",
+  "presign.subtitle": "Atlas explica cada transacción antes de que tu billetera solicite una firma.",
+  "presign.approve": "Aprobar",
+  "presign.approveAnyway": "Aprobar de todos modos",
+  "presign.reject": "Rechazar",
+  "presign.localLLM": "LLM local",
+  "presign.template": "plantilla verificada",
+  "rt.live": "En vivo",
+  "rt.degraded": "Degradado",
+  "rt.paused": "Actualizaciones en vivo pausadas",
+  "alerts.empty": "Todo en orden.",
+  "alerts.acknowledge": "Confirmar"
+}

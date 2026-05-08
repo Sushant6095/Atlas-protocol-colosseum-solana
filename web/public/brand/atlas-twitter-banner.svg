@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 500" role="img" aria-label="Atlas — Verifiable AI DeFi for Solana">
+  <title>Atlas — Verifiable AI DeFi for Solana</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1500" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#05060f"/>
+      <stop offset="0.55" stop-color="#0a0d28"/>
+      <stop offset="1" stop-color="#0d1030"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="1100" cy="180" r="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#29d3ff" stop-opacity="0.45"/>
+      <stop offset="0.5" stop-color="#7c5cff" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#7c5cff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orb2" cx="380" cy="420" r="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c5cff" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#7c5cff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="markG" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#7c5cff"/>
+      <stop offset="0.55" stop-color="#5b8cff"/>
+      <stop offset="1" stop-color="#29d3ff"/>
+    </linearGradient>
+    <radialGradient id="coreG" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.35" stop-color="#29d3ff"/>
+      <stop offset="1" stop-color="#29d3ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#29d3ff" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#29d3ff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#7c5cff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- bg + nebula -->
+  <rect width="1500" height="500" fill="url(#bg)"/>
+  <rect width="1500" height="500" fill="url(#orb)"/>
+  <rect width="1500" height="500" fill="url(#orb2)"/>
+
+  <!-- starfield -->
+  <g fill="#ffffff">
+    <circle cx="80"   cy="60"  r="0.9" opacity="0.7"/>
+    <circle cx="180"  cy="120" r="1.3" opacity="0.85"/>
+    <circle cx="260"  cy="40"  r="0.7" opacity="0.6"/>
+    <circle cx="540"  cy="80"  r="1.0" opacity="0.7"/>
+    <circle cx="720"  cy="50"  r="0.8" opacity="0.6"/>
+    <circle cx="900"  cy="110" r="1.1" opacity="0.7"/>
+    <circle cx="1180" cy="60"  r="0.7" opacity="0.55"/>
+    <circle cx="1320" cy="140" r="1.4" opacity="0.9"/>
+    <circle cx="1430" cy="80"  r="0.8" opacity="0.6"/>
+    <circle cx="120"  cy="380" r="0.9" opacity="0.55"/>
+    <circle cx="240"  cy="450" r="1.2" opacity="0.7"/>
+    <circle cx="1240" cy="430" r="1.0" opacity="0.65"/>
+    <circle cx="1380" cy="370" r="0.9" opacity="0.6"/>
+    <circle cx="1450" cy="450" r="1.4" opacity="0.85"/>
+  </g>
+
+  <!-- subtle latitude lines (nod to atlas/maps) -->
+  <g stroke="#ffffff" stroke-opacity="0.04" stroke-width="1" fill="none">
+    <path d="M0 130 H1500"/>
+    <path d="M0 250 H1500"/>
+    <path d="M0 370 H1500"/>
+  </g>
+
+  <!-- armillary sphere mark -->
+  <g transform="translate(420 250)">
+    <g stroke="url(#markG)" stroke-width="5" fill="none" stroke-linecap="round">
+      <circle cx="0" cy="0" r="110"/>
+      <ellipse cx="0" cy="0" rx="110" ry="30"/>
+      <ellipse cx="0" cy="0" rx="30" ry="110"/>
+      <ellipse cx="0" cy="0" rx="110" ry="44" transform="rotate(28)" opacity="0.7"/>
+      <line x1="0" y1="-130" x2="0" y2="-118"/>
+      <line x1="0" y1="118"  x2="0" y2="130"/>
+    </g>
+    <circle cx="0" cy="0" r="34" fill="url(#coreG)"/>
+    <circle cx="0" cy="0" r="9"  fill="#ffffff"/>
+    <circle cx="0" cy="-130" r="3" fill="#29d3ff"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="600" y="280"
+        font-family="ui-sans-serif, -apple-system, 'Inter', 'SF Pro Display', system-ui, sans-serif"
+        font-size="148" font-weight="600" letter-spacing="-6"
+        fill="#f5f7ff">atlas</text>
+
+  <!-- divider -->
+  <rect x="600" y="320" width="640" height="1" fill="url(#rule)"/>
+
+  <!-- tagline -->
+  <text x="600" y="360"
+        font-family="ui-sans-serif, -apple-system, 'Inter', system-ui, sans-serif"
+        font-size="28" font-weight="500" letter-spacing="-0.5"
+        fill="#c9cfe8">Verifiable AI DeFi for Solana.</text>
+
+  <!-- subline -->
+  <text x="600" y="394"
+        font-family="ui-sans-serif, -apple-system, 'Inter', system-ui, sans-serif"
+        font-size="18" font-weight="400" letter-spacing="0.5"
+        fill="#7c83a8">SP1 zkVM proofs · onchain verified · Token-2022</text>
+
+  <!-- corner motto -->
+  <text x="1460" y="468" text-anchor="end"
+        font-family="ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace"
+        font-size="14" letter-spacing="2"
+        fill="#5b8cff" opacity="0.7">TRUST · THE · MATH</text>
+</svg>

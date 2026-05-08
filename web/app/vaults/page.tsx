@@ -4,8 +4,15 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, Layers, ShieldCheck, Filter, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Footer } from "@/components/Footer";
 import { VAULTS, type AtlasVaultMeta } from "@/lib/vaults";
+
+// ElectricBorder uses canvas + ResizeObserver — client-only.
+const ElectricBorder = dynamic(
+  () => import("@/components/effects/ElectricBorder"),
+  { ssr: false },
+);
 
 const CATS = ["All", "Stable", "Volatile", "LST", "Hybrid", "RWA", "LP"] as const;
 type Cat = (typeof CATS)[number];
@@ -111,9 +118,22 @@ export default function VaultsPage() {
       {/* card grid */}
       <section className="mx-auto max-w-6xl px-6 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {list.map((v, i) => (
-            <VaultCard key={v.symbol} vault={v} idx={i} />
-          ))}
+          {list.map((v, i) =>
+            i === 0 ? (
+              <ElectricBorder
+                key={v.symbol}
+                color="#3F8CFF"
+                speed={1}
+                chaos={0.14}
+                thickness={2}
+                style={{ borderRadius: 16 }}
+              >
+                <VaultCard vault={v} idx={i} />
+              </ElectricBorder>
+            ) : (
+              <VaultCard key={v.symbol} vault={v} idx={i} />
+            ),
+          )}
         </div>
       </section>
 

@@ -12,6 +12,10 @@ const nextConfig = {
     // from each partner's official site. We trust them; allow SVG.
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    remotePatterns: [
+      { protocol: "https", hostname: "cdn.brandfetch.io" },
+      { protocol: "https", hostname: "asset.brandfetch.io" },
+    ],
   },
   webpack: (config) => {
     // `@atlas/qvac` is a workspace TS package (sdk/qvac). Until it's

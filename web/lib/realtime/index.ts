@@ -17,3 +17,8 @@ export {
   useRealtimeLagMs,
   useRealtimeDroppedTotal,
 } from "./hooks";
+export {
+  isHidden as isRealtimeHidden,
+  getSkippedWhileHiddenTotal,
+} from "./background-tab";
+export { startMockStream, stopMockStream } from "./mock-stream";

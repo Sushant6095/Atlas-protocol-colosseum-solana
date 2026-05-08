@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="Atlas brand sheet">
+  <title>Atlas brand sheet — Pleiades</title>
+
+  <!-- background -->
+  <rect width="1200" height="720" fill="#06070A"/>
+
+  <defs>
+    <linearGradient id="bsLine" x1="0" y1="1" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#A682FF"/>
+      <stop offset="0.55" stop-color="#5B8CFF"/>
+      <stop offset="1" stop-color="#3F8CFF"/>
+    </linearGradient>
+    <radialGradient id="bsCons" cx="0.5" cy="0.59" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.35" stop-color="#3F8CFF"/>
+      <stop offset="0.7" stop-color="#A682FF" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#A682FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- reusable mark at viewBox 0 0 64 64 -->
+    <symbol id="markPleiades" viewBox="0 0 64 64">
+      <g stroke="url(#bsLine)" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.85">
+        <line x1="32" y1="8"  x2="22" y2="27"/>
+        <line x1="22" y1="27" x2="14" y2="48"/>
+        <line x1="32" y1="8"  x2="42" y2="27"/>
+        <line x1="42" y1="27" x2="50" y2="48"/>
+        <line x1="22" y1="27" x2="32" y2="38"/>
+        <line x1="32" y1="38" x2="42" y2="27"/>
+      </g>
+      <circle cx="32" cy="38" r="9" fill="url(#bsCons)"/>
+      <circle cx="32" cy="8"  r="2.4" fill="#3F8CFF"/>
+      <circle cx="32" cy="8"  r="1.0" fill="#FFFFFF"/>
+      <circle cx="22" cy="27" r="1.8" fill="#A682FF"/>
+      <circle cx="22" cy="27" r="0.7" fill="#FFFFFF"/>
+      <circle cx="42" cy="27" r="1.8" fill="#A682FF"/>
+      <circle cx="42" cy="27" r="0.7" fill="#FFFFFF"/>
+      <circle cx="32" cy="38" r="3.2" fill="#FFFFFF"/>
+      <circle cx="32" cy="38" r="2.0" fill="#3F8CFF"/>
+      <circle cx="32" cy="38" r="0.9" fill="#FFFFFF"/>
+      <circle cx="14" cy="48" r="1.8" fill="#F478C6"/>
+      <circle cx="14" cy="48" r="0.7" fill="#FFFFFF"/>
+      <circle cx="50" cy="48" r="1.8" fill="#F478C6"/>
+      <circle cx="50" cy="48" r="0.7" fill="#FFFFFF"/>
+      <circle cx="32" cy="56" r="1.4" fill="#3CE39A" opacity="0.85"/>
+      <circle cx="32" cy="56" r="0.5" fill="#FFFFFF"/>
+      <line x1="14" y1="56" x2="50" y2="56" stroke="#3F8CFF" stroke-width="0.4" stroke-dasharray="0.5 1.5" opacity="0.35"/>
+    </symbol>
+  </defs>
+
+  <!-- header -->
+  <text x="60" y="80" fill="#E6EAF2" font-family="'Cabinet Grotesk','General Sans',ui-sans-serif,system-ui,sans-serif" font-size="40" font-weight="700" letter-spacing="3">ATLAS · Pleiades</text>
+  <text x="60" y="112" fill="#9AA3B5" font-family="'Geist','Inter Tight',ui-sans-serif,system-ui,sans-serif" font-size="16" letter-spacing="0.5">Seven stars · seven agents · one consensus</text>
+  <line x1="60" y1="130" x2="1140" y2="130" stroke="#3F8CFF" stroke-width="0.6" opacity="0.3"/>
+
+  <!-- section: Mark variants -->
+  <text x="60" y="170" fill="#5D6577" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="11" letter-spacing="1.5">01 · MARK</text>
+
+  <!-- mark large -->
+  <use href="#markPleiades" x="60" y="200" width="240" height="240"/>
+
+  <!-- mark medium -->
+  <use href="#markPleiades" x="340" y="280" width="120" height="120"/>
+
+  <!-- mark small -->
+  <use href="#markPleiades" x="500" y="320" width="64" height="64"/>
+
+  <!-- mark tiny -->
+  <use href="#markPleiades" x="600" y="340" width="32" height="32"/>
+
+  <!-- mark on alt surface -->
+  <rect x="700" y="240" width="240" height="200" fill="#0B0D12" stroke="#3F8CFF" stroke-width="0.5" opacity="1"/>
+  <use href="#markPleiades" x="780" y="270" width="80" height="80"/>
+  <text x="700" y="468" fill="#5D6577" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="10" letter-spacing="1">on raised surface</text>
+
+  <!-- section: Wordmark -->
+  <text x="60" y="500" fill="#5D6577" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="11" letter-spacing="1.5">02 · WORDMARK</text>
+
+  <use href="#markPleiades" x="60" y="520" width="64" height="64"/>
+  <line x1="138" y1="534" x2="138" y2="570" stroke="#3F8CFF" stroke-width="0.4" opacity="0.4"/>
+  <text x="156" y="572" fill="#E6EAF2" font-family="'Cabinet Grotesk','General Sans',ui-sans-serif,system-ui,sans-serif" font-size="48" font-weight="600" letter-spacing="8">ATLAS</text>
+  <line x1="156" y1="590" x2="396" y2="590" stroke="#F478C6" stroke-width="0.6" opacity="0.4"/>
+
+  <!-- section: Color tokens -->
+  <text x="60" y="640" fill="#5D6577" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="11" letter-spacing="1.5">03 · COLOR</text>
+
+  <g font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="10" fill="#9AA3B5" letter-spacing="0.5">
+    <rect x="60"  y="660" width="40" height="40" fill="#06070A" stroke="#3F8CFF" stroke-width="0.5"/>
+    <text x="108" y="678">surface.base</text>
+    <text x="108" y="694">#06070A</text>
+
+    <rect x="220" y="660" width="40" height="40" fill="#3F8CFF"/>
+    <text x="268" y="678">accent.electric</text>
+    <text x="268" y="694">#3F8CFF</text>
+
+    <rect x="380" y="660" width="40" height="40" fill="#A682FF"/>
+    <text x="428" y="678">accent.zk</text>
+    <text x="428" y="694">#A682FF</text>
+
+    <rect x="540" y="660" width="40" height="40" fill="#F478C6"/>
+    <text x="588" y="678">accent.proof</text>
+    <text x="588" y="694">#F478C6</text>
+
+    <rect x="700" y="660" width="40" height="40" fill="#3CE39A"/>
+    <text x="748" y="678">accent.execute</text>
+    <text x="748" y="694">#3CE39A</text>
+
+    <rect x="860" y="660" width="40" height="40" fill="#E6EAF2"/>
+    <text x="908" y="678">ink.primary</text>
+    <text x="908" y="694">#E6EAF2</text>
+  </g>
+
+  <!-- side annotation -->
+  <g font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="10" fill="#5D6577" letter-spacing="0.5">
+    <text x="700" y="180">7 stars · 7 agents</text>
+    <text x="700" y="196">apex · verification point</text>
+    <text x="700" y="212">center · consensus</text>
+    <text x="700" y="228">base · foundation</text>
+  </g>
+</svg>

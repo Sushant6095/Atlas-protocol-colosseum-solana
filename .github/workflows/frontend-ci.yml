@@ -1,0 +1,83 @@
+name: frontend-ci
+
+# Phase 24 §8 — frontend ship discipline. Three parallel jobs:
+#  • Type-check + ESLint
+#  • Playwright golden-path + axe-core a11y scan
+#  • Lighthouse CI against a production build
+#
+# All three must pass for a frontend-touching PR to be mergeable.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "atlas/web/**"
+      - "atlas/sdk/viz/**"
+      - "atlas/sdk/widgets/**"
+      - "atlas/sdk/qvac/**"
+      - ".github/workflows/frontend-ci.yml"
+  pull_request:
+    paths:
+      - "atlas/web/**"
+      - "atlas/sdk/viz/**"
+      - "atlas/sdk/widgets/**"
+      - "atlas/sdk/qvac/**"
+      - ".github/workflows/frontend-ci.yml"
+
+defaults:
+  run:
+    working-directory: atlas/web
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: atlas/web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm exec eslint .
+
+  e2e-axe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: atlas/web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test --project=e2e
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: atlas/web/playwright-report
+          retention-days: 7
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: atlas/web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm dlx @lhci/cli@0.14.x autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}

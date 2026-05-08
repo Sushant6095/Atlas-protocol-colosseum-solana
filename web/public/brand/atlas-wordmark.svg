@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" fill="none" role="img" aria-label="Atlas">
+  <title>Atlas</title>
+  <defs>
+    <linearGradient id="atlasWG" x1="10" y1="70" x2="70" y2="10" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c5cff"/>
+      <stop offset="0.55" stop-color="#5b8cff"/>
+      <stop offset="1" stop-color="#29d3ff"/>
+    </linearGradient>
+    <radialGradient id="atlasWCore" cx="40" cy="40" r="7" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.4" stop-color="#29d3ff"/>
+      <stop offset="1" stop-color="#29d3ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <g stroke="url(#atlasWG)" stroke-width="3" fill="none" stroke-linecap="round">
+    <circle cx="40" cy="40" r="27"/>
+    <ellipse cx="40" cy="40" rx="27" ry="7.5"/>
+    <ellipse cx="40" cy="40" rx="7.5" ry="27"/>
+    <ellipse cx="40" cy="40" rx="27" ry="11" transform="rotate(28 40 40)" opacity="0.7"/>
+    <line x1="40" y1="8" x2="40" y2="13"/>
+    <line x1="40" y1="67" x2="40" y2="72"/>
+  </g>
+  <circle cx="40" cy="40" r="7" fill="url(#atlasWCore)"/>
+  <circle cx="40" cy="40" r="2.2" fill="#ffffff"/>
+  <circle cx="40" cy="8" r="1.9" fill="#29d3ff"/>
+
+  <text x="92" y="56"
+        font-family="ui-sans-serif, -apple-system, 'Inter', 'SF Pro Display', system-ui, sans-serif"
+        font-size="44" font-weight="600" letter-spacing="-1.5"
+        fill="#0b0d1f">atlas</text>
+</svg>

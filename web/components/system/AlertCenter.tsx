@@ -7,12 +7,11 @@
 
 "use client";
 
-import { memo, useEffect } from "react";
+import { memo, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { useUiStore } from "@/lib/ui-store";
 import { useRealtimeStore } from "@/lib/realtime";
-import { useShallow } from "zustand/react/shallow";
 import { cn } from "@/components/primitives";
 import { AlertPill } from "@/components/primitives/AlertPill";
 import { transitions } from "@/lib/motion";
@@ -21,21 +20,24 @@ function AlertCenterImpl() {
   const open = useUiStore((s) => s.alertCenterOpen);
   const close = useUiStore((s) => s.setAlertCenterOpen);
 
-  const alerts = useRealtimeStore(
-    useShallow((s) => {
-      const items: { topic: string; ts: number; text: string }[] = [];
-      for (const [topic, t] of Object.entries(s.topics)) {
-        if (!topic.endsWith(".alert") || !t.snapshot) continue;
-        const payload = t.snapshot.payload as { text?: string } | undefined;
-        items.push({
-          topic,
-          ts: t.snapshot.emitted_at_ms ?? 0,
-          text: payload?.text ?? "(alert)",
-        });
-      }
-      return items.sort((a, b) => b.ts - a.ts).slice(0, 50);
-    }),
-  );
+  // Read the stable `topics` reference; derive in render. Building
+  // an array inside the selector with `useShallow` re-creates fresh
+  // objects on every store change → React 19 detects an
+  // "uncached" snapshot and loops.
+  const topics = useRealtimeStore((s) => s.topics);
+  const alerts = useMemo(() => {
+    const items: { topic: string; ts: number; text: string }[] = [];
+    for (const [topic, t] of Object.entries(topics)) {
+      if (!topic.endsWith(".alert") || !t.snapshot) continue;
+      const payload = t.snapshot.payload as { text?: string } | undefined;
+      items.push({
+        topic,
+        ts: t.snapshot.emitted_at_ms ?? 0,
+        text: payload?.text ?? "(alert)",
+      });
+    }
+    return items.sort((a, b) => b.ts - a.ts).slice(0, 50);
+  }, [topics]);
 
   // Mark "user opened" so the next push-permission prompt is allowed.
   useEffect(() => {

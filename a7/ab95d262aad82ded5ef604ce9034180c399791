@@ -1,0 +1,817 @@
+apps/dev/app/layout.tsx
+  s_c3576656714da0::t_d15fd0f79c4fb9 1-2,6-7,9-12,17-18,45,99-100
+  s_c3576656714da0::t_9dded3d53cd7cf 3-5,8,13-16,19-44,46-98
+sdk/viz/tsconfig.json
+  s_c3576656714da0::t_7ca06559b47a45 1-14
+web/components/hero/Globe.partners.ts
+  s_c3576656714da0::t_6c56e5aaae0eea 1-106
+web/components/ui/moving-border.tsx
+  s_c3576656714da0::t_22df4f7160f88a 9
+  s_c3576656714da0::t_933d2e95e7896e 1-8,10-139
+web/components/ui/sparkles.tsx
+  s_c3576656714da0::t_22df4f7160f88a 8
+  s_c3576656714da0::t_933d2e95e7896e 1-7,9-434
+web/components/r3f/LiquidEther.css
+  s_c3576656714da0::t_6f4f57246f25ac 1-7
+web/components/primitives/ProofBadge.tsx
+  s_c3576656714da0::t_1c1ade15716ca7 1-84
+web/components/nav/MegaMenu.tsx
+  s_c3576656714da0::t_9ccde866b72c18 1-2,5,42,44,46-47,53,61-63,97,124,145,175
+  s_c3576656714da0::t_f4f826d6ff18cd 3-4,6-41,43,45,48-52,54-60,64-96,98-123,125-144,146-174
+sdk/viz/src/SlotDriftHeatmap.tsx
+  s_c3576656714da0::t_10b0be16919b34 1-105
+packages/ui/src/AllocationBadge.tsx
+  s_c3576656714da0::t_ac97f28b28e5cb 1-55
+web/components/scroll/SmoothScrollProvider.tsx
+  s_c3576656714da0::t_f4626d3c826ebb 3,5-11,43,47-71
+  s_c3576656714da0::t_67703b7b5362ff 1-2,12,31-42,44-46,72
+  s_c3576656714da0::t_9e2d7b50ba00a5 4,13-30
+web/components/primitives/PhonePreview.tsx
+  s_c3576656714da0::t_cc8c4cf104f388 1-51
+web/components/marquee/LogoLoop.css
+  s_f63398d3bbe21a::t_457342827ced83 1-183
+web/public/brand/atlas-mark.svg
+  s_1a3cdfd3ef2c6e::t_00c7684977ac90 4,6,9-13,15-35
+  s_1a3cdfd3ef2c6e::t_d7b83707188199 1-3,5,7-8,14,36
+web/components/primitives/AnimatedNumber.tsx
+  s_c3576656714da0::t_cc8c4cf104f388 1-69
+web/app/globals.css
+  s_c3576656714da0::t_359cc394076593 139-146,149-150
+  s_c3576656714da0::t_08c018b785a97f 64-76,82
+  s_c3576656714da0::t_26558ddea5da09 172-200
+  s_c3576656714da0::t_2aa63be46e8eaa 2-6,346-401,443-523
+  s_c3576656714da0::t_12a8b3e4e3ca85 273-279,307-335
+  s_c3576656714da0::t_52f50398b6779b 7-10,12,26,34,36-39
+  s_c3576656714da0::t_a7d6069ee03d1a 54
+  s_c3576656714da0::t_a77187ef4fbe2e 11
+  s_c3576656714da0::t_5a6bc0d534ef3a 134
+  s_c3576656714da0::t_a0fa0691006b71 156-171
+  s_c3576656714da0::t_5b1c42626022ee 403-442
+  s_c3576656714da0::t_bbf31924f42e3b 135-138,147-148,151-153
+  s_c3576656714da0::t_630dc048ccfd82 287-294
+  s_c3576656714da0::t_af8786d0132be4 280-286
+  s_c3576656714da0::t_6e0525cee40aa6 13-25,27-33,35,40-51
+  s_c3576656714da0::t_7bd764bbd72d48 99-103
+  s_c3576656714da0::t_42839a2315ddf9 295-306
+packages/ui/src/DemoBanner.tsx
+  s_c3576656714da0::t_f58802bb600b43 1-79
+packages/ui/src/Marquee.tsx
+  s_c3576656714da0::t_d15cef1cde9447 1-297
+web/lib/realtime/index.ts
+  s_c3576656714da0::t_fbe80e3abb56a6 20-23
+  s_c3576656714da0::t_5117e5fc7ce111 24
+web/app/providers.tsx
+  s_c3576656714da0::t_c424329c6b3993 19
+  s_c3576656714da0::t_f52f93a0e97d2c 91-97
+web/public/brand/convert-pleiades-to-png.sh
+  s_f63398d3bbe21a::t_e8d309df83a55c 1-87
+web/public/brand/TITAN.md
+  s_f63398d3bbe21a::t_a8c23edb30b18a 1-160
+sdk/viz/src/RadialLiquidityMap.tsx
+  s_c3576656714da0::t_f44ac8de293b75 1-151
+web/components/primitives/Diagram.tsx
+  s_c3576656714da0::t_cc8c4cf104f388 1-177
+web/components/primitives/Toast.tsx
+  s_c3576656714da0::t_cc8c4cf104f388 1-169
+sdk/viz/src/RiskRadar.tsx
+  s_c3576656714da0::t_b86391b523dcb9 1-92
+apps/web/tsconfig.json
+  s_c3576656714da0::t_2e22d1717c716b 1-21
+packages/ui/src/Tooltip.tsx
+  s_c3576656714da0::t_b51f6ba1e093bb 1-65
+sdk/extension/lib/storage.ts
+  s_c3576656714da0::t_2c7f66a9800b5a 1-65
+web/lib/i18n/messages.ts
+  s_c3576656714da0::t_6c58a273e42993 1-36
+apps/web/next.config.mjs
+  s_c3576656714da0::t_9aabfe73b003a0 1-11
+sdk/ios/Atlas/Models/Models.swift
+  s_c3576656714da0::t_8b764ed185d2fc 1-121
+web/public/brand/atlas-wordmark.svg
+  s_1a3cdfd3ef2c6e::t_08720069e073bc 1,4,6,9-13,16-26
+  s_1a3cdfd3ef2c6e::t_8759eccec2923f 2-3,5,7-8,14-15,27-32
+web/components/primitives/AllocationBadge.tsx
+  s_c3576656714da0::t_cc8c4cf104f388 1-55
+web/components/primitives/LineChart.tsx
+  s_c3576656714da0::t_cc8c4cf104f388 1-106
+web/components/marquee/PoweredByMarquee.data.ts
+  s_f63398d3bbe21a::t_9080bb77ef3650 3-5,12-16,19-26,29-34,37-40,43-44,47-48
+  s_c3576656714da0::t_4b9c0ef42b0085 1-2,6-11,17-18,27-28,35-36,41-42,45-46,49
+web/components/sections/Globe.data.ts
+  s_c3576656714da0::t_1a4e10b5fa0fff 1-78
+web/components/narrative/HeroCounters.tsx
+  s_c3576656714da0::t_fd760af2d27e6f 1-219
+web/components/marquee/LogoLoop.tsx
+  s_f63398d3bbe21a::t_fabb3689d926e2 1-386
+web/components/primitives/Button.tsx
+  s_c3576656714da0::t_6732caa9d876e8 2-12,31-39,44-45,53-100,106,110
+web/components/ui/3d-card.tsx
+  s_c3576656714da0::t_933d2e95e7896e 1-155
+web/lib/realtime/store.ts
+  s_c3576656714da0::t_71bf2f8ad91077 53
+  s_c3576656714da0::t_bf3fd3c73bb3b8 93-95
+  s_c3576656714da0::t_6e029970eea5b0 18
+  s_c3576656714da0::t_0dddceab369539 179-180
+  s_c3576656714da0::t_e534f29a22b04f 152-160,164-169
+web/components/shells/MarketingShell.tsx
+  s_c3576656714da0::t_52edff209f9fbb 1,12,44
+  s_c3576656714da0::t_8f829416a25ed6 3-5,7-10,13-26,29,32-41
+web/components/ui/background-beams.tsx
+  s_c3576656714da0::t_22df4f7160f88a 3
+  s_c3576656714da0::t_933d2e95e7896e 1-2,4-141
+sdk/ios/Atlas/AtlasApp.swift
+  s_c3576656714da0::t_686b607b1dc729 1-31
+web/components/sections/Section.tsx
+  s_c3576656714da0::t_86075f72386eb7 1-103
+web/app/dashboard/page.tsx
+  s_c3576656714da0::t_0d97693e8cb7d3 1-23
+sdk/viz/src/tiles.ts
+  s_c3576656714da0::t_99f2920122bd8e 1-213
+.gitignore
+  s_c3576656714da0::t_6e63d69efcd15e 43-51
+package.json
+  s_c3576656714da0::t_a6f35430102fc0 8-10,15-16,18-23,30-31
+web/components/primitives/Tooltip.tsx
+  s_c3576656714da0::t_cc8c4cf104f388 1-65
+web/components/shells/PublicShell.tsx
+  s_c3576656714da0::t_5a4aa82d5a9266 1,3-7,12-18,22
+web/app/dashboard/layout.tsx
+  s_c3576656714da0::t_9a1802b58c5b55 1-14
+web/components/marquee/Marquee.tsx
+  s_c3576656714da0::t_64b870e0029bff 1-297
+packages/ui/src/index.ts
+  s_c3576656714da0::t_996d0603ae4ae7 1-2,6-14
+  s_c3576656714da0::t_22b434d0e66204 3
+  s_c3576656714da0::t_666ead214f8c12 4-5,15-41
+sdk/ios/APP_STORE_NOTES.md
+  s_c3576656714da0::t_20b4deddddd734 1-75
+sdk/widgets/src/proof-of-reserve.ts
+  s_c3576656714da0::t_13545aac4eb6d0 1-122
+web/components/operator/VaultStatusBar.tsx
+  s_c3576656714da0::t_a65d61f6ff5c54 29-31,33,40-41,47
+packages/ui/package.json
+  s_c3576656714da0::t_67c6f25cfb95a1 1-21
+packages/ui/src/MonoNumber.tsx
+  s_c3576656714da0::t_2c5acf1a02e3ec 1-98
+packages/ui/src/DataTable.tsx
+  s_c3576656714da0::t_3b2e9d158f6e4c 1-197
+web/app/(marketing)/security/page.tsx
+  s_1a3cdfd3ef2c6e::t_20c686f6aea1f3 155
+web/components/primitives/WalletButton.tsx
+  s_c3576656714da0::t_cc8c4cf104f388 1-129
+sdk/ios/Atlas/Tabs/ApprovalsView.swift
+  s_c3576656714da0::t_b5834f9d87881b 1-139
+web/app/(docs)/layout.tsx
+  s_c3576656714da0::t_61fed89e29ae01 1-8,11-12
+web/components/ui/tracing-beam.tsx
+  s_c3576656714da0::t_22df4f7160f88a 9
+  s_c3576656714da0::t_933d2e95e7896e 1-8,10-126
+web/components/r3f/LiquidEther.jsx
+  s_c3576656714da0::t_822161663e86e0 1-1168
+sdk/ios/Package.swift
+  s_c3576656714da0::t_90e9ea70332134 1-25
+web/components/narrative/ProofLifecycle.tsx
+  s_c3576656714da0::t_3314fd6e07d75e 211,215-216
+  s_c3576656714da0::t_4b465b1da75018 1-20,25,27-46,51,53,57-74,76-77,80-81,83-85,87-89,92-100,102-119,125-139,141-210,212-214,218-264
+  s_c3576656714da0::t_d9a52a87401221 140
+web/lighthouserc.json
+  s_c3576656714da0::t_764c9ecbdae5a8 1-41
+packages/ui/src/Panel.tsx
+  s_c3576656714da0::t_e7a3cd7bce9a2d 1-47
+web/components/narrative/HeroLattice.tsx
+  s_c3576656714da0::t_994c4577a28b45 91-92
+  s_c3576656714da0::t_03f3fa950766ef 111-112
+  s_c3576656714da0::t_e972f8ca76300c 11-16
+.github/workflows/frontend-ci.yml
+  s_c3576656714da0::t_17906a62cd03a1 1-83
+sdk/viz/src/tokens.ts
+  s_c3576656714da0::t_272b98fdfc46c4 1-42
+sdk/viz/src/Globe.tsx
+  s_c3576656714da0::t_eddd0a77c39694 1-105
+sdk/extension/components/PreSignOverlay.tsx
+  s_c3576656714da0::t_1bf9a3890fbadf 1-106
+packages/ui/src/BarChart.tsx
+  s_c3576656714da0::t_c205be6270e3b2 1-154
+apps/dev/app/projects/page.tsx
+  s_c3576656714da0::t_bb19f135f1ed0d 1-383
+web/components/primitives/DonutChart.tsx
+  s_c3576656714da0::t_cc8c4cf104f388 1-95
+web/components/marquee/PoweredByMarquee.tsx
+  s_f63398d3bbe21a::t_601d84ed1baa1e 3-4,8,10,26,30-39,42-45,53-54,61-66,68-78,80-85
+  s_f63398d3bbe21a::t_fc87c45fdcfa05 5,11-12,14-19,22,67,79
+  s_c3576656714da0::t_f5d2729fc188dd 1-2,6-7,9,13,20-21,23-25,27-29,40-41,46-52,55-60,86-89
+web/components/magicui/globe.tsx
+  s_c3576656714da0::t_293542c382f88f 4-8
+  s_c3576656714da0::t_97dfb15d29b25a 1-3,9-132
+web/components/primitives/PrimitiveCard.tsx
+  s_c3576656714da0::t_bb327c7aaf212d 2
+  s_c3576656714da0::t_56a5723f3fa840 1,3-35,46,51,54,68-69,71-72
+  s_c3576656714da0::t_016eafb27492ac 36-45,47-50,52-53,55-67,70
+web/components/operator/AllocationBar.tsx
+  s_c3576656714da0::t_9f2ad3cc6600ea 9-18
+  s_c3576656714da0::t_c40af342dd213c 70-77
+web/public/brand/partners/jupiter.svg
+  s_c3576656714da0::t_6e060ee29e709f 2-4,6-15
+  s_c3576656714da0::t_448cdd315af7eb 1,5,16
+web/components/ui/animated-gradient-text.tsx
+  s_c3576656714da0::t_5b1c42626022ee 1-37
+packages/ui/src/Identifier.tsx
+  s_c3576656714da0::t_b093ef6a51ff94 1-88
+sdk/extension/entrypoints/sidepanel/main.tsx
+  s_c3576656714da0::t_46bfec5d0d249a 1-104
+apps/dev/components/ClusterPill.tsx
+  s_c3576656714da0::t_e1ad651736791b 1-76
+web/app/vaults/layout.tsx
+  s_c3576656714da0::t_c9c7a9b0b27d1a 1-15
+web/components/primitives/Identifier.tsx
+  s_c3576656714da0::t_85bf131275c7df 1-99
+web/components/primitives/PrimitivesSection.tsx
+  s_c3576656714da0::t_a323bc516a27e0 1-74
+sdk/viz/src/DependencyGraph.tsx
+  s_c3576656714da0::t_749dd36d994726 1-138
+web/components/scroll/StickySection.tsx
+  s_c3576656714da0::t_faf636bb1015a8 1-29
+web/public/brand/atlas-titan-cinematic.svg
+  s_f63398d3bbe21a::t_ae69999c166993 1,3,12-14,16,20-34,39,46,64-68,78-83,90-103,107-108,111,115,122,135-142,146-153,157-163,170-461,465-480,482,484-486,488-496,499,502-506,510-511
+  s_f63398d3bbe21a::t_358c057889de59 2,4-11,15,17-19,35-38,40-45,47-63,69-77,84-89,104-106,109-110,112-114,116-121,123-134,143-145,154-156,164-169,462-464,481,483,487,497-498,500-501,507-509,512
+web/components/ui/wobble-card.tsx
+  s_c3576656714da0::t_22df4f7160f88a 3
+  s_c3576656714da0::t_933d2e95e7896e 1-2,4-78
+sdk/widgets/src/index.ts
+  s_c3576656714da0::t_c480d37ba7e78e 11-14,16
+packages/ui/src/DonutChart.tsx
+  s_c3576656714da0::t_2125b5c2fb152b 1-95
+apps/dev/components/Sidebar.tsx
+  s_c3576656714da0::t_c02eb15b08f96c 1-256
+sdk/extension/entrypoints/popup/index.html
+  s_c3576656714da0::t_3f13ada08e9d59 1-16
+web/components/scroll/ScrollReveal.tsx
+  s_c3576656714da0::t_a7873bc52d24aa 1-46
+sdk/extension/entrypoints/popup/main.tsx
+  s_c3576656714da0::t_48f646e4633651 1-120
+sdk/ios/Atlas/Signing/BiometricLockScreen.swift
+  s_c3576656714da0::t_2b156fabc7eccc 1-36
+sdk/extension/package.json
+  s_c3576656714da0::t_20f17f2f923de0 1-28
+sdk/widgets/src/last-rebalance.ts
+  s_c3576656714da0::t_b14b873231f8e0 1-116
+web/public/brand/HERO-IMAGE-PROMPTS.md
+  s_f63398d3bbe21a::t_7872bc9541a82d 1-4,6-182
+  s_1a3cdfd3ef2c6e::t_20c686f6aea1f3 5
+sdk/extension/tsconfig.json
+  s_c3576656714da0::t_ff0a39d2e400a2 1-18
+sdk/viz/src/RebalanceTicker.tsx
+  s_c3576656714da0::t_fa8ca831a66533 1-102
+packages/tokens/tsconfig.json
+  s_c3576656714da0::t_8b906a334ecaa1 1-16
+web/components/WalletPickerModal.tsx
+  s_c3576656714da0::t_66ec14bb617a15 5,17-28,30-94,98-113,115-118,130-132,136,139-145,148-159,164-207,210,212
+web/components/shells/HeaderBar.tsx
+  s_c3576656714da0::t_9e852b3e2d38ed 39
+  s_c3576656714da0::t_d6a27865e85a8b 11
+  s_c3576656714da0::t_d2e95dc59c8ea2 43-45,47
+  s_c3576656714da0::t_7af485176444c3 10
+  s_c3576656714da0::t_2b2cca1d6a94bd 14
+  s_c3576656714da0::t_dc21c5e417af5f 13
+  s_c3576656714da0::t_ce3443dfe7d440 46,48-49,51-53,60-61
+  s_c3576656714da0::t_adc45025a3c941 124-125
+  s_c3576656714da0::t_9fc353ab06c1f6 86-87,89-90
+  s_c3576656714da0::t_27f367d3605469 37,40,50,54-59,65,71-72
+  s_c3576656714da0::t_bf6b812a59711d 88
+  s_c3576656714da0::t_06d75d16493421 15
+  s_c3576656714da0::t_45c71cc8f48e51 16
+  s_c3576656714da0::t_6683619eaac593 63
+  s_c3576656714da0::t_5157c004752021 117-118
+web/public/brand/atlas-pleiades-light.svg
+  s_f63398d3bbe21a::t_2898687768cf49 1-39
+sdk/extension/entrypoints/content-overlay/style.css
+  s_c3576656714da0::t_32517a11b7bf2b 1-13
+apps/app/package.json
+  s_c3576656714da0::t_1e4eab7993be32 1-27
+packages/ui/src/StatusPill.tsx
+  s_c3576656714da0::t_b0187bbe06c3b8 1-67
+web/app/api/v1/infra/route.ts
+  s_c3576656714da0::t_f4a6806591b33c 1-21
+web/public/brand/atlas-titan-light.svg
+  s_f63398d3bbe21a::t_1eeb2ba66b5ce2 1-42
+web/components/qvac/index.ts
+  s_c3576656714da0::t_71de2ede4e6d6a 1-6
+web/app/api/v1/vaults/route.ts
+  s_c3576656714da0::t_a9aa63387ffae9 1-14
+web/components/primitives/Skeleton.tsx
+  s_c3576656714da0::t_245efe025f61d5 1-94
+sdk/ios/Atlas/Signing/BiometricGate.swift
+  s_c3576656714da0::t_6837ff14b74513 1-79
+sdk/ios/Atlas/Tabs/ActivityView.swift
+  s_c3576656714da0::t_6700de53d28a63 1-60
+web/components/qvac-docs/WidgetPreview.tsx
+  s_c3576656714da0::t_0bf393cde5786b 2-8,12,14-23,30-55
+  s_c3576656714da0::t_f668d435067ec4 1,9-11,13,24-29,56
+sdk/viz/src/SankeyFlow.tsx
+  s_c3576656714da0::t_d8e220d331b0bc 1-132
+apps/web/app/page.tsx
+  s_c3576656714da0::t_595c8735d8ace2 1-46
+apps/app/next.config.mjs
+  s_c3576656714da0::t_90f79153e9c7fc 1-6
+packages/ui/src/Tabs.tsx
+  s_c3576656714da0::t_df2e36806b852c 1-89
+packages/ui/src/CodeBlock.tsx
+  s_c3576656714da0::t_4dc54e9b27554f 1-181
+apps/app/postcss.config.mjs
+  s_c3576656714da0::t_9fa9489531848b 1
+web/components/i18n/LocalePicker.tsx
+  s_c3576656714da0::t_212d71f9a4dba4 1-41
+web/components/marquee/PartnerMarquee.data.ts
+  s_c3576656714da0::t_de27db922ae3fd 1-20
+web/components/marquee/PartnerMarquee.tsx
+  s_c3576656714da0::t_63b4e6ef11c6ba 1-53
+web/components/primitives/anim/AnimPrewarm.tsx
+  s_c3576656714da0::t_4a0e1e9d0b1b87 1-36
+pnpm-workspace.yaml
+  s_c3576656714da0::t_a6a412fc3d65c0 3-5
+web/components/nav/MegaMenu.data.ts
+  s_c3576656714da0::t_980b6ce005133b 1-2,7-8,12,14,17,19,21,24,31-33,35,38,43-45,47,50,57-60
+  s_c3576656714da0::t_45faebec063646 3-6,9-11,13,15-16,18,20,22-23,25-30,34,36-37,39-42,46,48-49,51-56,61-69
+web/next.config.mjs
+  s_f63398d3bbe21a::t_06bfa1f110313d 15-18
+web/components/magicui/terminal.tsx
+  s_c3576656714da0::t_1bdc056876008f 4
+sdk/viz/src/ProofPipeline.tsx
+  s_c3576656714da0::t_45456730d79937 1-118
+sdk/extension/lib/messaging.ts
+  s_c3576656714da0::t_9bf993c8eede7f 1-40
+web/components/primitives/anim/AnimVerification.tsx
+  s_c3576656714da0::t_442bd2a25ea073 1-71
+web/components/effects/PillNav.jsx
+  s_c3576656714da0::t_9d974507b76622 1-356
+web/public/brand/partners/solana.svg
+  s_c3576656714da0::t_cf6497143f8511 1,7,18
+  s_c3576656714da0::t_2444af3b1db4fd 2-6,8-17
+web/lib/i18n/README.md
+  s_c3576656714da0::t_09ef45d321a266 1-34
+web/lib/motion.ts
+  s_c3576656714da0::t_2aa60b5617fc8f 30
+  s_c3576656714da0::t_0333a9d4a78996 28
+  s_c3576656714da0::t_1a0f9af3211fd9 23-24
+  s_c3576656714da0::t_6184728bd744b8 25-26
+web/app/layout.tsx
+  s_c3576656714da0::t_8a8bbda2712612 114-116,118
+  s_c3576656714da0::t_e657e927865ce5 41,47-71
+  s_c3576656714da0::t_fe93eb18ded725 79-101
+  s_c3576656714da0::t_974d7bf398a01c 6
+  s_c3576656714da0::t_721c108c4908bc 126-132
+  s_c3576656714da0::t_213179aa1468cb 117
+  s_c3576656714da0::t_9530539de52aba 7-8
+  s_c3576656714da0::t_7d3598877b2b56 2,10-32,72
+  s_c3576656714da0::t_636cfd5898ca0b 119-124
+  s_1a3cdfd3ef2c6e::t_20c686f6aea1f3 78
+  s_c3576656714da0::t_5733af518ebc09 33-40,42-46
+  s_c3576656714da0::t_2aa63be46e8eaa 9
+packages/tokens/src/index.ts
+  s_c3576656714da0::t_b5ac86c69eac6f 1-64
+web/public/brand/fetch-partner-logos.sh
+  s_f63398d3bbe21a::t_366c08d7a8b58d 2,5-11,13-14,23-48,52-72,76-101,103-104,143,148-149
+  s_f63398d3bbe21a::t_c63595c699d7fd 1,3-4,12,15-22,49-51,73-75,102,105-142,144-147
+web/components/qvac/InvoiceOcrModal.tsx
+  s_c3576656714da0::t_87b011a41a21b7 1-201
+web/components/system/AlertCenter.tsx
+  s_c3576656714da0::t_e1102bf3f7d892 23-40
+  s_c3576656714da0::t_d0350a447679a7 10
+web/playwright.config.ts
+  s_c3576656714da0::t_728f7731a224e9 1-37
+web/components/shells/TerminalShell.tsx
+  s_c3576656714da0::t_c36b3a2407c660 1,3-9,34-37,40,44,46-48,95,97,102
+  s_c3576656714da0::t_9e59ece4a61670 49,52,60-61,63-64,67-77,79-86,88
+apps/app/tsconfig.json
+  s_c3576656714da0::t_9705f170972a4a 1-12
+sdk/ios/Atlas/Tabs/AlertsView.swift
+  s_c3576656714da0::t_d65c5788861170 1-73
+packages/ui/src/PhonePreview.tsx
+  s_c3576656714da0::t_760bf8d9c977dd 1-51
+web/app/vaults/page.tsx
+  s_c3576656714da0::t_d951413a5836cb 7,11-15
+  s_c3576656714da0::t_c9748f66c84c44 121-136
+web/public/brand/atlas-brand-sheet.svg
+  s_f63398d3bbe21a::t_c9458755c5a0fd 1-119
+web/components/hero/Globe.scene.tsx
+  s_c3576656714da0::t_b8fc2607801a9d 1-163,165,167-262,264-266,268-342
+  s_c3576656714da0::t_9944499bd81e73 263,267
+  s_c3576656714da0::t_997caf0000ff56 164,166
+web/components/ui/shimmer-button.tsx
+  s_c3576656714da0::t_5b1c42626022ee 1-96
+web/components/scroll/ParallaxLayer.tsx
+  s_c3576656714da0::t_3ab12bda14b35f 1-27
+web/hooks/useReducedMotion.ts
+  s_c3576656714da0::t_ba2fe68cba939a 1-24
+web/components/scroll/Tilt3D.tsx
+  s_c3576656714da0::t_732c59b7da073e 1-40
+sdk/viz/src/ZkLattice.tsx
+  s_c3576656714da0::t_80c497086a8482 1-92
+apps/app/app/page.tsx
+  s_c3576656714da0::t_9be806fc5fee6e 2,6,8,12,14-15,21-22
+  s_c3576656714da0::t_3a6f9be26660ab 1,3-5,7,9-11,13,16-20
+sdk/viz/src/MerkleTreeViewer.tsx
+  s_c3576656714da0::t_34d7ff48c561e6 1-104
+web/components/effects/ElectricBorder.jsx
+  s_c3576656714da0::t_0734206dca64ee 1-294
+web/public/brand/protocols/jupiter.svg
+  s_f63398d3bbe21a::t_fb0ad5d7e7a81a 1-9,11-47
+  s_c3576656714da0::t_6222afa1c5a5f5 49
+  s_f63398d3bbe21a::t_dd89524fa1c333 10,48
+web/public/brand/atlas-pleiades-favicon.svg
+  s_f63398d3bbe21a::t_a40f6ce26c756f 1-32
+apps/dev/package.json
+  s_c3576656714da0::t_9800e46822c71c 18-21
+  s_c3576656714da0::t_a4f7cce3651725 1-17,22-30
+web/app/(marketing)/page.tsx
+  s_c3576656714da0::t_629ceeed1873dd 1,3-4,6-22,40,43,65,74,86,119-120,144-150,186-187,189-191,218-220,223-225,227-228,230-241,261,264,274,281,287,298,302,305-307,311,345-348,350-351,353,357-362,554,557-563,581-582,587-591,594-595,599-602,605-606,610-611,614-615,619-620,623-624,628-630,635-636,659,672-673,678-681,711-713,720-723,725-730,732-733,735-742,744-752,773-795,810-818,820-840,949-953,955,957-960,962-963,965-966,968-971,973,975,981-990,992-993
+  s_c3576656714da0::t_e124f54450f8bf 352,354-356,363-370,376-385,387,390-391,393-400,403,405-410,412-413,415-419,422-423,426-427,429-433,435-437,440,442,446-448,450-451,454-455,458-459,463,466,470-472,474-478,480-482,485-490,494-498,550
+  s_c3576656714da0::t_6b599fcbfbebb9 41,45-47
+  s_c3576656714da0::t_47b4ec1eb05d95 491-493,499-549
+  s_c3576656714da0::t_ad10a55b6cee8b 753-772
+  s_c3576656714da0::t_c4d95e0cd0d921 222
+  s_c3576656714da0::t_8e5cf7730be51e 954,956,961,964,967,972,991
+  s_c3576656714da0::t_384b09ac9771a3 52
+  s_c3576656714da0::t_626dee7187bb71 85,121-143
+  s_c3576656714da0::t_6336905a851607 371-375,444
+  s_c3576656714da0::t_f8e55f44b7082f 151-185,188
+  s_c3576656714da0::t_e8e834afac6c71 54-61
+  s_c3576656714da0::t_4ecb969e23a821 340-341
+  s_c3576656714da0::t_a94491ef1269be 841-948
+  s_c3576656714da0::t_7234b3f25ae914 714-719,724,731,734,743
+  s_c3576656714da0::t_0c56cd754e4cae 386,388-389,392,401-402,404,411,414,420-421,425,428,434,441,443,445,449,456,462,464-465,467,469,473,479
+  s_c3576656714da0::t_f6300c4c3d3f10 63-64
+  s_c3576656714da0::t_6e12529195824f 796-809,819
+  s_c3576656714da0::t_3c71d5197bac76 93,100,110
+  s_c3576656714da0::t_cef079aeab9f34 192-196,198-200,204,207-211
+  s_c3576656714da0::t_5a86a303434b77 335
+  s_c3576656714da0::t_bb1762e990a4f1 62
+  s_c3576656714da0::t_6615d7713ff7f4 631-634,642-643,646-647,649-650,652-654,656-658
+  s_c3576656714da0::t_597fa5914d61ed 315,317-334,336-337,339
+  s_c3576656714da0::t_0520463b82df32 342
+  s_c3576656714da0::t_2f6fba60ba6b7e 304,308
+  s_c3576656714da0::t_03de9aea4273c9 27,29-35
+  s_c3576656714da0::t_2b244056c63ba3 69-71
+  s_c3576656714da0::t_23d401f03cd429 226
+  s_c3576656714da0::t_fdb9533af3eb92 245,259
+  s_c3576656714da0::t_69617b2e1f7860 72
+  s_c3576656714da0::t_d63b4e59f1d560 212-217
+  s_c3576656714da0::t_1b2b2419b9f36b 338
+  s_c3576656714da0::t_028ad6787d0989 555-556
+  s_c3576656714da0::t_6ffecbf96632eb 637-641,655,660-671,674
+  s_c3576656714da0::t_7c2d47498b4db5 313
+  s_c3576656714da0::t_c04c72e1d39719 221
+  s_c3576656714da0::t_e97cff09fc692b 36-39
+  s_c3576656714da0::t_f1b5da83499a84 67
+  s_c3576656714da0::t_2cf39a65569cd6 551-553
+  s_c3576656714da0::t_f096b4b0f5efc9 51
+  s_c3576656714da0::t_ae8de17fb92c96 644-645,648,651
+  s_c3576656714da0::t_4ce64edfa85e0d 564-580,583
+  s_c3576656714da0::t_d755297226a0b3 974,976-980
+  s_c3576656714da0::t_1e29228899a12b 49
+  s_c3576656714da0::t_739ccd97829e89 53
+  s_c3576656714da0::t_4afb653bf32e13 118
+  s_c3576656714da0::t_6db65f0c01d554 42
+  s_c3576656714da0::t_bd305550c9ca20 247
+  s_c3576656714da0::t_8ee6ee0dcaf4ef 77-84,87-92,94-99,101-109,111-113,115-117
+  s_c3576656714da0::t_469f6360d2db11 592-593,596-598,603-604,607-609,612-613,616-618,621-622,625-627
+  s_c3576656714da0::t_f0445cf2c3e203 66
+  s_c3576656714da0::t_a1c5e0e7c5d787 114
+  s_c3576656714da0::t_ef1be197ee36fe 68
+  s_c3576656714da0::t_b9f581bfb3f061 197,201-203,205-206
+  s_c3576656714da0::t_547656438d20ce 243,248-258,262,265,267-273,280,282-286,288-289
+web/components/nav/ProductButton.tsx
+  s_c3576656714da0::t_5170cb2e539659 5-10,12
+  s_c3576656714da0::t_95c5634966a3aa 1-4,11
+web/components/scroll/GrainBackground.tsx
+  s_c3576656714da0::t_037e24705ce751 1-15
+CHANGELOG.md
+  s_c3576656714da0::t_cfd158529a410e 3-90
+sdk/viz/src/index.ts
+  s_c3576656714da0::t_e1f4ad44d6f0e5 1-23
+sdk/widgets/src/bundle-landed.ts
+  s_c3576656714da0::t_c4dd16a9ee0512 1-83
+web/components/primitives/AtlasMark.tsx
+  s_c3576656714da0::t_91badbbb9a7dfb 1-87
+web/package.json
+  s_c3576656714da0::t_2aa63be46e8eaa 34-54,57-59,65-66
+  s_c3576656714da0::t_933d2e95e7896e 30-32
+  s_c3576656714da0::t_9f207594b88954 64
+  s_c3576656714da0::t_057bdf84202349 10-14
+packages/tokens/package.json
+  s_c3576656714da0::t_af9be3ca84f413 1-13
+web/lib/fixtures/infra.ts
+  s_c3576656714da0::t_d6e32694ae8ecf 1-134
+web/components/narrative/LiveRebalanceFeed.tsx
+  s_c3576656714da0::t_8146f5729ce810 10,14-17
+  s_c3576656714da0::t_0651eb5315f27c 81-100
+  s_c3576656714da0::t_2e570e9ec98489 8
+  s_c3576656714da0::t_8c3c4411440c62 28-46
+packages/tokens/src/theme.css
+  s_c3576656714da0::t_d27750cdf4e4d4 1-82
+sdk/ios/Atlas/Tabs/DiscoverView.swift
+  s_c3576656714da0::t_03f92378804085 1-63
+README.md
+  s_1a3cdfd3ef2c6e::t_20c686f6aea1f3 38,83,187,512,584
+web/components/qvac/PreSignExplainerModal.tsx
+  s_c3576656714da0::t_6b3a7fc4e4d257 1-135
+apps/web/postcss.config.mjs
+  s_c3576656714da0::t_724752bbd2c451 1
+apps/web/app/globals.css
+  s_c3576656714da0::t_690d26712f7df1 1-19
+apps/app/components/Dashboard.tsx
+  s_c3576656714da0::t_00c6b7690146c2 1-645
+web/app/api/actions/deposit/route.ts
+  s_1a3cdfd3ef2c6e::t_20c686f6aea1f3 11
+web/components/narrative/BackgroundField.tsx
+  s_c3576656714da0::t_d9204ec537c778 1-243
+web/messages/es.json
+  s_c3576656714da0::t_669f59c29ba6e1 1-18
+web/components/primitives/ProtocolIcon.tsx
+  s_c3576656714da0::t_8f8ebd58f8df65 1-209
+web/app/(docs)/webhooks/page.tsx
+  s_c3576656714da0::t_b1290e6af6df1c 1-7
+sdk/extension/entrypoints/content-overlay/index.ts
+  s_c3576656714da0::t_c83d754fcef6f5 1-87
+web/components/system/WalletStatusPill.tsx
+  s_c3576656714da0::t_d10db012247382 1-121
+web/public/brand/atlas-twitter-banner.svg
+  s_1a3cdfd3ef2c6e::t_c2511348d783b0 5-6,9,11,14-17,20,23-27,30,35,38,40-55,58-62,64-84,87,90,96
+  s_1a3cdfd3ef2c6e::t_2cbe95a8a92fbc 1-4,7-8,10,12-13,18-19,21-22,28-29,31-34,36-37,39,56-57,63,85-86,88-89,91-95,97-106
+apps/dev/app/api/auth/[...nextauth]/route.ts
+  s_c3576656714da0::t_5a82fd821ee069 1-2
+  s_c3576656714da0::t_c8657f79772ba2 3-4
+sdk/extension/entrypoints/sidepanel/index.html
+  s_c3576656714da0::t_1fbcb5ff107294 1-16
+packages/ui/src/LineChart.tsx
+  s_c3576656714da0::t_31ed5591a0371a 1-106
+web/lib/fixtures/vaults.ts
+  s_c3576656714da0::t_f9277f1fcdcfc4 1-95
+web/app/proofs/layout.tsx
+  s_c3576656714da0::t_7e672e214f4519 1-12
+web/lib/utils.ts
+  s_c3576656714da0::t_2aa63be46e8eaa 1-6
+web/tests/playwright/golden-path.spec.ts
+  s_c3576656714da0::t_cdaf5f27c696d1 1-30
+web/components/effects/PillNav.css
+  s_c3576656714da0::t_71f6ad083a2cc5 1,5-6,15-247
+  s_c3576656714da0::t_b29bac6d4d7faf 2-4,7-14
+web/components/primitives/CodeBlock.tsx
+  s_c3576656714da0::t_a019213554e2e3 1-101
+web/components/architecture/SystemDiagram.tsx
+  s_c3576656714da0::t_19e451e2d89010 346-347,349,357,360
+  s_c3576656714da0::t_2986f8f6e9f374 1,3-17,22,25,30-33,38-81,83,85-86,89,92-100,103-117,120,122-132,144,146,157-203,205-223,225-248,250-251,255,257-269,271-275,288,290-292,331-332,342,344-345,348,350-356,358-359,361-365
+  s_c3576656714da0::t_45308802bf853e 138-139
+  s_c3576656714da0::t_25489c1a447069 249,252-254,256
+  s_c3576656714da0::t_35e1cfe4811dd6 270
+  s_c3576656714da0::t_f4bd902ee471fe 289,294,297,301-302,305,307,315,322,329
+web/public/brand/partners/drift.svg
+  s_c3576656714da0::t_d080ffcd7b3184 2-4,6-15
+  s_c3576656714da0::t_2a17162b68f086 1,5,16
+web/components/ui/word-rotate.tsx
+  s_c3576656714da0::t_22df4f7160f88a 4
+  s_c3576656714da0::t_5b1c42626022ee 1-3,5-50
+web/components/sections/ProductSurfaceCard.tsx
+  s_c3576656714da0::t_ef40b6409e15c0 1-140
+web/lib/i18n/locale-store.ts
+  s_c3576656714da0::t_7c0c1209b71681 1-60
+web/public/brand/atlas-pleiades.svg
+  s_f63398d3bbe21a::t_172897cb6b08d0 1-69
+web/components/ThemeToggle.tsx
+  s_c3576656714da0::t_dc26b4e7f5075f 1-97
+web/public/brand/partners/succinct.svg
+  s_c3576656714da0::t_845b7a9c281a4f 2-4,6-15
+  s_c3576656714da0::t_d8b80dd758e5cc 1,5,16
+web/public/brand/atlas-titan-wordmark.svg
+  s_f63398d3bbe21a::t_8fd7663fe7412b 1-60
+packages/ui/src/Button.tsx
+  s_c3576656714da0::t_45464c9c78776b 1-75
+web/tests/playwright/landing.perf.spec.ts
+  s_c3576656714da0::t_45fcacd08d2a4b 1-44
+sdk/viz/package.json
+  s_c3576656714da0::t_4a15f48d0dafab 1-37
+apps/web/package.json
+  s_c3576656714da0::t_bfbc74773ad029 1-33
+web/messages/ja.json
+  s_c3576656714da0::t_d0421d61dccf4f 1-18
+sdk/ios/Atlas/Networking/AtlasSession.swift
+  s_c3576656714da0::t_68e14e83ed28ce 1-77
+web/public/brand/atlas-titan-favicon.svg
+  s_f63398d3bbe21a::t_b16775b49f373b 1-32
+web/components/narrative/index.ts
+  s_c3576656714da0::t_94261dd2c430ae 7
+  s_c3576656714da0::t_99499daff7e87a 8
+  s_c3576656714da0::t_09086f312fbd2e 9
+web/app/proofs/page.tsx
+  s_c3576656714da0::t_3b66cbcb57910a 492-493,501-510
+  s_c3576656714da0::t_8e494152a4643d 313-314
+  s_c3576656714da0::t_649e8ea42757a8 59
+  s_c3576656714da0::t_e4677dd8c00855 3-10,14-32,34,37,39-40,43-58,61-82,85-86,93-112,114-120,125,127-264,270,272-273,278,280-286,289-295,301-302,306,310,316-336,340-341,353-380,385-491,494-500,511
+  s_c3576656714da0::t_7c4ecf1c88d4af 13
+web/components/ui/blur-fade.tsx
+  s_c3576656714da0::t_5b1c42626022ee 1-10,12-94
+  s_c3576656714da0::t_22df4f7160f88a 11
+web/components/narrative/HeroPleiades.tsx
+  s_c3576656714da0::t_97918220ef9c6a 1-249
+web/components/qvac/SecondOpinionAnalyst.tsx
+  s_c3576656714da0::t_0ba97bf2fedf7d 1-150
+web/lib/realtime/mock-stream.ts
+  s_c3576656714da0::t_aeac81df192be8 78-84
+  s_c3576656714da0::t_07116134109d6c 1-19,21,37-77,85-204
+  s_c3576656714da0::t_55b014d202855e 20,22-36
+sdk/widgets/package.json
+  s_c3576656714da0::t_e1e0fe5e246185 13-17
+sdk/extension/entrypoints/background.ts
+  s_c3576656714da0::t_48163bd38de9c3 1-50
+web/lib/tokens.ts
+  s_c3576656714da0::t_5781631ccb96aa 51-58
+  s_c3576656714da0::t_f406a53a095a0a 166-168,170-174
+  s_c3576656714da0::t_5da214aaa61fc3 20-28,34
+web/components.json
+  s_c3576656714da0::t_2aa63be46e8eaa 1-25
+sdk/extension/README.md
+  s_c3576656714da0::t_34e42a5ebeef5f 1-40
+web/components/qvac/TranslationToggle.tsx
+  s_c3576656714da0::t_262096f299e5cd 1-97
+packages/ui/src/AnimatedNumber.tsx
+  s_c3576656714da0::t_faa17e96de1ff3 1-69
+apps/app/app/layout.tsx
+  s_c3576656714da0::t_3358a7eb0fde53 1-16
+packages/ui/src/CommandPalette.tsx
+  s_c3576656714da0::t_da41ecf4978947 1-210
+sdk/ios/Atlas/Networking/AtlasClient.swift
+  s_c3576656714da0::t_97a5c342e46903 1-100
+web/lib/i18n/index.ts
+  s_c3576656714da0::t_880a7e5b44d237 1-50
+apps/dev/app/page.tsx
+  s_c3576656714da0::t_37008460b43ba7 4,9
+  s_c3576656714da0::t_189683fc295785 1-3,5-8
+apps/dev/auth.ts
+  s_c3576656714da0::t_724a8ed6e7324a 1-31
+sdk/ios/Atlas/RootView.swift
+  s_c3576656714da0::t_95c3ce3d52a4f9 1-42
+web/components/effects/ElectricBorder.css
+  s_c3576656714da0::t_7371720be32c47 1-62
+packages/ui/src/Diagram.tsx
+  s_c3576656714da0::t_abd0471529db6d 1-177
+sdk/widgets/src/web-component.ts
+  s_c3576656714da0::t_8a734a32620722 1-112
+web/components/hero/Globe.tsx
+  s_c3576656714da0::t_362f0b0c2340e2 1-73
+web/app/markets/layout.tsx
+  s_c3576656714da0::t_41b34629b4bca3 1-12
+web/components/ui/timeline.tsx
+  s_c3576656714da0::t_22df4f7160f88a 7
+  s_c3576656714da0::t_933d2e95e7896e 1-6,8-90
+web/tests/axe/README.md
+  s_c3576656714da0::t_fa68eb9ba727c5 1-30
+sdk/extension/components/AllowlistEditor.tsx
+  s_c3576656714da0::t_4e9030a445ec75 1-111
+web/lib/realtime/background-tab.ts
+  s_c3576656714da0::t_e731e52d897905 1-107
+sdk/widgets/src/tps.ts
+  s_c3576656714da0::t_7cecc84f92bed8 1-91
+sdk/viz/src/a11y.ts
+  s_c3576656714da0::t_89e1a7874a55b2 1-40
+turbo.json
+  s_c3576656714da0::t_cda5f0883752a3 1-25
+web/components/primitives/index.ts
+  s_c3576656714da0::t_3c69af569583c0 22-25
+  s_c3576656714da0::t_4a50507f2e643d 21
+  s_c3576656714da0::t_9e531f220c95a7 20
+  s_c3576656714da0::t_2873d017a0f5d9 26-47
+  s_c3576656714da0::t_ffdc274bf12915 11,13,15-19
+packages/ui/src/Skeleton.tsx
+  s_c3576656714da0::t_639744132988c0 1-138
+sdk/ios/Atlas/Tabs/TreasuryView.swift
+  s_c3576656714da0::t_c6a4ab58222655 1-123
+packages/ui/src/ThemeToggle.tsx
+  s_c3576656714da0::t_d03a0187881928 1-89
+packages/ui/src/WalletButton.tsx
+  s_c3576656714da0::t_4a07a2d014c719 1-129
+web/app/(docs)/playground/page.tsx
+  s_c3576656714da0::t_a563820f8cf065 1-3,5,7-8
+packages/ui/src/ProofBadge.tsx
+  s_c3576656714da0::t_8b08fb3d5faede 1-69
+packages/ui/src/Toast.tsx
+  s_c3576656714da0::t_a0351849ab3dcd 1-169
+web/components/primitives/CommandPalette.tsx
+  s_c3576656714da0::t_cc8c4cf104f388 1-210
+sdk/ios/README.md
+  s_c3576656714da0::t_21052836f414f9 1-36
+web/app/api/v1/freshness/[id]/route.ts
+  s_c3576656714da0::t_1f01a3f7577ee1 1-33
+web/public/brand/atlas-titan.svg
+  s_f63398d3bbe21a::t_1c212422c4863d 1-91
+web/components/primitives/DataTable.tsx
+  s_c3576656714da0::t_cc8c4cf104f388 1-197
+web/public/brand/PLEIADES.md
+  s_f63398d3bbe21a::t_effa2dafdb7674 1-151
+sdk/extension/wxt.config.ts
+  s_c3576656714da0::t_7f88f3d6eb2ae4 1-38
+web/components/sections/index.ts
+  s_c3576656714da0::t_0b20215fb95799 1-8
+web/components/primitives/StatusPill.tsx
+  s_c3576656714da0::t_e63eb0448fbe0f 1-80
+apps/dev/app/reference/transactions/deposit/page.tsx
+  s_c3576656714da0::t_45f21c81d28559 1-282
+web/public/brand/partners/kamino.svg
+  s_c3576656714da0::t_b77cef4ac0e0d7 1,5,16
+  s_c3576656714da0::t_0b44a156f01730 2-4,6-15
+web/public/brand/atlas-pleiades-wordmark.svg
+  s_f63398d3bbe21a::t_764a0fdd210530 1-59
+web/messages/en.json
+  s_c3576656714da0::t_4979efaa750101 1-18
+apps/app/app/globals.css
+  s_c3576656714da0::t_a8ab332d60d83d 1-9
+web/app/(public)/decision-engine/page.tsx
+  s_c3576656714da0::t_d3a3d085838547 1-6,8-10,12-15,17-22,35-36,52-126,128,130-133,135-140,142-146,148-172,175-177,180-181,183-184,186,188-192,194-196,198-199,201-220,222-231,233-246,248-258,260-330,334-418
+web/components/primitives/anim/AnimAllocation.tsx
+  s_c3576656714da0::t_f99990ffa0c6be 1-48
+web/components/footer/Footer.data.ts
+  s_c3576656714da0::t_21d38f1c105ef9 1-96
+web/components/primitives/anim/AnimPrivateExec.tsx
+  s_c3576656714da0::t_b30f9446f563a7 1-42
+web/app/(marketing)/architecture/page.tsx
+  s_c3576656714da0::t_103ba1bf63f66c 1,9-18,21-31,33-40
+packages/ui/src/cn.ts
+  s_c3576656714da0::t_c87ea217daf587 1-8
+web/components/sections/LiveOpsGlobe.tsx
+  s_c3576656714da0::t_7a0925e308ed6a 1-6,9-11,17-19,24-26,31-32,87-107,125-139,142-154,157-161,167-168,170-174,176,181-188,190-200
+  s_c3576656714da0::t_a342bc56657b12 7-8,33-86,141,163-166,169
+  s_c3576656714da0::t_019d69348f9153 12-16,20-23,27-30,108-124,140,155-156,162,175,177-180,189
+web/components/primitives/anim/AnimTriggers.tsx
+  s_c3576656714da0::t_bc5349b0b4d8cb 1-42
+web/components/primitives/anim/AnimConfidential.tsx
+  s_c3576656714da0::t_6a8dff391523b7 1-39
+web/components/ui/number-ticker.tsx
+  s_c3576656714da0::t_5b1c42626022ee 1-3,5-74
+  s_c3576656714da0::t_22df4f7160f88a 4
+web/components/marquee/BrandLogo.tsx
+  s_f63398d3bbe21a::t_cb61c75219dcb0 1-2,4-13,17-18,21,23,27-28,31-32,35-38,41-47,53-57,59-84
+  s_f63398d3bbe21a::t_1cc09e85d7d8f5 3,14-16,19-20,22,24-26,29-30,33-34,39-40,48-52,58
+web/components/magicui/meteors.tsx
+  s_c3576656714da0::t_2aa63be46e8eaa 1-60
+sdk/ios/Atlas/Signing/MWASigner.swift
+  s_c3576656714da0::t_5951bb8a6f13f5 1-44
+web/public/brand/atlas-wordmark-dark.svg
+  s_1a3cdfd3ef2c6e::t_cb10a5265397d3 1,4,6,9-13,16-26
+  s_1a3cdfd3ef2c6e::t_34df5c1aeb6fed 2-3,5,7-8,14-15,27-32
+web/lib/realtime/hooks.ts
+  s_c3576656714da0::t_baad4f8d9b3644 43-46,48
+web/components/primitives/MonoNumber.tsx
+  s_c3576656714da0::t_cae4a4afb38571 1-110
+web/components/footer/Footer.tsx
+  s_c3576656714da0::t_46f9ed3d278975 1-121
+web/components/primitives/PleiadesIcon.tsx
+  s_c3576656714da0::t_d7b6b01cdd9777 1-94
+apps/web/app/layout.tsx
+  s_c3576656714da0::t_32aae97b5f0769 1-18
+packages/ui/tsconfig.json
+  s_c3576656714da0::t_8a4c45daaddda2 1-16
+web/components/primitives/KpiTile.tsx
+  s_c3576656714da0::t_2d5034bc527527 1-165
+web/app/proofs/[hash]/page.tsx
+  s_c3576656714da0::t_5bae91f05228d3 1-206
+web/public/brand/protocols/helius.svg
+  s_f63398d3bbe21a::t_fb0ad5d7e7a81a 1
+web/messages/ar.json
+  s_c3576656714da0::t_e57bff25df4b22 1-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "a7ab95d262aad82ded5ef604ce9034180c399791",
+  "prompts": {},
+  "humans": {
+    "h_39ca709eb13776": {
+      "author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_1a3cdfd3ef2c6e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "edf2a47c-0ae7-4b0c-b8d6-7b054167c913",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    },
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    },
+    "s_f63398d3bbe21a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3767c1e4-70e1-4adc-96c8-1dd36d2f258e",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

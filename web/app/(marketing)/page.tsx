@@ -82,6 +82,9 @@ export default function LandingPage(): JSX.Element {
       </ParallaxLayer>
 
       <Hero />
+      <ScrollReveal variant="fade" amount={0.15}>
+        <PoweredByMarquee />
+      </ScrollReveal>
       <ScrollReveal variant="rise" amount={0.3}>
         <PrimitivesSection />
       </ScrollReveal>
@@ -113,7 +116,6 @@ export default function LandingPage(): JSX.Element {
       <ScrollReveal variant="fade" amount={0.1}>
         <CtaFooter />
       </ScrollReveal>
-      <PoweredByMarquee />
     </>
   );
 }

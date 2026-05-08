@@ -10,6 +10,7 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import type { ShellProps } from "./types";
 import { Footer } from "@/components/footer/Footer";
+import { LiveStrip } from "@/components/marquee/LiveStrip";
 
 // PillNav is a client component (gsap + ResizeObserver). Lazy-load
 // with ssr:false so the SSR pass doesn't try to instantiate it.
@@ -29,6 +30,15 @@ export function MarketingShell({ children }: ShellProps) {
   const pathname = usePathname() ?? "/";
   return (
     <div className="min-h-screen bg-[color:var(--color-surface-base)]">
+      {/* Band 1 — APY ticker. Modal-faithful: relative (scrolls away
+          with content), so only the nav stays pinned. */}
+      <div className="relative h-10 border-b border-white/5 overflow-hidden z-30">
+        <LiveStrip />
+      </div>
+
+      {/* Band 2 — PillNav. Sticky below the APY band. PillNav itself
+          is `position: sticky; top: 1em` per its own CSS, but we wrap
+          in a centered flex so it never collides with siblings. */}
       <PillNav
         logo="/brand/atlas-mark.svg"
         logoAlt="Atlas"

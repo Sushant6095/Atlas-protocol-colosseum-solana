@@ -18,12 +18,19 @@ const PillNav = dynamic(() => import("@/components/effects/PillNav"), {
   ssr: false,
 });
 
+// One-click terminal access from the header. Marketing-only routes
+// (Architecture / Security / Decision Engine / Docs) stay reachable
+// via the comprehensive Footer + the mega-menu.
 const PILL_NAV_ITEMS = [
-  { label: "Home",            href: "/" },
-  { label: "Architecture",    href: "/architecture" },
-  { label: "Security",        href: "/security" },
-  { label: "Decision Engine", href: "/decision-engine" },
-  { label: "Docs",            href: "/docs" },
+  { label: "Home",           href: "/" },
+  { label: "Vaults",         href: "/vaults" },
+  { label: "Rebalance",      href: "/rebalance/live" },
+  { label: "Triggers",       href: "/triggers" },
+  { label: "Recurring",      href: "/recurring" },
+  { label: "Hedging",        href: "/hedging" },
+  { label: "Treasury",       href: "/treasury" },
+  { label: "Governance",     href: "/governance" },
+  { label: "Docs",           href: "/docs" },
 ];
 
 export function MarketingShell({ children }: ShellProps) {

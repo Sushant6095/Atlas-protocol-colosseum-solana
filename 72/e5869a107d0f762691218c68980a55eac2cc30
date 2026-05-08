@@ -1,0 +1,20 @@
+web/components/docs/DocStub.tsx
+  s_c3576656714da0::t_3f95673f350767 1-3,9
+  s_c3576656714da0::t_364dcd763afab8 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "72e5869a107d0f762691218c68980a55eac2cc30",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

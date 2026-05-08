@@ -1,0 +1,20 @@
+web/app/(marketing)/page.tsx
+  s_c3576656714da0::t_9ab4e41899ad3f 615-627
+  s_c3576656714da0::t_eb2b88c36279e1 636-638,646-655,660-677
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "1daaf782c61c83a942e8fa683bcf66761819ec77",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

@@ -1,12 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowUpRight, Layers, ShieldCheck, Filter, Search } from "lucide-react";
+import { ArrowUpRight, Layers, ShieldCheck, Filter, Search, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Footer } from "@/components/Footer";
 import { VAULTS, type AtlasVaultMeta } from "@/lib/vaults";
+import { BorderBeam } from "@/components/magicui/border-beam";
 
 // ElectricBorder uses canvas + ResizeObserver — client-only.
 const ElectricBorder = dynamic(
@@ -14,8 +15,11 @@ const ElectricBorder = dynamic(
   { ssr: false },
 );
 
-const CATS = ["All", "Stable", "Volatile", "LST", "Hybrid", "RWA", "LP"] as const;
+const CATS = ["All", "PUSD", "Stable", "Volatile", "LST", "Hybrid", "RWA", "LP"] as const;
 type Cat = (typeof CATS)[number];
+
+// PUSD brand color — accent.zk in Atlas tokens.
+const PUSD_ACCENT = "#A682FF";
 
 export default function VaultsPage() {
   const [cat, setCat] = useState<Cat>("All");
@@ -24,7 +28,12 @@ export default function VaultsPage() {
 
   const list = useMemo(() => {
     let r = VAULTS;
-    if (cat !== "All") r = r.filter((v) => v.type === cat);
+    // PUSD chip is a virtual filter — there is no PUSD vault in the
+    // registry yet (PUSD-native vault ships via /vaults/pusd). When
+    // the chip is selected we return zero rows so the featured card
+    // dominates the grid.
+    if (cat === "PUSD") r = [];
+    else if (cat !== "All") r = r.filter((v) => v.type === cat);
     if (q) {
       const s = q.toLowerCase();
       r = r.filter(
@@ -113,6 +122,11 @@ export default function VaultsPage() {
             <option value="tvl">Sort: TVL</option>
           </select>
         </div>
+      </section>
+
+      {/* featured PUSD card — 2x size, BorderBeam halo */}
+      <section className="mx-auto max-w-6xl px-6 pb-4">
+        <PusdFeaturedCard />
       </section>
 
       {/* card grid */}
@@ -207,6 +221,127 @@ function Tile({ label, value, sub }: { label: string; value: string; sub: string
       <div className="text-2xl font-bold tracking-tight">{value}</div>
       <div className="text-xs text-[color:var(--color-muted)] mt-1">{sub}</div>
     </motion.div>
+  );
+}
+
+// Featured PUSD card — 2x footprint on the grid, BorderBeam halo,
+// PRIMARY RESERVE pin. Links to the dedicated /vaults/pusd detail
+// page (not the dynamic [symbol] route — PUSD is a category, not a
+// single recipe).
+function PusdFeaturedCard(): JSX.Element {
+  return (
+    <Link
+      href="/vaults/pusd"
+      className="relative block overflow-hidden rounded-[16px]"
+      style={{
+        border: `1px solid color-mix(in oklab, ${PUSD_ACCENT} 35%, transparent)`,
+        background:
+          `linear-gradient(135deg, color-mix(in oklab, ${PUSD_ACCENT} 14%, var(--color-surface-raised)) 0%, var(--color-surface-raised) 60%)`,
+        boxShadow: `0 24px 64px -32px ${PUSD_ACCENT}66`,
+      }}
+    >
+      <BorderBeam size={260} duration={9} colorFrom={PUSD_ACCENT} colorTo="#3F8CFF" />
+      <BorderBeam size={260} duration={9} delay={4.5} colorFrom="#3F8CFF" colorTo={PUSD_ACCENT} />
+
+      <div className="relative p-6 md:p-8">
+        {/* pin label */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em]"
+            style={{
+              borderColor: `color-mix(in oklab, ${PUSD_ACCENT} 45%, transparent)`,
+              color: PUSD_ACCENT,
+              background: `color-mix(in oklab, ${PUSD_ACCENT} 12%, transparent)`,
+            }}
+          >
+            <Sparkles className="h-3 w-3" /> Primary reserve · PUSD-native
+          </span>
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em]"
+            style={{
+              borderColor: "color-mix(in oklab, var(--color-accent-execute) 30%, transparent)",
+              color: "var(--color-accent-execute)",
+              background: "color-mix(in oklab, var(--color-accent-execute) 7%, transparent)",
+            }}
+          >
+            <ShieldCheck className="h-3 w-3" /> Token-2022 vetted
+          </span>
+        </div>
+
+        <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-[1.4fr_1fr]">
+          {/* left: headline + CTA */}
+          <div>
+            <h2
+              className="font-display text-2xl font-semibold leading-[1.15] md:text-3xl"
+              style={{ color: "var(--color-ink-primary)" }}
+            >
+              Atlas is <span style={{ color: PUSD_ACCENT }}>PUSD-native</span>.
+              <br className="hidden md:block" /> Not <em className="not-italic opacity-70">"we also support PUSD"</em>.
+            </h2>
+            <p className="mt-3 text-sm leading-[1.55]" style={{ color: "var(--color-ink-secondary)" }}>
+              12 strategies × 3 risk bands = 12 vault recipes. Every recipe
+              denominated, settled, and rebalanced in PUSD with a Token-2022
+              extension manifest and a hard <code>atlas-drift-check</code>
+              CI gate.
+            </p>
+
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <span
+                className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium"
+                style={{ background: PUSD_ACCENT, color: "var(--color-surface-base)" }}
+              >
+                Open PUSD vaults <ArrowUpRight className="h-4 w-4" />
+              </span>
+              <span
+                className="font-mono text-[10px] uppercase tracking-[0.18em]"
+                style={{ color: "var(--color-ink-tertiary)" }}
+              >
+                /vaults/pusd
+              </span>
+            </div>
+          </div>
+
+          {/* right: 12 recipe stat */}
+          <div
+            className="rounded-md border p-5"
+            style={{
+              borderColor: "var(--color-line-soft)",
+              background: "color-mix(in oklab, var(--color-surface-base) 70%, transparent)",
+            }}
+          >
+            <p
+              className="font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{ color: "var(--color-ink-tertiary)" }}
+            >
+              recipe matrix
+            </p>
+            <p
+              className="mt-1 font-display text-3xl font-semibold tabular-nums leading-none"
+              style={{ color: "var(--color-ink-primary)" }}
+            >
+              12 × 3 <span className="text-base opacity-60">=</span> 12
+            </p>
+            <p className="mt-1 text-[11px]" style={{ color: "var(--color-ink-secondary)" }}>
+              strategies × risk bands = vault recipes
+            </p>
+
+            <div className="mt-4 space-y-1.5 font-mono text-[11px]" style={{ color: "var(--color-ink-secondary)" }}>
+              {[
+                { k: "PusdSafeYield",      bands: "low · mid · hot" },
+                { k: "PusdYieldBalanced",  bands: "low · mid · hot" },
+                { k: "PusdTreasuryDefense",bands: "low · mid · hot" },
+                { k: "PusdJupiterLend",    bands: "low · mid · hot" },
+              ].map((r) => (
+                <div key={r.k} className="flex items-center justify-between gap-3">
+                  <span style={{ color: "var(--color-ink-primary)" }}>{r.k}</span>
+                  <span className="opacity-70">{r.bands}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }
 

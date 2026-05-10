@@ -493,7 +493,10 @@ function KpiStrip(): JSX.Element {
         <AnimatedSpan delay={2100} className="text-[color:var(--color-accent-execute)]">
           <span>✔ proofs settled :  142  (24h)</span>
         </AnimatedSpan>
-        <AnimatedSpan delay={2400} className="text-[color:var(--color-accent-execute)]">
+        <AnimatedSpan delay={2400} className="text-[color:#A682FF]">
+          <span>✔ PUSD-native    :  12 recipes  · primary reserve</span>
+        </AnimatedSpan>
+        <AnimatedSpan delay={2600} className="text-[color:var(--color-accent-execute)]">
           <span>✔ refusal floor  :  1 / 7  hard veto</span>
         </AnimatedSpan>
 

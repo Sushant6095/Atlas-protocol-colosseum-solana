@@ -439,7 +439,11 @@ html, body {
   100% {
     transform:    rotate(calc(var(--angle) * 1deg + 360deg)) translateY(calc(var(--radius) * 1px)) rotate(calc((var(--angle) * -1deg) - 360deg));
     }
-  }}
+  }
+  @keyframes border-beam {
+    100% { offset-distance: 100%; }
+  }
+}
 
 :root {
   --background:    oklch(1 0 0);

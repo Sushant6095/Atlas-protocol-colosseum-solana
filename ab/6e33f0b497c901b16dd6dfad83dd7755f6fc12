@@ -1,0 +1,21 @@
+web/app/(treasury)/treasury/[id]/payments/page.tsx
+  s_c3576656714da0::t_00877161adc40a 1-2,6-7,24-34,43-50,61-88,90,92-94,101-216,218-222,253-281
+web/app/(docs)/docs/integrations/dodo/page.tsx
+  ai_agent 1-6,10-12,14-70,72-244
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "ab6e33f0b497c901b16dd6dfad83dd7755f6fc12",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

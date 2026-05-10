@@ -1,0 +1,95 @@
+programs/atlas-verifier/src/lib.rs
+  s_f63398d3bbe21a::t_f7e682ef464ad4 15
+apps/sentinel/next.config.mjs
+  s_c3576656714da0::t_e121bbfbfc2e7e 1-8
+apps/sentinel/app/layout.tsx
+  s_c3576656714da0::t_199cd71a8ce296 1-21
+programs/atlas-vault/Cargo.toml
+  s_f63398d3bbe21a::t_6275ade805673c 3-5
+  s_f63398d3bbe21a::t_1e206d69e219ff 21-22
+apps/sentinel/tsconfig.json
+  s_c3576656714da0::t_bcd796a4997429 1-22
+programs/atlas-verifier/Cargo.toml
+  s_f63398d3bbe21a::t_6275ade805673c 3-5
+  s_f63398d3bbe21a::t_1e206d69e219ff 21
+  s_f63398d3bbe21a::t_2cbf889b8b90e0 22-23
+apps/sentinel/components/Footer.tsx
+  s_c3576656714da0::t_9de596655bbe8a 1-40
+Cargo.toml.bak
+  s_f63398d3bbe21a::t_6ddaddf9d268d6 1-125
+apps/sentinel/components/Nav.tsx
+  s_c3576656714da0::t_913a30b0a1e0e0 1-44
+apps/sentinel/.env.example
+  s_c3576656714da0::t_bd57d34ce4c219 1-19
+programs/atlas-registry/Cargo.toml
+  s_f63398d3bbe21a::t_1e206d69e219ff 21-22
+  s_f63398d3bbe21a::t_6275ade805673c 3-5
+  s_f63398d3bbe21a::t_2cbf889b8b90e0 23
+apps/sentinel/components/PositionCard.tsx
+  s_c3576656714da0::t_1c665428a36542 1-131
+apps/sentinel/lib/mocks/anomalies.ts
+  s_c3576656714da0::t_31c1ea65a26ce7 1-34
+Anchor.toml
+  s_f63398d3bbe21a::t_f7e682ef464ad4 10-13,16-19
+apps/sentinel/app/w/[address]/page.tsx
+  s_c3576656714da0::t_83930a5d48d724 1-74
+programs/atlas-vault/src/lib.rs
+  s_f63398d3bbe21a::t_f7e682ef464ad4 17
+apps/sentinel/components/KpiTiles.tsx
+  s_c3576656714da0::t_c3eb2df6da6c5b 1-82
+programs/atlas-rebalancer/src/lib.rs
+  s_f63398d3bbe21a::t_f7e682ef464ad4 18
+apps/sentinel/package.json
+  s_c3576656714da0::t_29db5ed9dbc984 1-32
+apps/sentinel/postcss.config.mjs
+  s_c3576656714da0::t_7368a6c8aee987 1-3
+apps/sentinel/components/BirdeyeIntel.tsx
+  s_c3576656714da0::t_03abc3b6e627c9 1-114
+apps/sentinel/lib/mocks/positions.ts
+  ai_agent 1-73
+apps/sentinel/README.md
+  s_c3576656714da0::t_89dffa50884c44 1-57
+apps/sentinel/lib/env.ts
+  s_c3576656714da0::t_e438bac649f0b0 1-15
+programs/atlas-rebalancer/Cargo.toml
+  s_f63398d3bbe21a::t_6275ade805673c 3-5
+  s_f63398d3bbe21a::t_1e206d69e219ff 21-22
+apps/sentinel/components/WalletGate.tsx
+  s_c3576656714da0::t_329af15b2e975a 1-139
+apps/sentinel/app/globals.css
+  s_c3576656714da0::t_c5c7a78708d9f1 1-37
+apps/sentinel/components/PositionGrid.tsx
+  s_c3576656714da0::t_49d7e09208ca8b 1-77
+programs/atlas-registry/src/lib.rs
+  s_f63398d3bbe21a::t_f7e682ef464ad4 14
+Cargo.toml
+  s_f63398d3bbe21a::t_8aeb798c9ad46f 113
+  s_f63398d3bbe21a::t_6ddaddf9d268d6 28
+  s_f63398d3bbe21a::t_d468b9d3eea26b 78-79
+apps/sentinel/app/page.tsx
+  s_c3576656714da0::t_a3d2fa92113d85 1-101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "29ceb2459ea1fa6d7eb1f90662b8630ab5637cfe",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "unknown"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    },
+    "s_f63398d3bbe21a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3767c1e4-70e1-4adc-96c8-1dd36d2f258e",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

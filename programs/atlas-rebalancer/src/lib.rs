@@ -15,7 +15,7 @@
 
 use anchor_lang::prelude::*;
 
-declare_id!("AtLasReba1ancer11111111111111111111111111");
+declare_id!("4At18ooZgs7Sno83kGyKX1QptKqiWvfjZwZCBMcWKuAY");
 
 pub const REBALANCE_AUTH_SEED: &[u8] = b"rebalance-auth";
 pub const PROOF_FRESHNESS_SLOTS: u64 = 150; // ~60 sec at 400ms blocks

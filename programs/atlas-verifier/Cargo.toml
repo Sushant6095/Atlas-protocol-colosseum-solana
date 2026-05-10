@@ -1,8 +1,8 @@
 [package]
 name = "atlas-verifier"
-version.workspace = true
-edition.workspace = true
-license.workspace = true
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
 description = "Atlas Verifier — onchain Groth16 verifier wrapping sp1-solana for Solana programs"
 
 [lib]
@@ -18,6 +18,6 @@ default = []
 idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
-anchor-lang.workspace = true
-sp1-solana.workspace = true
-solana-program.workspace = true
+anchor-lang = { version = "0.32.1", features = ["init-if-needed"] }
+sp1-solana = "0.1.0"
+solana-program = "2.1.0"

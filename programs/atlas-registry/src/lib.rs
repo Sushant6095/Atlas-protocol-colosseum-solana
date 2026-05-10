@@ -11,7 +11,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
 
-declare_id!("AtLasReg1stry1111111111111111111111111111");
+declare_id!("5Pe99BkTVZrNQbNjTATJ6UT6owCZZZ1cJaoDdZEw3WEJ");
 
 pub const MAX_DEPTH: u32 = 20;
 pub const MAX_BUFFER: u32 = 64;

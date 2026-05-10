@@ -14,7 +14,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface, TransferChecked, transfer_checked, MintTo, mint_to, Burn, burn};
 
-declare_id!("AtLasVau1t11111111111111111111111111111111");
+declare_id!("HejuE3SUKb2PT7WiCxzY9GFt8t3dToxVSB2DtT8JqCjG");
 
 pub const VAULT_SEED: &[u8] = b"vault";
 pub const SHARE_MINT_SEED: &[u8] = b"share-mint";

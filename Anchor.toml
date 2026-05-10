@@ -7,16 +7,16 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-atlas_verifier = "AtLasVer1f1er11111111111111111111111111111"
-atlas_registry = "AtLasReg1stry1111111111111111111111111111"
-atlas_vault = "AtLasVau1t11111111111111111111111111111111"
-atlas_rebalancer = "AtLasReba1ancer11111111111111111111111111"
+atlas_verifier = "A738nTHZKBpwHrPoHcwi9qrC8m7m17eXn2PzWix1ufR1"
+atlas_registry = "5Pe99BkTVZrNQbNjTATJ6UT6owCZZZ1cJaoDdZEw3WEJ"
+atlas_vault = "HejuE3SUKb2PT7WiCxzY9GFt8t3dToxVSB2DtT8JqCjG"
+atlas_rebalancer = "4At18ooZgs7Sno83kGyKX1QptKqiWvfjZwZCBMcWKuAY"
 
 [programs.devnet]
-atlas_verifier = "AtLasVer1f1er11111111111111111111111111111"
-atlas_registry = "AtLasReg1stry1111111111111111111111111111"
-atlas_vault = "AtLasVau1t11111111111111111111111111111111"
-atlas_rebalancer = "AtLasReba1ancer11111111111111111111111111"
+atlas_verifier = "A738nTHZKBpwHrPoHcwi9qrC8m7m17eXn2PzWix1ufR1"
+atlas_registry = "5Pe99BkTVZrNQbNjTATJ6UT6owCZZZ1cJaoDdZEw3WEJ"
+atlas_vault = "HejuE3SUKb2PT7WiCxzY9GFt8t3dToxVSB2DtT8JqCjG"
+atlas_rebalancer = "4At18ooZgs7Sno83kGyKX1QptKqiWvfjZwZCBMcWKuAY"
 
 [registry]
 url = "https://api.apr.dev"

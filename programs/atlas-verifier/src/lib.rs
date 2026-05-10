@@ -12,7 +12,7 @@
 use anchor_lang::prelude::*;
 use sp1_solana::verify_proof_fixed;
 
-declare_id!("AtLasVer1f1er11111111111111111111111111111");
+declare_id!("A738nTHZKBpwHrPoHcwi9qrC8m7m17eXn2PzWix1ufR1");
 
 #[program]
 pub mod atlas_verifier {

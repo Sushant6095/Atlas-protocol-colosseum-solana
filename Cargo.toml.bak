@@ -25,7 +25,7 @@ members = [
     "crates/atlas-governance",
     "crates/atlas-monitor",
     "crates/atlas-runtime",
-#    "crates/atlas-alt",
+    "crates/atlas-alt",
     "crates/atlas-cpi-guard",
     "crates/atlas-bundle",
     "crates/atlas-mev",
@@ -75,8 +75,6 @@ license = "Apache-2.0"
 repository = "https://github.com/atlas-fi/atlas"
 
 [workspace.dependencies]
-ctutils = "=0.4.1"
-digest = "=0.10.7"
 anchor-lang = { version = "0.32.1", features = ["init-if-needed"] }
 anchor-spl = { version = "0.32.1", features = ["token_2022", "token_2022_extensions"] }
 solana-program = "2.1.0"
@@ -110,7 +108,7 @@ prometheus = "0.13"
 clap = { version = "4.5", features = ["derive", "env"] }
 
 # event bus
-blake3 = "=1.5.5"
+blake3 = "1.5"
 bytes = "1.7"
 hmac = "0.12"
 sha2 = "0.10"

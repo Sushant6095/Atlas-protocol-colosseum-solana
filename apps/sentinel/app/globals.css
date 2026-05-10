@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@source "../";
+
+@theme {
+  --color-surface-base:   #06070A;
+  --color-surface-raised: #0B0D12;
+  --color-surface-sunken: #04050A;
+  --color-line-soft:      rgba(255,255,255,0.04);
+  --color-line-medium:    rgba(255,255,255,0.08);
+  --color-line-strong:    rgba(255,255,255,0.16);
+
+  --color-ink-primary:    #E6EAF2;
+  --color-ink-secondary:  #9AA3B5;
+  --color-ink-tertiary:   #5D6577;
+
+  --color-accent-execute: #3CE39A;
+  --color-accent-danger:  #FF6166;
+  --color-accent-zk:      #A682FF;
+  --color-accent-warn:    #F7B955;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+body {
+  background: var(--color-surface-base);
+  color: var(--color-ink-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes pulse-anomaly {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(247,185,85,0.5); }
+  50%      { box-shadow: 0 0 0 8px rgba(247,185,85,0); }
+}
+.anomaly-pulse { animation: pulse-anomaly 2s ease-in-out infinite; }

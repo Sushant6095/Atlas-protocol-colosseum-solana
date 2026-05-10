@@ -1,8 +1,8 @@
 [package]
 name = "atlas-rebalancer"
-version.workspace = true
-edition.workspace = true
-license.workspace = true
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
 description = "Atlas Rebalancer — proof-gated allocator across Kamino, Drift, Jupiter, marginfi"
 
 [lib]
@@ -18,8 +18,8 @@ default = []
 idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
-anchor-lang.workspace = true
-anchor-spl.workspace = true
+anchor-lang = { version = "0.32.1", features = ["init-if-needed"] }
+anchor-spl = { version = "0.32.1", features = ["token_2022", "token_2022_extensions"] }
 atlas-verifier = { path = "../atlas-verifier", features = ["cpi"] }
 atlas-vault = { path = "../atlas-vault", features = ["cpi"] }
 atlas-registry = { path = "../atlas-registry", features = ["cpi"] }

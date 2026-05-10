@@ -1,0 +1,30 @@
+web/app/vaults/page.tsx
+  s_c3576656714da0::t_2d51af54fd548e 227-347
+  s_c3576656714da0::t_4effb6963c597c 4,10,18,21-22
+  s_c3576656714da0::t_f43c40e93c6338 31-36
+  s_c3576656714da0::t_31b6eb7dae490c 127-131
+web/app/(docs)/docs/integrations/pusd/page.tsx
+  s_c3576656714da0::t_5df66322a3eb2e 1-5,9-11,13-121,123-355
+web/app/globals.css
+  s_c3576656714da0::t_5fd15c39212ec2 442-446
+web/components/magicui/border-beam.tsx
+  s_c3576656714da0::t_e94aa3cc3fd844 1-53
+web/app/(marketing)/page.tsx
+  s_c3576656714da0::t_61f93c023ec972 496-499
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "1dd2e6a3acb22b94f9b63badf00f75c8d7f8e426",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

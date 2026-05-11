@@ -48,11 +48,19 @@ interface MenuColumn {
   items: MenuItem[];
 }
 
-const DIRECT_ITEMS: DirectItem[] = [
+interface DirectItemX extends DirectItem {
+  /** Hide below the xl breakpoint (1280px) — overflow protection. */
+  collapseBelowXl?: boolean;
+}
+
+const DIRECT_ITEMS: DirectItemX[] = [
   { label: "Home",            href: "/" },
   { label: "Decision Engine", href: "/decision-engine" },
   { label: "Proofs",          href: "/proofs" },
   { label: "Vaults",          href: "/vaults" },
+  { label: "Treasury",        href: "/treasury" },
+  { label: "Markets",         href: "/markets", collapseBelowXl: true },
+  { label: "Security",        href: "/security", collapseBelowXl: true },
   { label: "Docs",            href: "/docs" },
 ];
 
@@ -140,11 +148,12 @@ export function HeaderNav(): JSX.Element {
         <nav className="ml-4 hidden flex-1 md:flex">
           <NavigationMenu viewport={false} className="max-w-none justify-start">
             <NavigationMenuList className="gap-1.5">
-              {/* PRODUCT mega-menu */}
+              {/* PRODUCT mega-menu — built-in shadcn chevron rotates
+                  180° on open (group-data-open/navigation-menu-trigger). */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger
                   className={cn(
-                    "h-9 rounded-full bg-transparent px-4 font-mono text-[11px] uppercase tracking-[0.16em] text-white/85 hover:bg-white/8 hover:text-white",
+                    "h-8 rounded-full bg-transparent px-3 py-1.5 font-mono text-[13px] uppercase tracking-[0.14em] text-white/85 hover:bg-white/8 hover:text-white",
                     "data-[state=open]:bg-white/8 data-[state=open]:text-white",
                     "focus:bg-white/8 focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-electric)]",
                   )}
@@ -156,17 +165,20 @@ export function HeaderNav(): JSX.Element {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* direct pills */}
+              {/* direct pills — tighter density to fit 8 + dropdown */}
               {DIRECT_ITEMS.map((it) => {
                 const active = isActive(pathname, it.href);
                 return (
-                  <NavigationMenuItem key={it.href}>
+                  <NavigationMenuItem
+                    key={it.href}
+                    className={cn(it.collapseBelowXl && "hidden xl:flex")}
+                  >
                     <NavigationMenuLink asChild>
                       <Link
                         href={it.href}
                         aria-current={active ? "page" : undefined}
                         className={cn(
-                          "relative inline-flex h-9 items-center rounded-full px-4 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors",
+                          "relative inline-flex h-8 items-center rounded-full px-3 py-1.5 font-mono text-[13px] uppercase tracking-[0.14em] transition-colors whitespace-nowrap",
                           active
                             ? "bg-white/8 text-white"
                             : "text-white/75 hover:bg-white/8 hover:text-white",
@@ -199,19 +211,19 @@ export function HeaderNav(): JSX.Element {
 function ProductMegaMenu(): JSX.Element {
   return (
     <div
-      className="rounded-2xl border p-8 shadow-2xl"
+      className="rounded-2xl border p-10 shadow-2xl"
       style={{
         background: "color-mix(in oklab, #0B0D12 95%, transparent)",
         backdropFilter: "blur(16px)",
         borderColor: "color-mix(in oklab, #ffffff 10%, transparent)",
-        width: 920,
+        width: 1080,
       }}
     >
-      <div className="grid grid-cols-4 gap-x-8 gap-y-2">
+      <div className="grid grid-cols-4 gap-x-10">
         {PRODUCT_COLUMNS.map((col) => (
-          <div key={col.heading}>
+          <div key={col.heading} className="flex flex-col">
             <p
-              className="mb-4 font-mono text-[11px] uppercase tracking-[0.22em]"
+              className="mb-5 font-mono text-[10px] uppercase tracking-[0.28em]"
               style={{ color: "rgba(255,255,255,0.45)" }}
             >
               {col.heading}
@@ -222,16 +234,16 @@ function ProductMegaMenu(): JSX.Element {
                   <NavigationMenuLink asChild>
                     <Link
                       href={it.href}
-                      className="group block rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]"
+                      className="group -mx-3 block rounded-lg p-3 transition-colors duration-200 hover:bg-white/5"
                     >
                       <p
-                        className="font-display text-sm font-semibold tracking-[-0.01em] leading-tight"
+                        className="font-display text-[14px] font-semibold leading-tight tracking-[-0.01em] whitespace-nowrap"
                         style={{ color: "#FFFFFF" }}
                       >
                         {it.label}
                       </p>
                       <p
-                        className="mt-0.5 text-[11px] leading-tight"
+                        className="mt-1 font-sans text-[12px] font-normal leading-snug text-balance"
                         style={{ color: "rgba(255,255,255,0.5)" }}
                       >
                         {it.description}
@@ -245,13 +257,13 @@ function ProductMegaMenu(): JSX.Element {
         ))}
       </div>
       <div
-        className="mt-6 flex items-center border-t pt-4"
+        className="mt-8 flex items-center border-t pt-5"
         style={{ borderColor: "color-mix(in oklab, #ffffff 10%, transparent)" }}
       >
         <NavigationMenuLink asChild>
           <Link
             href={MENU_FOOTER.href}
-            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] hover:opacity-90"
+            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.22em] hover:opacity-90"
             style={{ color: ELECTRIC }}
           >
             {MENU_FOOTER.label}

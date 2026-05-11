@@ -1,0 +1,36 @@
+web/app/vaults/[symbol]/page.tsx
+  s_c3576656714da0::t_c73a4bd6d55533 116-120
+  s_c3576656714da0::t_4ee5c7d07425cb 37
+web/app/vaults/pusd/page.tsx
+  s_c3576656714da0::t_708700fac95795 148
+web/components/narrative/HeroCounters.tsx
+  s_c3576656714da0::t_e8226a4482c3c6 122,143-148
+  s_c3576656714da0::t_47a84e38cb8270 50-53
+  s_c3576656714da0::t_4110075257810f 170-171,174
+  s_c3576656714da0::t_2a9ca573425326 206,210
+web/app/(marketing)/page.tsx
+  s_c3576656714da0::t_5164322db2ecb8 208
+web/components/vaults/PrewarmDemo.tsx
+  s_c3576656714da0::t_954963d0c52b39 1-217
+web/app/vaults/page.tsx
+  s_c3576656714da0::t_914334e41b85bc 282
+  s_c3576656714da0::t_1d3a9914ad9883 322,325
+web/app/(docs)/docs/integrations/pusd/page.tsx
+  s_c3576656714da0::t_2ff4119395a25d 26,125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "08c29bdb564fda102bc7b61201356209d77777dc",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

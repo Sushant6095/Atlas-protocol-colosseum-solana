@@ -7,7 +7,8 @@
 
 import Link from "next/link";
 import type { ShellProps } from "./types";
-import { HeaderBar } from "./HeaderBar";
+import { LiveStrip } from "@/components/marquee/LiveStrip";
+import { HeaderNav } from "@/components/nav/HeaderNav";
 import { cn } from "@/components/primitives";
 import { usePathname } from "next/navigation";
 
@@ -24,7 +25,10 @@ export function IntelligenceShell({ children }: ShellProps) {
   const pathname = usePathname();
   return (
     <div className="min-h-screen bg-[color:var(--color-surface-base)]">
-      <HeaderBar />
+      <div className="relative h-14 border-b border-white/5 overflow-hidden z-30">
+        <LiveStrip />
+      </div>
+      <HeaderNav />
       <div className="flex max-w-[1440px] mx-auto">
         <aside className="w-56 border-r border-[color:var(--color-line-soft)] py-8 px-3 hidden lg:block">
           <p className="text-[10px] uppercase tracking-[0.08em] text-[color:var(--color-ink-tertiary)] px-2 mb-2">

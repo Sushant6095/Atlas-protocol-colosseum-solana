@@ -1,25 +1,22 @@
 // PublicShell.
 //
-// Used for /infra, /proofs/live, /decision-engine. These pages need
-// the same full-chrome header as the marketing surface — Atlas
-// wordmark + Product mega-menu + Architecture / Security / Decision
-// Engine / Docs nav anchors — so a viewer landing deep can always
-// navigate back without a browser back-button.
+// Renders the Atlas-wide chrome (APY ticker + 8-pill HeaderNav with
+// PRODUCT mega-menu) used across /decision-engine, /infra, /proofs,
+// /proofs/live, /vaults, /markets, /dashboard. Same band as the
+// marketing surface so judges see one consistent header on every
+// route.
 
 import type { ShellProps } from "./types";
-import { HeaderBar } from "./HeaderBar";
-
-const PUBLIC_NAV = [
-  { label: "Architecture",   href: "/architecture" },
-  { label: "Security",       href: "/security" },
-  { label: "Decision Engine", href: "/decision-engine" },
-  { label: "Docs",           href: "/docs" },
-];
+import { LiveStrip } from "@/components/marquee/LiveStrip";
+import { HeaderNav } from "@/components/nav/HeaderNav";
 
 export function PublicShell({ children }: ShellProps) {
   return (
     <div className="min-h-screen bg-[color:var(--color-surface-base)]">
-      <HeaderBar nav={PUBLIC_NAV} />
+      <div className="relative h-14 border-b border-white/5 overflow-hidden z-30">
+        <LiveStrip />
+      </div>
+      <HeaderNav />
       <main className="px-6 py-10 max-w-[1440px] mx-auto">{children}</main>
     </div>
   );

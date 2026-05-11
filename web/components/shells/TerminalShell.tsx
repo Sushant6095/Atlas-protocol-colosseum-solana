@@ -12,7 +12,8 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { HeaderBar } from "./HeaderBar";
+import { LiveStrip } from "@/components/marquee/LiveStrip";
+import { HeaderNav } from "@/components/nav/HeaderNav";
 import { cn } from "@/components/primitives";
 import { useUiStore } from "@/lib/ui-store";
 import { usePathname } from "next/navigation";
@@ -42,7 +43,10 @@ export function TerminalShell({ children, sidecar, statusBar, bottomStrip }: Ter
   const rightRailOpen = useUiStore((s) => s.rightRailOpen);
   return (
     <div className="min-h-screen flex flex-col bg-[color:var(--color-surface-base)]">
-      <HeaderBar showRightRailToggle />
+      <div className="relative h-14 border-b border-white/5 overflow-hidden z-30">
+        <LiveStrip />
+      </div>
+      <HeaderNav />
       {statusBar ? statusBar : null}
       <div className="flex flex-1 max-w-[1440px] w-full mx-auto">
         <aside className="w-60 shrink-0 border-r border-[color:var(--color-line-soft)] py-6 px-2 hidden md:block">

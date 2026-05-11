@@ -1,0 +1,22 @@
+web/app/vaults/[symbol]/page.tsx
+  s_c3576656714da0::t_45f6af778c917c 35
+  s_c3576656714da0::t_1d05178aaabd3a 275-286,306,310-362
+web/lib/vaults/performance-fixtures.ts
+  s_c3576656714da0::t_57baafc8321687 1-74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "8bc0d83a1e9c44b786841066e1660292729790f7",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

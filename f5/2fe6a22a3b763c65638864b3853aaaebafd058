@@ -1,0 +1,20 @@
+README.md
+  s_c3576656714da0::t_c1ccceeab56d94 80,82,84,86,88-99,101,103-116,118-128,131-145
+  s_c3576656714da0::t_73169a35666817 331,335-336,339,343,347,350,352
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "f52fe6a22a3b763c65638864b3853aaaebafd058",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

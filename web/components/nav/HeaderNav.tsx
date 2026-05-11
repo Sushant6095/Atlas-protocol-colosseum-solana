@@ -211,63 +211,41 @@ export function HeaderNav(): JSX.Element {
 function ProductMegaMenu(): JSX.Element {
   return (
     <div
-      className="rounded-2xl border p-10 shadow-2xl"
-      style={{
-        background: "color-mix(in oklab, #0B0D12 95%, transparent)",
-        backdropFilter: "blur(16px)",
-        borderColor: "color-mix(in oklab, #ffffff 10%, transparent)",
-        width: 1080,
-      }}
+      className="w-[1080px] max-w-[calc(100vw-32px)] rounded-2xl border border-white/10 bg-[#0B0D12]/95 p-8 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl"
     >
-      <div className="grid grid-cols-4 gap-x-10">
+      <div className="grid grid-cols-4 gap-x-8">
         {PRODUCT_COLUMNS.map((col) => (
-          <div key={col.heading} className="flex flex-col">
-            <p
-              className="mb-5 font-mono text-[10px] uppercase tracking-[0.28em]"
-              style={{ color: "rgba(255,255,255,0.45)" }}
-            >
+          <div key={col.heading} className="flex flex-col space-y-0">
+            <h3 className="mb-4 border-b border-white/5 pb-2 font-mono text-[10px] font-medium uppercase tracking-[0.24em] text-[color:color-mix(in_oklab,var(--color-ink-tertiary)_70%,transparent)]">
               {col.heading}
-            </p>
-            <ul className="space-y-1">
-              {col.items.map((it) => (
-                <li key={it.href}>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      href={it.href}
-                      className="group -mx-3 block rounded-lg p-3 transition-colors duration-200 hover:bg-white/5"
-                    >
-                      <p
-                        className="font-display text-[14px] font-semibold leading-tight tracking-[-0.01em] whitespace-nowrap"
-                        style={{ color: "#FFFFFF" }}
-                      >
-                        {it.label}
-                      </p>
-                      <p
-                        className="mt-1 font-sans text-[12px] font-normal leading-snug text-balance"
-                        style={{ color: "rgba(255,255,255,0.5)" }}
-                      >
-                        {it.description}
-                      </p>
-                    </Link>
-                  </NavigationMenuLink>
-                </li>
-              ))}
-            </ul>
+            </h3>
+            {col.items.map((it) => (
+              <NavigationMenuLink asChild key={it.href}>
+                <Link
+                  href={it.href}
+                  className="group -mx-3 flex flex-col gap-0.5 rounded-lg px-3 py-2 transition-colors duration-150 hover:bg-white/5 focus-visible:bg-white/5 focus-visible:outline-none"
+                >
+                  <span className="whitespace-nowrap font-display text-[15px] font-semibold leading-tight tracking-[-0.01em] text-[color:var(--color-ink-primary)] group-hover:text-white">
+                    {it.label}
+                  </span>
+                  <span className="font-sans text-[12.5px] font-normal leading-snug text-[color:var(--color-ink-tertiary)] group-hover:text-[color:var(--color-ink-secondary)]">
+                    {it.description}
+                  </span>
+                </Link>
+              </NavigationMenuLink>
+            ))}
           </div>
         ))}
       </div>
-      <div
-        className="mt-8 flex items-center border-t pt-5"
-        style={{ borderColor: "color-mix(in oklab, #ffffff 10%, transparent)" }}
-      >
+
+      <div className="mt-6 flex items-center justify-between border-t border-white/[0.08] pt-4">
         <NavigationMenuLink asChild>
           <Link
             href={MENU_FOOTER.href}
-            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.22em] hover:opacity-90"
-            style={{ color: ELECTRIC }}
+            className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-accent-electric)] transition-colors hover:text-white"
           >
             {MENU_FOOTER.label}
-            <ArrowUpRight className="h-3.5 w-3.5" />
+            <ArrowUpRight className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </NavigationMenuLink>
       </div>

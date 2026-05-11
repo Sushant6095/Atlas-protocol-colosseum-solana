@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/sheet";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { NumberTicker } from "@/components/ui/number-ticker";
+import { DecisionEngineDepth } from "@/components/decision/DecisionEngineDepth";
 
 const NODE_W = 200;
 const NODE_H = 96;
@@ -426,6 +427,9 @@ export default function DecisionEnginePage(): JSX.Element {
           <Legend color="#FF6166" label="refusal path" />
         </div>
       </section>
+
+      {/* 7-section engineering deep dive */}
+      <DecisionEngineDepth />
 
       {/* receipt toast */}
       {sim.toast && (

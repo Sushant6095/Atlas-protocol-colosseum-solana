@@ -18,19 +18,18 @@ const PillNav = dynamic(() => import("@/components/effects/PillNav"), {
   ssr: false,
 });
 
-// One-click terminal access from the header. Marketing-only routes
-// (Architecture / Security / Decision Engine / Docs) stay reachable
-// via the comprehensive Footer + the mega-menu.
+// Demo-quality top-level nav. Operator routes (rebalance, triggers,
+// recurring, hedging, treasury, governance) still exist and are
+// reachable via direct URL + footer; they're dropped from the top
+// nav so judges land only on pages that have been polished for the
+// submission.
 const PILL_NAV_ITEMS = [
-  { label: "Home",           href: "/" },
-  { label: "Vaults",         href: "/vaults" },
-  { label: "Rebalance",      href: "/rebalance/live" },
-  { label: "Triggers",       href: "/triggers" },
-  { label: "Recurring",      href: "/recurring" },
-  { label: "Hedging",        href: "/hedging" },
-  { label: "Treasury",       href: "/treasury" },
-  { label: "Governance",     href: "/governance" },
-  { label: "Docs",           href: "/docs" },
+  { label: "Home",            href: "/" },
+  { label: "Decision Engine", href: "/decision-engine" },
+  { label: "Proofs",          href: "/proofs" },
+  { label: "Vaults",          href: "/vaults" },
+  { label: "Integrations",    href: "/docs/integrations" },
+  { label: "Docs",            href: "/docs" },
 ];
 
 export function MarketingShell({ children }: ShellProps) {
@@ -38,8 +37,10 @@ export function MarketingShell({ children }: ShellProps) {
   return (
     <div className="min-h-screen bg-[color:var(--color-surface-base)]">
       {/* Band 1 — APY ticker. Modal-faithful: relative (scrolls away
-          with content), so only the nav stays pinned. */}
-      <div className="relative h-10 border-b border-white/5 overflow-hidden z-30">
+          with content), so only the nav stays pinned. h-14 (56px)
+          matches the Marquee track height — h-10 was clipping the
+          two-line pill content. */}
+      <div className="relative h-14 border-b border-white/5 overflow-hidden z-30">
         <LiveStrip />
       </div>
 

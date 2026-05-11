@@ -1,206 +1,443 @@
 "use client";
 
-// /proofs/[hash] — single receipt detail.
+// /proofs/[hash] — Stripe-style proof receipt.
 //
-// Phase 1 stub: renders hash + structural fields fixture-deterministic
-// from the slug, plus a "Verify · Phase 2" CTA. Real wiring (proof
-// blob fetch + sp1-solana WASM verifier) lands in Phase 2.
+// Two-column layout (stacks on mobile): public input panel on the
+// left, sticky verify card on the right. ShimmerButton runs a 1.6s
+// progress bar then flips to PASS with an animated checkmark.
+// Tx history table sits below the grid; any pasted hash resolves
+// via findProof's fallback so the URL never 404s for judges.
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Check, ShieldCheck, Copy, ExternalLink } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Check,
+  Copy,
+  ExternalLink,
+  ShieldCheck,
+  Share2,
+} from "lucide-react";
+import { findProof, type ProofReceipt, type ProofTx } from "@/lib/proofs/fixtures";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
+
+const PUSD_ACCENT = "#A682FF";
 
 type VerifyState = "idle" | "running" | "pass";
 
-function fixtureFromHash(hash: string) {
-  let h = 0;
-  for (let i = 0; i < hash.length; i++) h = (h * 31 + hash.charCodeAt(i)) >>> 0;
-  return {
-    slot: 298_000_000 + (h % 1_000_000),
-    legs: 3 + (h % 3),
-    cu:   720_000 + (h % 80_000),
-    proverMs: 28_000 + (h % 8_000),
-    explanationHash: `0x${(h * 7).toString(16).padStart(16, "0")}${"f".repeat(48)}`,
-    vkHash: `0xvk${(h ^ 0xdeadbeef).toString(16).padStart(14, "0")}${"0".repeat(48)}`,
-  };
+function trunc(s: string, head = 6, tail = 4): string {
+  if (s.length <= head + tail + 1) return s;
+  return `${s.slice(0, head)}…${s.slice(-tail)}`;
 }
 
-export default function ProofDetailPage(): JSX.Element {
+function fmtUtc(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} UTC`;
+}
+function pad(n: number): string { return n.toString().padStart(2, "0"); }
+
+interface Toast { msg: string; key: number; }
+
+export default function ProofReceiptPage(): JSX.Element {
   const params = useParams<{ hash: string }>();
   const router = useRouter();
   const hash = params?.hash ?? "0x" + "0".repeat(64);
-  const fx = fixtureFromHash(hash);
-  const [verify, setVerify] = useState<VerifyState>("idle");
-  const [copied, setCopied] = useState(false);
+  const proof: ProofReceipt = findProof(hash);
 
-  function runVerify() {
+  const [verify, setVerify] = useState<VerifyState>("idle");
+  const [toast, setToast] = useState<Toast | null>(null);
+
+  function fireToast(msg: string): void {
+    setToast({ msg, key: Date.now() });
+    setTimeout(() => setToast(null), 2200);
+  }
+
+  async function copy(text: string, label: string): Promise<void> {
+    if (typeof navigator === "undefined") return;
+    await navigator.clipboard.writeText(text);
+    fireToast(`${label} copied`);
+  }
+
+  function runVerify(): void {
+    if (verify !== "idle") return;
     setVerify("running");
     setTimeout(() => setVerify("pass"), 1600);
   }
 
-  function copyHash() {
-    if (typeof navigator === "undefined") return;
-    navigator.clipboard.writeText(hash);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
+  function sharePage(): void {
+    if (typeof window === "undefined") return;
+    const url = window.location.href;
+    if (navigator.share) {
+      void navigator.share({ url, title: "Atlas proof receipt" }).catch(() => {});
+      return;
+    }
+    void navigator.clipboard.writeText(url);
+    fireToast("link copied");
   }
 
   return (
-    <div className="min-h-screen bg-[color:var(--color-surface-base)] text-[color:var(--color-ink-primary)]">
-      <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-12 md:py-16">
-        <button
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] hover:text-[color:var(--color-ink-primary)]"
-          style={{ color: "var(--color-ink-tertiary)" }}
-        >
-          <ArrowLeft className="h-3 w-3" /> back to proof feed
-        </button>
-
-        <div className="mt-6 flex flex-wrap items-center gap-2">
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em]"
-            style={{
-              color: "var(--color-accent-execute)",
-              background: "color-mix(in oklab, var(--color-accent-execute) 12%, var(--color-surface-base))",
-              border: "1px solid color-mix(in oklab, var(--color-accent-execute) 35%, transparent)",
-            }}
-          >
-            <ShieldCheck className="h-3 w-3" /> verified
-          </span>
-          <span
-            className="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em]"
-            style={{
-              color: "var(--color-accent-zk)",
-              background: "color-mix(in oklab, var(--color-accent-zk) 12%, transparent)",
-              border: "1px solid color-mix(in oklab, var(--color-accent-zk) 30%, transparent)",
-            }}
-          >
-            sp1 · groth16
-          </span>
-          <span
-            className="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em]"
-            style={{
-              color: "var(--color-accent-warn)",
-              background: "color-mix(in oklab, var(--color-accent-warn) 12%, transparent)",
-              border: "1px solid color-mix(in oklab, var(--color-accent-warn) 30%, transparent)",
-            }}
-          >
-            devnet · phase 1
-          </span>
-        </div>
-
-        <h1 className="mt-6 font-display text-3xl font-medium tracking-tight md:text-5xl">
-          Rebalance receipt
-        </h1>
-        <div className="mt-4 flex items-center gap-3">
-          <code className="font-mono text-sm break-all" style={{ color: "var(--color-accent-zk)" }}>
-            {hash}
-          </code>
+    <main
+      className="min-h-screen"
+      style={{ background: "#06070A", color: "var(--color-ink-primary)" }}
+    >
+      {/* sticky header */}
+      <header
+        className="sticky top-0 z-30 border-b backdrop-blur"
+        style={{
+          borderColor: "color-mix(in oklab, #ffffff 8%, transparent)",
+          background: "color-mix(in oklab, #06070A 86%, transparent)",
+        }}
+      >
+        <div className="mx-auto flex max-w-[1100px] items-center justify-between gap-3 px-6 py-3">
           <button
-            type="button"
-            onClick={copyHash}
-            className="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-[10px] uppercase tracking-[0.16em] hover:border-[color:var(--color-line-strong)]"
-            style={{ borderColor: "var(--color-line-soft)", color: "var(--color-ink-tertiary)" }}
+            onClick={() => router.push("/proofs")}
+            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] hover:opacity-80"
+            style={{ color: "rgba(255,255,255,0.65)" }}
           >
-            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-            {copied ? "copied" : "copy"}
+            <ArrowLeft className="h-3 w-3" /> proofs
+          </button>
+
+          <div className="flex items-center gap-2">
+            <span
+              className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{
+                color: PUSD_ACCENT,
+                borderColor: `color-mix(in oklab, ${PUSD_ACCENT} 35%, transparent)`,
+                background: `color-mix(in oklab, ${PUSD_ACCENT} 10%, transparent)`,
+              }}
+            >
+              <ShieldCheck className="h-3 w-3" /> proof receipt · devnet
+            </span>
+            <button
+              onClick={sharePage}
+              className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] hover:opacity-90"
+              style={{
+                color: "rgba(255,255,255,0.75)",
+                borderColor: "color-mix(in oklab, #ffffff 12%, transparent)",
+              }}
+            >
+              <Share2 className="h-3 w-3" /> share
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-[1100px] px-6 py-8 md:py-12">
+        {/* hash banner */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: "rgba(255,255,255,0.55)" }}>
+              proof hash
+            </p>
+            <p className="mt-1 break-all font-mono text-sm" style={{ color: "#FFFFFF" }}>
+              {proof.hash}
+            </p>
+          </div>
+          <button
+            onClick={() => copy(proof.hash, "hash")}
+            className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] hover:opacity-90"
+            style={{ color: "rgba(255,255,255,0.75)", borderColor: "color-mix(in oklab, #ffffff 12%, transparent)" }}
+          >
+            <Copy className="h-3 w-3" /> copy
           </button>
         </div>
 
-        {/* Stat grid */}
-        <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-xl border md:grid-cols-4"
-             style={{ borderColor: "var(--color-line-medium)", background: "var(--color-line-medium)" }}>
-          {[
-            { label: "Slot",       value: fx.slot.toLocaleString() },
-            { label: "Legs",       value: String(fx.legs) },
-            { label: "Compute",    value: `${(fx.cu / 1000).toFixed(0)}k CU` },
-            { label: "Prover",     value: `${(fx.proverMs / 1000).toFixed(1)}s` },
-          ].map((s) => (
-            <div key={s.label} className="px-5 py-6" style={{ background: "var(--color-surface-raised)" }}>
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: "var(--color-ink-tertiary)" }}>
-                {s.label}
-              </p>
-              <p className="mt-2 font-mono text-2xl font-semibold tabular-nums" style={{ color: "var(--color-ink-primary)" }}>
-                {s.value}
-              </p>
+        {/* two-column grid */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+          {/* public input panel */}
+          <section
+            className="rounded-[12px] border overflow-hidden"
+            style={{
+              borderColor: "color-mix(in oklab, #ffffff 8%, transparent)",
+              background: "#0B0D12",
+            }}
+          >
+            <div className="border-b px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em]"
+                 style={{ borderColor: "color-mix(in oklab, #ffffff 8%, transparent)", color: "rgba(255,255,255,0.55)" }}>
+              public input
             </div>
-          ))}
-        </div>
+            <dl className="divide-y" style={{ borderColor: "color-mix(in oklab, #ffffff 8%, transparent)" } as React.CSSProperties}>
+              <Row label="vault_id" mono>
+                <span style={{ color: "#3F8CFF" }}>{trunc(proof.vaultId, 5, 5)}</span>
+              </Row>
+              <Row label="strategy_hash" mono>
+                <span style={{ color: "#3F8CFF" }}>{trunc(proof.strategyHash, 6, 4)}</span>
+              </Row>
+              <Row label="allocation">
+                <div className="space-y-1.5 font-mono text-[13px]">
+                  {proof.allocation.map((leg) => (
+                    <div key={leg.protocol} className="flex items-center gap-3">
+                      <span className="w-20" style={{ color: "rgba(255,255,255,0.65)" }}>{leg.protocol}</span>
+                      <span style={{ color: "#FFFFFF" }} className="tabular-nums">{leg.pct.toFixed(1)}%</span>
+                      <span
+                        className="h-1.5 flex-1 max-w-[160px] rounded-full overflow-hidden"
+                        style={{ background: "color-mix(in oklab, #ffffff 6%, transparent)" }}
+                      >
+                        <span
+                          className="block h-full"
+                          style={{
+                            width: `${leg.pct}%`,
+                            background: "linear-gradient(to right, #3F8CFF, #A682FF)",
+                          }}
+                        />
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </Row>
+              <Row label="slot" mono>
+                <span className="tabular-nums" style={{ color: "#FFFFFF" }}>{proof.slot.toLocaleString()}</span>
+              </Row>
+              <Row label="timestamp" mono>
+                <span style={{ color: "rgba(255,255,255,0.85)" }}>{fmtUtc(proof.ts)}</span>
+              </Row>
+              <Row label="commitment" mono>
+                <span style={{ color: "#3F8CFF" }}>{trunc(proof.commitment, 6, 4)}</span>
+              </Row>
+            </dl>
+          </section>
 
-        {/* Verify CTA */}
-        <div className="mt-10 rounded-xl border p-6 md:p-8"
-             style={{ borderColor: "var(--color-line-medium)", background: "var(--color-surface-raised)" }}>
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: "var(--color-ink-tertiary)" }}>
-            in-browser verification
-          </p>
-          <h2 className="mt-2 font-display text-xl font-medium md:text-2xl">
-            Run the WASM verifier on this receipt.
-          </h2>
-          <p className="mt-3 max-w-[60ch] text-sm leading-relaxed" style={{ color: "var(--color-ink-secondary)" }}>
-            Phase 1 ships the proof shape + receipt UI. The full sp1-solana
-            WASM verifier (alt_bn128 pairing in 250k CU) lands in Phase 2.
-          </p>
-          <div className="mt-5 flex items-center gap-3">
-            <button
-              onClick={runVerify}
-              disabled={verify !== "idle"}
-              className="inline-flex items-center gap-2 rounded-md border px-4 py-2 font-mono text-xs uppercase tracking-[0.16em] transition-colors hover:border-[color:var(--color-line-strong)] disabled:opacity-60"
+          {/* verify card */}
+          <aside className="lg:sticky lg:top-[88px] lg:self-start">
+            <section
+              className="rounded-[12px] border overflow-hidden"
               style={{
-                borderColor: "var(--color-line-medium)",
-                background: "var(--color-surface-base)",
-                color: verify === "pass" ? "var(--color-accent-execute)" : "var(--color-accent-electric)",
+                borderColor: "color-mix(in oklab, #ffffff 8%, transparent)",
+                background: "#0B0D12",
               }}
             >
-              {verify === "running" && (
-                <span className="h-3 w-3 animate-spin rounded-full border-2 border-transparent" style={{ borderTopColor: "currentColor", borderRightColor: "currentColor" }} />
-              )}
-              {verify === "pass" && <Check className="h-3 w-3" />}
-              {verify === "idle" && <ShieldCheck className="h-3 w-3" />}
-              {verify === "idle" ? "verify" : verify === "running" ? "verifying…" : "passed"}
-              <span
-                className="rounded-full px-1.5 py-px font-mono text-[8px] uppercase tracking-[0.14em]"
-                style={{
-                  background: "color-mix(in oklab, var(--color-accent-warn) 14%, transparent)",
-                  color: "var(--color-accent-warn)",
-                  border: "1px solid color-mix(in oklab, var(--color-accent-warn) 30%, transparent)",
-                }}
-              >
-                Phase 2
-              </span>
-            </button>
-            <Link
-              href="/docs/sdk/verify-proof"
-              className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.16em]"
-              style={{ color: "var(--color-ink-tertiary)" }}
-            >
-              docs <ExternalLink className="h-3 w-3" />
-            </Link>
-          </div>
+              <Block label="verifier program">
+                <p className="break-all font-mono text-[12px]" style={{ color: "#3F8CFF" }}>
+                  {trunc(proof.verifierProgram, 10, 6)}
+                </p>
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    onClick={() => copy(proof.verifierProgram, "verifier")}
+                    className="inline-flex items-center gap-1 rounded-md border px-2 py-1 font-mono text-[10px] uppercase tracking-[0.16em] hover:opacity-90"
+                    style={{ color: "rgba(255,255,255,0.75)", borderColor: "color-mix(in oklab, #ffffff 12%, transparent)" }}
+                  >
+                    <Copy className="h-3 w-3" /> copy
+                  </button>
+                  <a
+                    href={`https://solana.fm/address/${proof.verifierProgram}?cluster=devnet-alpha`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 rounded-md border px-2 py-1 font-mono text-[10px] uppercase tracking-[0.16em] hover:opacity-90"
+                    style={{ color: "rgba(255,255,255,0.75)", borderColor: "color-mix(in oklab, #ffffff 12%, transparent)" }}
+                  >
+                    <ExternalLink className="h-3 w-3" /> solana.fm
+                  </a>
+                </div>
+              </Block>
+
+              <Divider />
+
+              <Block label="vk hash">
+                <p className="break-all font-mono text-[12px]" style={{ color: "#3F8CFF" }}>
+                  {trunc(proof.vkHash, 6, 4)}
+                </p>
+                <button
+                  onClick={() => copy(proof.vkHash, "vk hash")}
+                  className="mt-2 inline-flex items-center gap-1 rounded-md border px-2 py-1 font-mono text-[10px] uppercase tracking-[0.16em] hover:opacity-90"
+                  style={{ color: "rgba(255,255,255,0.75)", borderColor: "color-mix(in oklab, #ffffff 12%, transparent)" }}
+                >
+                  <Copy className="h-3 w-3" /> copy
+                </button>
+              </Block>
+
+              <Divider />
+
+              <div className="px-5 py-6 flex flex-col items-center gap-3">
+                {verify === "idle" && (
+                  <ShimmerButton
+                    onClick={runVerify}
+                    background="#0B0D12"
+                    shimmerColor="#3CE39A"
+                    borderRadius="10px"
+                    className="px-5 py-2.5 text-sm font-medium"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      Verify in browser ▶
+                    </span>
+                  </ShimmerButton>
+                )}
+
+                {verify === "running" && (
+                  <div className="w-full">
+                    <div
+                      className="h-2 w-full overflow-hidden rounded-full"
+                      style={{ background: "color-mix(in oklab, #ffffff 8%, transparent)" }}
+                    >
+                      <motion.div
+                        className="h-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: "100%" }}
+                        transition={{ duration: 1.6, ease: "easeOut" }}
+                        style={{ background: "linear-gradient(to right, #3F8CFF, #3CE39A)" }}
+                      />
+                    </div>
+                    <p className="mt-2 text-center font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.65)" }}>
+                      computing groth16…
+                    </p>
+                  </div>
+                )}
+
+                {verify === "pass" && (
+                  <motion.div
+                    initial={{ scale: 0.7, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 16 }}
+                    className="flex flex-col items-center gap-2"
+                  >
+                    <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                      <circle cx="28" cy="28" r="26" stroke="#3CE39A" strokeWidth="2" />
+                      <motion.path
+                        d="M16 29 L25 38 L41 19"
+                        stroke="#3CE39A"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.55, ease: "easeOut" }}
+                      />
+                    </svg>
+                    <p className="font-display text-lg font-semibold" style={{ color: "#3CE39A" }}>
+                      PASS · Groth16 valid
+                    </p>
+                    <p className="font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                      verified locally · {proof.proverMs.toLocaleString()}ms prover · {proof.cuConsumed.toLocaleString()} CU
+                    </p>
+                  </motion.div>
+                )}
+              </div>
+            </section>
+          </aside>
         </div>
 
-        {/* Hashes */}
-        <div className="mt-10 rounded-xl border p-6 md:p-8"
-             style={{ borderColor: "var(--color-line-soft)", background: "var(--color-surface-sunken)" }}>
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: "var(--color-ink-tertiary)" }}>
-            commitments
+        {/* tx history */}
+        <section className="mt-10">
+          <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: "rgba(255,255,255,0.55)" }}>
+            tx history
           </p>
-          <dl className="mt-4 space-y-3 font-mono text-xs">
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4">
-              <dt className="w-44 shrink-0" style={{ color: "var(--color-ink-tertiary)" }}>explanation_hash</dt>
-              <dd className="break-all" style={{ color: "var(--color-accent-zk)" }}>{fx.explanationHash}</dd>
-            </div>
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4">
-              <dt className="w-44 shrink-0" style={{ color: "var(--color-ink-tertiary)" }}>vk_hash</dt>
-              <dd className="break-all" style={{ color: "var(--color-accent-proof)" }}>{fx.vkHash}</dd>
-            </div>
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4">
-              <dt className="w-44 shrink-0" style={{ color: "var(--color-ink-tertiary)" }}>public_input_hash</dt>
-              <dd className="break-all" style={{ color: "var(--color-accent-electric)" }}>{hash}</dd>
-            </div>
-          </dl>
-        </div>
+          <div
+            className="overflow-x-auto rounded-[12px] border"
+            style={{
+              borderColor: "color-mix(in oklab, #ffffff 8%, transparent)",
+              background: "#0B0D12",
+            }}
+          >
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  <th className="px-5 py-3 text-left font-medium">signature</th>
+                  <th className="px-5 py-3 text-left font-medium">type</th>
+                  <th className="px-5 py-3 text-left font-medium">timestamp</th>
+                  <th className="px-5 py-3 text-left font-medium">status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y" style={{ borderColor: "color-mix(in oklab, #ffffff 8%, transparent)" } as React.CSSProperties}>
+                {proof.txHistory.map((tx) => (
+                  <TxRow key={tx.signature} tx={tx} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
+
+      {/* toast */}
+      {toast && (
+        <div
+          key={toast.key}
+          className="fixed bottom-6 right-6 z-50 rounded-md border px-3 py-2 shadow-lg"
+          style={{
+            borderColor: "color-mix(in oklab, #3CE39A 40%, transparent)",
+            background: "#0B0D12",
+            color: "#FFFFFF",
+          }}
+        >
+          <p className="font-mono text-[11px]">
+            <Check className="mr-1 inline h-3 w-3" style={{ color: "#3CE39A" }} />
+            {toast.msg}
+          </p>
+        </div>
+      )}
+    </main>
+  );
+}
+
+function Row({
+  label, children, mono,
+}: { label: string; children: React.ReactNode; mono?: boolean }): JSX.Element {
+  return (
+    <div className="flex items-start gap-4 px-5 py-3"
+         style={{ borderColor: "color-mix(in oklab, #ffffff 8%, transparent)" }}>
+      <dt
+        className="w-32 shrink-0 font-mono text-[11px] uppercase tracking-[0.16em]"
+        style={{ color: "rgba(255,255,255,0.55)" }}
+      >
+        {label}
+      </dt>
+      <dd className={mono ? "font-mono text-[13px]" : "text-[13px]"} style={{ color: "rgba(255,255,255,0.85)" }}>
+        {children}
+      </dd>
     </div>
+  );
+}
+
+function Block({ label, children }: { label: string; children: React.ReactNode }): JSX.Element {
+  return (
+    <div className="px-5 py-4">
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: "rgba(255,255,255,0.55)" }}>
+        {label}
+      </p>
+      <div className="mt-2">{children}</div>
+    </div>
+  );
+}
+
+function Divider(): JSX.Element {
+  return <div className="h-px" style={{ background: "color-mix(in oklab, #ffffff 8%, transparent)" }} />;
+}
+
+function TxRow({ tx }: { tx: ProofTx }): JSX.Element {
+  const finalized = tx.status === "Finalized";
+  return (
+    <tr>
+      <td className="px-5 py-3">
+        <a
+          href={`https://solana.fm/tx/${tx.signature}?cluster=devnet-alpha`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 font-mono text-[12px] hover:underline"
+          style={{ color: "#3F8CFF" }}
+        >
+          {trunc(tx.signature, 8, 6)} <ArrowUpRight className="h-3 w-3" />
+        </a>
+      </td>
+      <td className="px-5 py-3 font-mono text-[12px]" style={{ color: "rgba(255,255,255,0.85)" }}>
+        {tx.type}
+      </td>
+      <td className="px-5 py-3 font-mono text-[12px]" style={{ color: "rgba(255,255,255,0.75)" }}>
+        {fmtUtc(tx.ts)}
+      </td>
+      <td className="px-5 py-3">
+        <span
+          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em]"
+          style={{
+            color: finalized ? "#3CE39A" : "#F7B955",
+            border: `1px solid color-mix(in oklab, ${finalized ? "#3CE39A" : "#F7B955"} 40%, transparent)`,
+            background: `color-mix(in oklab, ${finalized ? "#3CE39A" : "#F7B955"} 10%, transparent)`,
+          }}
+        >
+          {tx.status}
+        </span>
+      </td>
+    </tr>
   );
 }

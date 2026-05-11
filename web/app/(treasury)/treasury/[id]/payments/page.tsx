@@ -25,7 +25,7 @@ interface DodoReceipt {
   id: string;
   intent: string;
   amount_usd: number;
-  mint: "USDC" | "PYUSD";
+  mint: "USDC" | "PYUSD" | "PUSD";
   signed_at: string;
   hmac: string;
   prewarm_pct: number;

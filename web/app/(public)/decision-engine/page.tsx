@@ -1,420 +1,571 @@
-// /decision-engine — AI Decision Observatory.
-//
-// Visual overhaul: every rebalance ships a structured explanation, an
-// agent ensemble trace, and a CPI trace. The structured fields commit
-// on-chain; the prose is rendered. Below the fold: filterable list
-// of recent decisions.
-
 "use client";
 
-import { useState } from "react";
-import { DecisionList } from "@/components/decision/DecisionList";
-import { cn } from "@/components/primitives";
+// /decision-engine — React Flow architecture diagram.
+//
+// 7 agents arranged in 3 layers (6 sensors, 3 deciders, 1 executor),
+// dagre-laid-out left → right with animated edges. The proof-bearing
+// edge from Aggregator → Rebalancer renders accent.proof pink; every
+// other normal-signal edge renders accent.electric blue; the
+// Anomaly → Rebalancer refusal path renders accent.danger.
+//
+// Click any node to open a side sheet with reasoning + 3 recent
+// decisions + GitHub link. The "▶ Simulate rebalance" ShimmerButton
+// cascades a 3s animation across all 10 nodes: sensors light, then
+// deciders, then proof edge animates pink, then Rebalancer flashes
+// green with a "PROOF MINTED" pill and a bottom-right toast.
 
-type AgentId = "risk" | "yield" | "liquidity" | "tail-risk" | "compliance" | "execution" | "observer";
-type Vote = "support" | "soft_veto" | "hard_veto";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ReactFlow,
+  Background,
+  BackgroundVariant,
+  MarkerType,
+  type Edge,
+  type Node,
+  type NodeProps,
+  Handle,
+  Position,
+} from "@xyflow/react";
+import dagre from "dagre";
+import "@xyflow/react/dist/style.css";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Activity,
+  ShieldCheck,
+  CircleDot,
+  ExternalLink,
+  PlayCircle,
+} from "lucide-react";
+import {
+  AGENTS,
+  EDGES,
+  DECISION_METRICS,
+  type AgentNode,
+  type AgentStatus,
+} from "@/lib/decision-engine/agents";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { NumberTicker } from "@/components/ui/number-ticker";
 
-interface AgentProposal {
-  agent: AgentId;
-  confidence_bps: number;
-  vote: Vote;
-  rationale: string;
-}
+const NODE_W = 200;
+const NODE_H = 96;
 
-const FEATURED_PROPOSALS: AgentProposal[] = [
-  { agent: "risk",       confidence_bps: 8_400, vote: "support",   rationale: "Drawdown bounded; concentration index 0.31." },
-  { agent: "yield",      confidence_bps: 6_200, vote: "soft_veto", rationale: "Drift APY decayed 220 bps over the last 14d window." },
-  { agent: "liquidity",  confidence_bps: 7_400, vote: "support",   rationale: "Depth-1pct ≥ 5× rebalance notional on every leg." },
-  { agent: "tail-risk",  confidence_bps: 9_100, vote: "hard_veto", rationale: "Volatility spike severity 8100; defensive exit." },
-  { agent: "compliance", confidence_bps: 8_800, vote: "support",   rationale: "All routes pass region + sanctions pre-flight." },
-  { agent: "execution",  confidence_bps: 7_900, vote: "support",   rationale: "Predictive routing favours Drift-Kamino sequence." },
-  { agent: "observer",   confidence_bps: 6_500, vote: "soft_veto", rationale: "Cross-chain mirror diverges by 3.4%." },
-];
-
-const FEATURED_DRIVERS = [
-  { id: "vol_spike",   severity: 8_100, target: "all assets",  text: "30d realised vol breached the regime threshold." },
-  { id: "drift_apy",   severity: 4_400, target: "drift kSOL",  text: "Drift kSOL APY decayed 220 bps over 14d." },
-  { id: "kamino_rate", severity: 3_900, target: "kamino USDC", text: "Kamino USDC supply rate ranks above 14d median." },
-  { id: "regime_flip", severity: 7_200, target: "regime flag", text: "Cross-asset regime classifier flipped neutral → defensive." },
-];
-
-const FEATURED_CPI_TRACE = [
-  { ix: 0, program: "Compute Budget",   call: "set_compute_unit_limit(1_200_000)" },
-  { ix: 1, program: "Pyth pull",        call: "post_update(kSOL/USDC, vlbe_..)" },
-  { ix: 2, program: "Atlas Verifier",   call: "verify(public_input_v2, proof, vk_hash)" },
-  { ix: 3, program: "Atlas Rebalancer", call: "execute(post_state_commitment)" },
-  { ix: 4, program: "Drift v2",         call: "withdraw_collateral(kSOL, 12.0%)" },
-  { ix: 5, program: "Kamino Lend",      call: "deposit(USDC, 12.0%)" },
-  { ix: 6, program: "Atlas Vault",      call: "apply_post_state(after_root)" },
-  { ix: 7, program: "Bubblegum",        call: "append_leaf(rebalance_receipt)" },
-];
-
-// PascalCase labels rendered in the agent cards. The data IDs use
-// the wire format (lowercase, hyphenated); the labels are display-only.
-const AGENT_LABEL: Record<AgentId, "Risk" | "Yield" | "Liquidity" | "TailRisk" | "Compliance" | "Execution" | "Observer"> = {
-  "risk":       "Risk",
-  "yield":      "Yield",
-  "liquidity":  "Liquidity",
-  "tail-risk":  "TailRisk",
-  "compliance": "Compliance",
-  "execution":  "Execution",
-  "observer":   "Observer",
+const STATUS_COLOR: Record<AgentStatus, string> = {
+  PASS:   "#3CE39A",
+  WATCH:  "#F7B955",
+  REFUSE: "#FF6166",
 };
 
-// Each agent owns one accent. The colors are token references so
-// the surface still reads correctly under the light theme.
-const AGENT_TOP_LINE: Record<string, string> = {
-  Risk:       "bg-[color:var(--color-accent-electric)]",
-  Yield:      "bg-[color:var(--color-accent-warn)]",
-  Liquidity:  "bg-[color:var(--color-accent-zk)]",
-  TailRisk:   "bg-[color:var(--color-accent-danger)]",
-  Compliance: "bg-[color:var(--color-accent-execute)]",
-  Execution:  "bg-[color:var(--color-accent-proof)]",
-  Observer:   "bg-[color:var(--color-accent-warn)]",
-};
-const AGENT_TEXT: Record<string, string> = {
-  Risk:       "text-[color:var(--color-accent-electric)]",
-  Yield:      "text-[color:var(--color-accent-warn)]",
-  Liquidity:  "text-[color:var(--color-accent-zk)]",
-  TailRisk:   "text-[color:var(--color-accent-danger)]",
-  Compliance: "text-[color:var(--color-accent-execute)]",
-  Execution:  "text-[color:var(--color-accent-proof)]",
-  Observer:   "text-[color:var(--color-accent-warn)]",
-};
-const AGENT_FILL: Record<string, string> = {
-  Risk:       "bg-[color:var(--color-accent-electric)]",
-  Yield:      "bg-[color:var(--color-accent-warn)]",
-  Liquidity:  "bg-[color:var(--color-accent-zk)]",
-  TailRisk:   "bg-[color:var(--color-accent-danger)]",
-  Compliance: "bg-[color:var(--color-accent-execute)]",
-  Execution:  "bg-[color:var(--color-accent-proof)]",
-  Observer:   "bg-[color:var(--color-accent-warn)]",
-};
-const AGENT_HOVER_BORDER: Record<string, string> = {
-  Risk:       "hover:border-[color:var(--color-accent-electric)]/40",
-  Yield:      "hover:border-[color:var(--color-accent-warn)]/40",
-  Liquidity:  "hover:border-[color:var(--color-accent-zk)]/40",
-  TailRisk:   "hover:border-[color:var(--color-accent-danger)]/40",
-  Compliance: "hover:border-[color:var(--color-accent-execute)]/40",
-  Execution:  "hover:border-[color:var(--color-accent-proof)]/40",
-  Observer:   "hover:border-[color:var(--color-accent-warn)]/40",
+const GITHUB_ORG = "https://github.com/Sushant6095/Atlas-protocol-colosseum-solana/tree/main/crates";
+
+type AgentNodeData = {
+  agent: AgentNode;
+  flash: boolean;
+  override: AgentStatus | null;
+  [k: string]: unknown;
 };
 
-const VERDICT_LABEL: Record<Vote, "SUPPORT" | "SOFT VETO" | "HARD VETO"> = {
-  support:   "SUPPORT",
-  soft_veto: "SOFT VETO",
-  hard_veto: "HARD VETO",
-};
-const VERDICT_PILL: Record<Vote, string> = {
-  support:   "bg-[color:var(--color-accent-execute)]/10 text-[color:var(--color-accent-execute)]",
-  soft_veto: "bg-[color:var(--color-accent-warn)]/10 text-[color:var(--color-accent-warn)]",
-  hard_veto: "bg-[color:var(--color-accent-danger)]/10 text-[color:var(--color-accent-danger)]",
-};
+function AgentRectNode({ data }: NodeProps<Node<AgentNodeData>>) {
+  const { agent, flash, override } = data;
+  const status = override ?? agent.status;
+  const color = STATUS_COLOR[status];
 
-export default function Page(): JSX.Element {
-  return (
-    <div className="min-h-screen bg-[color:var(--color-surface-base)] text-[color:var(--color-ink-primary)] -mx-6 -my-10">
-      <PageHeader />
-      <StructuredDriversSection />
-      <AgentEnsembleSection />
-      <CpiTraceSection />
-      <RecentDecisionsSection />
-    </div>
-  );
-}
-
-// ─── §3b — page header ─────────────────────────────────────────────
-
-function PageHeader(): JSX.Element {
-  return (
-    <section className="border-b border-[color:var(--color-line-soft)] px-6 pb-16 pt-24 md:px-12 md:pt-32">
-      <div className="mx-auto max-w-7xl">
-        <p className="font-mono text-xs uppercase tracking-[0.22em] text-[color:var(--color-ink-tertiary)]">
-          AI DECISION OBSERVATORY · PUBLIC · ZERO AUTH
-        </p>
-        <h1 className="mt-6 font-display text-4xl font-medium leading-[1.05] tracking-[-0.02em] md:text-6xl">
-          Why Atlas moved capital,
-          <br />
-          <span className="bg-gradient-to-r from-[color:var(--color-accent-electric)] via-[color:var(--color-accent-zk)] to-[color:var(--color-accent-proof)] bg-clip-text text-transparent">
-            in three views.
-          </span>
-        </h1>
-        <p className="mt-8 max-w-2xl font-body text-base leading-relaxed text-[color:var(--color-ink-secondary)] md:text-lg">
-          Every rebalance carries a structured explanation, an agent ensemble
-          trace, and a CPI trace. The structured fields commit; the prose
-          renders. Below is a featured defensive-mode rebalance — the same
-          drilldown is available for every rebalance via the list.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-// ─── §3c+§3d — structured drivers panel ────────────────────────────
-
-function StructuredDriversSection(): JSX.Element {
-  return (
-    <section className="px-6 py-12 md:px-12">
-      <div className="mx-auto max-w-7xl">
-        <article className="relative overflow-hidden rounded-xl border border-[color:var(--color-line-medium)] bg-[color:var(--color-surface-raised)] p-8 md:p-12">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[color:var(--color-accent-electric)]/40 to-transparent" />
-
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-[color:var(--color-accent-warn)]/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-accent-warn)]">
-              DEFENSIVE
-            </span>
-            <span className="rounded-full bg-[color:var(--color-accent-warn)]/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-accent-warn)]">
-              DEFENSIVE MODE
-            </span>
-            <span className="rounded-full bg-[color:var(--color-accent-danger)]/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-accent-danger)]">
-              TAIL-RISK HARD VETO
-            </span>
-            <span className="ml-auto font-mono text-xs text-[color:var(--color-ink-tertiary)]">
-              slot 245_002_400
-            </span>
-            <span className="font-mono text-xs text-[color:var(--color-ink-tertiary)]">
-              a1b2c3…0000
-            </span>
-          </div>
-
-          <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.2em] text-[color:var(--color-ink-tertiary)]">
-            WHY · STRUCTURED DRIVERS
-          </p>
-
-          <div className="mt-6">
-            {FEATURED_DRIVERS.map((d) => (
-              <DriverRow
-                key={d.id}
-                name={d.id}
-                severity={d.severity}
-                target={d.target}
-                description={d.text}
-              />
-            ))}
-          </div>
-
-          <p className="mt-8 font-mono text-xs text-[color:var(--color-ink-tertiary)]">
-            explanation_hash · poseidon over canonical bytes ·{" "}
-            <span className="text-[color:var(--color-ink-secondary)]">9081a2…ffff</span>{" "}
-            <em className="not-italic text-[color:var(--color-ink-tertiary)]">rendering, not commitment</em>
-          </p>
-        </article>
-      </div>
-    </section>
-  );
-}
-
-interface DriverRowProps {
-  name: string;
-  severity: number;
-  target: string;
-  description: string;
-}
-
-function DriverRow({ name, severity, target, description }: DriverRowProps): JSX.Element {
-  const fill =
-    severity > 7000
-      ? "bg-gradient-to-r from-[color:var(--color-accent-danger)]/80 to-[color:var(--color-accent-danger)]"
-      : severity > 5000
-      ? "bg-gradient-to-r from-[color:var(--color-accent-warn)]/80 to-[color:var(--color-accent-warn)]"
-      : "bg-gradient-to-r from-[color:var(--color-accent-execute)]/80 to-[color:var(--color-accent-execute)]";
-
-  return (
-    <div className="grid grid-cols-12 items-center gap-4 border-b border-[color:var(--color-line-soft)] py-3 last:border-b-0">
-      <span className="col-span-2 font-mono text-sm text-[color:var(--color-ink-primary)]">
-        {name}
-      </span>
-      <div className="col-span-4">
-        <div className="relative h-2 w-full overflow-hidden rounded-full bg-[color:var(--color-surface-sunken)]">
-          <div
-            className={cn("absolute inset-y-0 left-0 rounded-full transition-[width] duration-700 ease-out", fill)}
-            style={{ width: `${(severity / 10000) * 100}%` }}
-          />
-        </div>
-        <span className="mt-1 block font-mono text-xs text-[color:var(--color-ink-tertiary)]">
-          severity {severity}
-        </span>
-      </div>
-      <span className="col-span-2 font-mono text-sm text-[color:var(--color-ink-secondary)]">
-        {target}
-      </span>
-      <span className="col-span-4 font-body text-sm text-[color:var(--color-ink-secondary)]">
-        {description}
-      </span>
-    </div>
-  );
-}
-
-// ─── §3e — 7-agent ensemble panel ──────────────────────────────────
-
-function AgentEnsembleSection(): JSX.Element {
-  return (
-    <section className="px-6 py-12 md:px-12">
-      <div className="mx-auto max-w-7xl">
-        <article className="relative overflow-hidden rounded-xl border border-[color:var(--color-line-medium)] bg-[color:var(--color-surface-raised)] p-8 md:p-12">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[color:var(--color-accent-zk)]/40 to-transparent" />
-
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:var(--color-ink-tertiary)]">
-            7-AGENT ENSEMBLE · WHO
-          </p>
-
-          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {FEATURED_PROPOSALS.map((p) => {
-              const label = AGENT_LABEL[p.agent];
-              return (
-                <AgentCard
-                  key={p.agent}
-                  label={label}
-                  verdict={VERDICT_LABEL[p.vote]}
-                  voteKey={p.vote}
-                  confidence={p.confidence_bps / 100}
-                  description={p.rationale}
-                />
-              );
-            })}
-          </div>
-        </article>
-      </div>
-    </section>
-  );
-}
-
-interface AgentCardProps {
-  label: keyof typeof AGENT_TOP_LINE;
-  verdict: "SUPPORT" | "SOFT VETO" | "HARD VETO";
-  voteKey: Vote;
-  confidence: number;
-  description: string;
-}
-
-function AgentCard({ label, verdict, voteKey, confidence, description }: AgentCardProps): JSX.Element {
   return (
     <div
-      className={cn(
-        "group relative overflow-hidden rounded-lg border border-[color:var(--color-line-medium)] bg-[color:var(--color-surface-sunken)] p-5",
-        "transition-colors duration-[220ms] ease-[cubic-bezier(0.20,0.80,0.20,1)]",
-        "hover:bg-[color:var(--color-surface-raised)]",
-        AGENT_HOVER_BORDER[label],
-      )}
+      className="relative rounded-[10px] border transition-all duration-300"
+      style={{
+        width: NODE_W,
+        height: NODE_H,
+        background: "#0B0D12",
+        borderColor: flash
+          ? color
+          : "color-mix(in oklab, #ffffff 8%, transparent)",
+        boxShadow: flash
+          ? `0 0 0 1px ${color}, 0 0 32px -8px ${color}aa`
+          : "0 1px 2px rgba(0,0,0,0.4)",
+      }}
     >
-      <div className={cn("absolute inset-x-0 top-0 h-px", AGENT_TOP_LINE[label])} />
+      <Handle type="target" position={Position.Left}  style={{ background: "#0B0D12", border: "none" }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#0B0D12", border: "none" }} />
 
-      <div className="flex items-center justify-between">
-        <span className={cn("font-display text-base font-semibold", AGENT_TEXT[label])}>
-          {label}
-        </span>
-        <span
-          className={cn(
-            "rounded-full px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em]",
-            VERDICT_PILL[voteKey],
-          )}
-        >
-          {verdict}
-        </span>
-      </div>
-
-      <div className="mt-4">
-        <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-[color:var(--color-surface-base)]">
-          <div
-            className={cn("absolute inset-y-0 left-0 rounded-full transition-[width] duration-700 ease-out", AGENT_FILL[label])}
-            style={{ width: `${confidence}%` }}
-          />
+      <div className="flex h-full flex-col justify-between p-3">
+        <div className="flex items-center justify-between gap-2">
+          <p
+            className="font-display text-[13px] font-semibold leading-none"
+            style={{ color: "#FFFFFF" }}
+          >
+            {agent.name}
+          </p>
+          <span
+            className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.16em]"
+            style={{
+              color,
+              border: `1px solid color-mix(in oklab, ${color} 40%, transparent)`,
+              background: `color-mix(in oklab, ${color} 10%, transparent)`,
+            }}
+          >
+            <CircleDot className="h-2 w-2" />
+            {status}
+          </span>
         </div>
-        <p className="mt-2 font-mono text-xs text-[color:var(--color-ink-tertiary)]">
-          {confidence.toFixed(1)}% confidence
-        </p>
-      </div>
 
-      <p className="mt-3 font-body text-sm leading-relaxed text-[color:var(--color-ink-secondary)]">
-        {description}
+        <div className="flex items-center justify-between font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.55)" }}>
+          <span>{agent.latencyMs}ms</span>
+          <span>{new Date(agent.lastRunAt).toLocaleTimeString([], { hour12: false })}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const NODE_TYPES = { agent: AgentRectNode };
+
+function layout(nodes: Node[], edges: Edge[]): Node[] {
+  const g = new dagre.graphlib.Graph();
+  g.setDefaultEdgeLabel(() => ({}));
+  g.setGraph({ rankdir: "LR", ranksep: 120, nodesep: 28, marginx: 40, marginy: 40 });
+  nodes.forEach((n) => g.setNode(n.id, { width: NODE_W, height: NODE_H }));
+  edges.forEach((e) => g.setEdge(e.source, e.target));
+  dagre.layout(g);
+  return nodes.map((n) => {
+    const p = g.node(n.id);
+    return {
+      ...n,
+      position: { x: p.x - NODE_W / 2, y: p.y - NODE_H / 2 },
+      targetPosition: Position.Left,
+      sourcePosition: Position.Right,
+    };
+  });
+}
+
+interface SimState {
+  /** Map of node id → status override (null = use real status). */
+  overrides: Record<string, AgentStatus | null>;
+  /** Set of node ids currently flashing. */
+  flashing: Set<string>;
+  /** Set of edge ids in proof mode. */
+  proofEdges: Set<string>;
+  /** Receipt toast. */
+  toast: string | null;
+}
+
+const INITIAL_SIM: SimState = {
+  overrides: {},
+  flashing: new Set(),
+  proofEdges: new Set(),
+  toast: null,
+};
+
+export default function DecisionEnginePage(): JSX.Element {
+  const [activeAgent, setActiveAgent] = useState<AgentNode | null>(null);
+  const [liveSignal, setLiveSignal] = useState(true);
+  const [sim, setSim] = useState<SimState>(INITIAL_SIM);
+  const [simRunning, setSimRunning] = useState(false);
+
+  const baseNodes: Node<AgentNodeData>[] = useMemo(
+    () =>
+      AGENTS.map((a) => ({
+        id: a.id,
+        type: "agent",
+        position: { x: 0, y: 0 },
+        data: {
+          agent: a,
+          flash: sim.flashing.has(a.id),
+          override: sim.overrides[a.id] ?? null,
+        },
+      })),
+    [sim.flashing, sim.overrides],
+  );
+
+  const baseEdges: Edge[] = useMemo(
+    () =>
+      EDGES.map((e) => {
+        const isProof = sim.proofEdges.has(e.id) || e.proof;
+        const color = e.refusal ? "#FF6166" : isProof ? "#F478C6" : "#3F8CFF";
+        return {
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          animated: liveSignal,
+          style: {
+            stroke: color,
+            strokeWidth: isProof ? 2 : 1.4,
+            strokeDasharray: "4 4",
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color,
+            width: 14,
+            height: 14,
+          },
+        };
+      }),
+    [sim.proofEdges, liveSignal],
+  );
+
+  const laidOut = useMemo(() => layout(baseNodes, baseEdges) as Node<AgentNodeData>[], [baseNodes, baseEdges]);
+
+  const onNodeClick = useCallback(
+    (_: unknown, node: Node<AgentNodeData>) => {
+      setActiveAgent(node.data.agent);
+    },
+    [],
+  );
+
+  function runSim(): void {
+    if (simRunning) return;
+    setSimRunning(true);
+    setSim(INITIAL_SIM);
+
+    const sensors  = AGENTS.filter((a) => a.layer === "sensor").map((a) => a.id);
+    const deciders = AGENTS.filter((a) => a.layer === "decider").map((a) => a.id);
+    const proofEdge = EDGES.find((e) => e.proof);
+
+    // t=0 — sensors flash PASS
+    setTimeout(() => {
+      setSim((s) => ({
+        ...s,
+        flashing: new Set(sensors),
+        overrides: Object.fromEntries(sensors.map((id) => [id, "PASS" as const])),
+      }));
+    }, 50);
+
+    // t=800 — deciders flash PASS
+    setTimeout(() => {
+      setSim((s) => ({
+        ...s,
+        flashing: new Set([...sensors, ...deciders]),
+        overrides: {
+          ...s.overrides,
+          ...Object.fromEntries(deciders.map((id) => [id, "PASS" as const])),
+        },
+      }));
+    }, 850);
+
+    // t=1600 — proof edge lights pink
+    setTimeout(() => {
+      if (proofEdge) {
+        setSim((s) => ({ ...s, proofEdges: new Set([proofEdge.id]) }));
+      }
+    }, 1650);
+
+    // t=2400 — Rebalancer flashes green + PROOF MINTED
+    setTimeout(() => {
+      setSim((s) => ({
+        ...s,
+        flashing: new Set([...sensors, ...deciders, "rebalancer"]),
+        overrides: { ...s.overrides, rebalancer: "PASS" },
+        toast: "Receipt 0xa1b…f29 on devnet",
+      }));
+    }, 2450);
+
+    // t=5500 — clean up
+    setTimeout(() => {
+      setSim(INITIAL_SIM);
+      setSimRunning(false);
+    }, 5500);
+  }
+
+  // dismiss toast after 4s
+  useEffect(() => {
+    if (!sim.toast) return;
+    const t = setTimeout(() => setSim((s) => ({ ...s, toast: null })), 4000);
+    return () => clearTimeout(t);
+  }, [sim.toast]);
+
+  const rebalancerOverride = sim.overrides.rebalancer;
+
+  return (
+    <main
+      className="min-h-screen"
+      style={{ background: "#06070A", color: "var(--color-ink-primary)" }}
+    >
+      {/* sticky header */}
+      <header
+        className="sticky top-0 z-30 border-b backdrop-blur"
+        style={{
+          borderColor: "color-mix(in oklab, #ffffff 8%, transparent)",
+          background: "color-mix(in oklab, #06070A 86%, transparent)",
+        }}
+      >
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-6 py-3">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.18em]"
+              style={{ color: "var(--color-ink-tertiary)" }}
+            >
+              <ArrowLeft className="h-3 w-3" /> home
+            </Link>
+            <span className="font-display text-base font-semibold">Decision Engine</span>
+            <span
+              className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{
+                color: "#A682FF",
+                borderColor: "color-mix(in oklab, #A682FF 35%, transparent)",
+                background: "color-mix(in oklab, #A682FF 10%, transparent)",
+              }}
+            >
+              <ShieldCheck className="h-3 w-3" /> devnet
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setLiveSignal((v) => !v)}
+              className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] hover:opacity-90"
+              style={{
+                borderColor: liveSignal
+                  ? "color-mix(in oklab, #3CE39A 40%, transparent)"
+                  : "color-mix(in oklab, #ffffff 12%, transparent)",
+                color: liveSignal ? "#3CE39A" : "rgba(255,255,255,0.65)",
+                background: liveSignal ? "color-mix(in oklab, #3CE39A 10%, transparent)" : "transparent",
+              }}
+            >
+              <Activity className="h-3 w-3" />
+              {liveSignal ? "live signal" : "paused"}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* metrics + play button */}
+      <section className="mx-auto max-w-7xl px-6 pt-6">
+        <div
+          className="rounded-[12px] border p-5"
+          style={{
+            borderColor: "color-mix(in oklab, #ffffff 8%, transparent)",
+            background: "#0B0D12",
+          }}
+        >
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-3 md:grid-cols-4">
+              <Metric label="Decisions today"        value={DECISION_METRICS.decisionsToday} />
+              <Metric label="Proofs minted"          value={DECISION_METRICS.proofsMinted} />
+              <Metric label="Refusals (correct)"     value={DECISION_METRICS.refusalsCorrect} />
+              <Metric label="Avg decision time"      value={DECISION_METRICS.avgDecisionMs} suffix="ms" />
+            </div>
+
+            <ShimmerButton
+              onClick={runSim}
+              disabled={simRunning}
+              background="#0B0D12"
+              shimmerColor="#3F8CFF"
+              borderRadius="10px"
+              className="px-5 py-2.5 text-sm font-medium disabled:opacity-60"
+            >
+              <span className="inline-flex items-center gap-2">
+                <PlayCircle className="h-4 w-4" />
+                {simRunning ? "simulating…" : "Simulate rebalance"}
+              </span>
+            </ShimmerButton>
+          </div>
+        </div>
+      </section>
+
+      {/* React Flow canvas */}
+      <section className="mx-auto max-w-7xl px-6 py-6">
+        <div
+          className="relative h-[640px] w-full overflow-hidden rounded-[12px] border"
+          style={{
+            borderColor: "color-mix(in oklab, #ffffff 8%, transparent)",
+            background: "#06070A",
+          }}
+        >
+          <ReactFlow
+            nodes={laidOut}
+            edges={baseEdges}
+            nodeTypes={NODE_TYPES}
+            onNodeClick={onNodeClick}
+            fitView
+            fitViewOptions={{ padding: 0.18 }}
+            proOptions={{ hideAttribution: true }}
+            minZoom={0.4}
+            maxZoom={1.8}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            edgesFocusable={false}
+            panOnScroll
+            zoomOnPinch
+          >
+            <Background
+              variant={BackgroundVariant.Dots}
+              gap={18}
+              size={1}
+              color="rgba(255,255,255,0.08)"
+            />
+          </ReactFlow>
+
+          {/* rebalancer PROOF MINTED overlay pill */}
+          {rebalancerOverride === "PASS" && simRunning && (
+            <div
+              className="pointer-events-none absolute right-6 top-6 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{
+                color: "#3CE39A",
+                borderColor: "color-mix(in oklab, #3CE39A 40%, transparent)",
+                background: "color-mix(in oklab, #3CE39A 12%, #06070A)",
+              }}
+            >
+              ✓ proof minted
+            </div>
+          )}
+        </div>
+
+        {/* legend */}
+        <div className="mt-3 flex flex-wrap items-center gap-4 font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "rgba(255,255,255,0.55)" }}>
+          <Legend color="#3F8CFF" label="normal signal" />
+          <Legend color="#F478C6" label="proof-bearing" />
+          <Legend color="#FF6166" label="refusal path" />
+        </div>
+      </section>
+
+      {/* receipt toast */}
+      {sim.toast && (
+        <div
+          className="fixed bottom-6 right-6 z-50 rounded-md border px-4 py-3 shadow-lg"
+          style={{
+            borderColor: "color-mix(in oklab, #3CE39A 40%, transparent)",
+            background: "#0B0D12",
+            color: "#FFFFFF",
+          }}
+        >
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: "#3CE39A" }}>
+            ✓ tx settled
+          </p>
+          <p className="mt-1 font-mono text-[12px]">{sim.toast}</p>
+        </div>
+      )}
+
+      {/* agent side sheet */}
+      <Sheet open={activeAgent !== null} onOpenChange={(o) => !o && setActiveAgent(null)}>
+        <SheetContent
+          side="right"
+          className="w-full max-w-[440px] sm:max-w-[440px]"
+          style={{ background: "#0B0D12", color: "#FFFFFF" }}
+        >
+          {activeAgent && (
+            <>
+              <SheetHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <SheetTitle className="font-display text-xl">{activeAgent.name}</SheetTitle>
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em]"
+                    style={{
+                      color: STATUS_COLOR[activeAgent.status],
+                      border: `1px solid color-mix(in oklab, ${STATUS_COLOR[activeAgent.status]} 40%, transparent)`,
+                      background: `color-mix(in oklab, ${STATUS_COLOR[activeAgent.status]} 10%, transparent)`,
+                    }}
+                  >
+                    <CircleDot className="h-2.5 w-2.5" />
+                    {activeAgent.status}
+                  </span>
+                </div>
+                <SheetDescription className="font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  {activeAgent.layer} · {activeAgent.latencyMs}ms · last {new Date(activeAgent.lastRunAt).toLocaleTimeString([], { hour12: false })}
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="space-y-6 px-4 pb-6">
+                <section>
+                  <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                    reasoning trace
+                  </p>
+                  <ul className="space-y-1.5 text-[13px] leading-[1.55]" style={{ color: "rgba(255,255,255,0.85)" }}>
+                    {activeAgent.reasoning.map((line, i) => (
+                      <li key={i} className="flex gap-2">
+                        <span className="opacity-50">{i + 1}.</span>
+                        <span>{line}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <section>
+                  <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                    last 3 decisions
+                  </p>
+                  <ul className="space-y-2">
+                    {activeAgent.recentDecisions.map((d) => (
+                      <li
+                        key={d.ts}
+                        className="rounded-md border p-2.5"
+                        style={{
+                          borderColor: "color-mix(in oklab, #ffffff 8%, transparent)",
+                          background: "#06070A",
+                        }}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                            {d.ts}
+                          </span>
+                          <span
+                            className="font-mono text-[10px] uppercase tracking-[0.16em]"
+                            style={{ color: STATUS_COLOR[d.verdict] }}
+                          >
+                            {d.verdict}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[12px] leading-[1.5]" style={{ color: "rgba(255,255,255,0.78)" }}>
+                          {d.rationale}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <a
+                  href={`${GITHUB_ORG}/${activeAgent.sourceCrate}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] hover:opacity-90"
+                  style={{ color: "#3F8CFF" }}
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  view source: crates/{activeAgent.sourceCrate}
+                  <ArrowUpRight className="h-3 w-3" />
+                </a>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
+    </main>
+  );
+}
+
+function Metric({ label, value, suffix }: { label: string; value: number; suffix?: string }) {
+  return (
+    <div>
+      <p
+        className="font-mono text-[10px] uppercase tracking-[0.18em]"
+        style={{ color: "rgba(255,255,255,0.55)" }}
+      >
+        {label}
+      </p>
+      <p
+        className="mt-1 font-display text-2xl font-semibold tabular-nums leading-none"
+        style={{ color: "#FFFFFF" }}
+      >
+        <NumberTicker value={value} className="text-white" />
+        {suffix && <span className="ml-1 text-base opacity-60">{suffix}</span>}
       </p>
     </div>
   );
 }
 
-// ─── §3f — CPI trace panel ─────────────────────────────────────────
-
-function CpiTraceSection(): JSX.Element {
+function Legend({ color, label }: { color: string; label: string }) {
   return (
-    <section className="px-6 py-12 md:px-12">
-      <div className="mx-auto max-w-7xl">
-        <article className="relative overflow-hidden rounded-xl border border-[color:var(--color-line-medium)] bg-[color:var(--color-surface-raised)] p-8 md:p-12">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[color:var(--color-accent-execute)]/40 to-transparent" />
-
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:var(--color-ink-tertiary)]">
-            HOW · CPI TRACE
-          </p>
-
-          <div className="mt-6 overflow-x-auto rounded-lg border border-[color:var(--color-line-soft)] bg-[color:var(--color-surface-sunken)]">
-            <table className="w-full">
-              <tbody>
-                {FEATURED_CPI_TRACE.map((row) => (
-                  <tr
-                    key={row.ix}
-                    className="border-b border-[color:var(--color-line-soft)] last:border-b-0 transition-colors hover:bg-[color:var(--color-surface-raised)]"
-                  >
-                    <td className="px-4 py-3 font-mono text-xs text-[color:var(--color-ink-tertiary)] tabular-nums">
-                      {String(row.ix).padStart(2, "0")}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-sm text-[color:var(--color-ink-primary)]">
-                      {row.program}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-sm text-[color:var(--color-accent-zk)]">
-                      {row.call}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </article>
-      </div>
-    </section>
-  );
-}
-
-// ─── §3g — recent decisions panel ──────────────────────────────────
-
-const RECENT_FILTERS: Array<{ id: "ALL" | "RISK-ON" | "NEUTRAL" | "DEFENSIVE" | "CRISIS" | "AGENT VETO"; label: string }> = [
-  { id: "ALL",        label: "ALL" },
-  { id: "RISK-ON",    label: "RISK-ON" },
-  { id: "NEUTRAL",    label: "NEUTRAL" },
-  { id: "DEFENSIVE",  label: "DEFENSIVE" },
-  { id: "CRISIS",     label: "CRISIS" },
-  { id: "AGENT VETO", label: "AGENT VETO" },
-];
-
-function RecentDecisionsSection(): JSX.Element {
-  const [active, setActive] = useState<typeof RECENT_FILTERS[number]["id"]>("ALL");
-
-  return (
-    <section className="px-6 pb-24 pt-12 md:px-12">
-      <div className="mx-auto max-w-7xl">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:var(--color-ink-tertiary)]">
-          RECENT DECISIONS · FILTER BY REGIME / VETO
-        </p>
-
-        <div className="mt-6 flex flex-wrap items-center gap-2">
-          {RECENT_FILTERS.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setActive(f.id)}
-              className={cn(
-                "rounded-full px-4 py-2 font-mono text-xs uppercase tracking-[0.16em] transition-colors",
-                active === f.id
-                  ? "border border-[color:var(--color-accent-electric)] bg-[color:var(--color-accent-electric)]/10 text-[color:var(--color-accent-electric)]"
-                  : "border border-[color:var(--color-line-medium)] bg-[color:var(--color-surface-sunken)] text-[color:var(--color-ink-tertiary)] hover:border-[color:var(--color-line-strong)] hover:text-[color:var(--color-ink-secondary)]",
-              )}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-6">
-          <DecisionList />
-        </div>
-      </div>
-    </section>
+    <span className="inline-flex items-center gap-1.5">
+      <span className="inline-block h-px w-6" style={{ background: color }} />
+      {label}
+    </span>
   );
 }

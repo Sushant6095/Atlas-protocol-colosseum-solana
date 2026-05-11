@@ -1,0 +1,25 @@
+web/components/shells/TerminalShell.tsx
+  s_c3576656714da0::t_7e74aa2e6f8c20 15-16
+  s_c3576656714da0::t_a7a0b545db1e75 46-49
+web/components/shells/IntelligenceShell.tsx
+  s_c3576656714da0::t_46d1b23f3b881d 28-31
+  s_c3576656714da0::t_3fdbd7e611b7e8 10-11
+web/components/shells/PublicShell.tsx
+  s_c3576656714da0::t_862cb6407e1d78 3-7,10-11,16-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "727de4a6ce014b734bb2d5b7898fccc27c0a622d",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

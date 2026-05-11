@@ -114,12 +114,21 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function HeaderNav(): JSX.Element {
+export interface HeaderNavProps {
+  /** Default true. Set false on the docs route so the docs chrome's
+   *  own sticky top-nav can keep ownership of the viewport top edge. */
+  sticky?: boolean;
+}
+
+export function HeaderNav({ sticky = true }: HeaderNavProps = {}): JSX.Element {
   const pathname = usePathname() ?? "/";
 
   return (
     <header
-      className="sticky top-0 z-40 border-b backdrop-blur"
+      className={cn(
+        "z-40 border-b backdrop-blur",
+        sticky && "sticky top-0",
+      )}
       style={{
         borderColor: "color-mix(in oklab, #ffffff 8%, transparent)",
         background: "color-mix(in oklab, #0F1117 90%, transparent)",

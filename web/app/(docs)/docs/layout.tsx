@@ -13,6 +13,8 @@ import type { ReactNode } from "react";
 import {
   DocsTopNav, DocsSidebar, DocsTocRail, MobileSidebar,
 } from "@/components/docs";
+import { LiveStrip } from "@/components/marquee/LiveStrip";
+import { HeaderNav } from "@/components/nav/HeaderNav";
 
 export default function DocsLayout({ children }: { children: ReactNode }) {
   return (
@@ -20,6 +22,14 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
       className="min-h-screen flex flex-col"
       style={{ background: "var(--color-surface-base)" }}
     >
+      {/* Atlas-wide chrome — same APY band + 8-pill nav as every
+          other route. Non-sticky on docs so DocsTopNav below owns
+          the viewport-top sticky once the user scrolls past. */}
+      <div className="relative h-14 border-b border-white/5 overflow-hidden z-30">
+        <LiveStrip />
+      </div>
+      <HeaderNav sticky={false} />
+
       <DocsTopNav />
 
       <div className="mx-auto w-full max-w-[1440px] flex-1 flex">

@@ -77,103 +77,72 @@ Three product surfaces, one repo:
 
 ## System architecture
 
+Atlas is split across four surfaces. Each one is a clean dependency boundary, so the diagrams render reliably on GitHub. The interactive end-to-end pipeline lives at [atlasfi.in/architecture](https://atlasfi.in/architecture).
+
+<!-- TODO: drop in a screenshot of the 16-stage pipeline canvas once recorded. -->
+
+![Atlas 16-stage pipeline](./web/public/brand/architecture-pipeline.png)
+
+### Client surfaces
+
 ```mermaid
-flowchart TB
-    subgraph CLIENT["🌐 Client surfaces"]
-        WEB[Next.js 15 · atlasfi.in]
-        EXT[Browser extension<br/>pre-sign overlay]
-        IOS[iOS app · MWA]
-        WC[Phantom · Solflare · Backpack<br/>via wallet-standard]
-    end
+flowchart LR
+    WEB["Next.js · atlasfi.in"]
+    EXT["Browser extension"]
+    IOS["iOS app · MWA"]
+    SDK["@atlas/sdk · TypeScript"]
+    WC["Wallet Standard<br/>Phantom · Solflare · Backpack"]
+    WEB --> WC
+    EXT --> WC
+    IOS --> WC
+    SDK --> WC
+```
 
-    subgraph PUBLIC["🛰 Public observability"]
-        OBS["/infra observatory"]
-        PRF["/proofs/live explorer"]
-        DEC["/decision-engine"]
-        LED["/treasury/{id}/ledger"]
-    end
+### Public observability
 
-    subgraph CHAIN["⛓ On-chain · Solana mainnet-beta"]
-        VAULT["atlas_vault<br/>Token-2022 shares"]
-        REB["atlas_rebalancer<br/>proof-gated allocator<br/>Pinocchio · zero-copy"]
-        VER["atlas_verifier<br/>sp1-solana Groth16"]
-        REG["atlas_registry<br/>compressed merkle of<br/>approved models"]
-        ALT["atlas_alt_keeper"]
-        ARC["atlas_archive<br/>Bubblegum receipts"]
-        TRG["atlas_trigger_gate<br/>proof-gated triggers"]
-        REC["atlas_recurring_plan"]
-        PER["atlas_per_gateway<br/>private ER settlement"]
-        KEEP["atlas_keeper_registry<br/>scoped mandates"]
+```mermaid
+flowchart LR
+    OBS["/infra observatory"]
+    PRF["/proofs live explorer"]
+    DEC["/decision-engine"]
+    LED["/treasury/{id}/ledger"]
+    API["atlas-public-api · /api/v1/*"]
+    OBS --> API
+    PRF --> API
+    DEC --> API
+    LED --> API
+```
 
-        KAM[(Kamino)]
-        DFT[(Drift v2)]
-        JUP[(Jupiter v6 · Lend · Trigger · Recurring)]
-        MFI[(marginfi)]
-    end
+### On-chain · Solana mainnet-beta
 
-    subgraph PIPE["🤖 16-stage pipeline · Tokio orchestrator"]
-        ING[01 Ingest · gRPC quorum]
-        FEAT[03 Features · canonical]
-        RISK[04 Risk topology]
-        AGT[05–06 7-agent ensemble<br/>+ consensus]
-        ALC[07–08 Allocate]
-        EXP[09 Explain]
-        SER[10 Serialize]
-        SP1[11 SP1 prove]
-        PLN[12 Plan execution]
-        SIM[14 Simulate]
-        SUB[15 Submit · Jito + SWQoS]
-        ARV[16 Archive]
-    end
-
-    subgraph DATA["📊 Data fabric"]
-        BUS[atlas-bus<br/>typed event bus]
-        WH["warehouse<br/>ClickHouse + Timescale + S3"]
-        CEP[anomaly triggers]
-        FOR[forensic engine]
-    end
-
-    subgraph SOURCES["🌐 Multi-source quorum"]
-        TRT[Triton Yellowstone]
-        HEL[Helius Yellowstone]
-        QN[QuickNode Yellowstone]
-        RPF[RPC Fast tier-A]
-        PYT[Pyth Hermes]
-        SWB[Switchboard]
-        BIR[Birdeye · Dune SIM]
-    end
-
-    SOURCES --> BUS --> ING
-    ING --> FEAT --> RISK --> AGT --> ALC --> EXP --> SER --> SP1 --> PLN --> SIM --> SUB --> ARV
-    BUS --> CEP --> FOR
-    ARV --> WH
-
-    SUB -->|atomic bundle| REB
+```mermaid
+flowchart LR
+    REG["atlas_registry"]
+    VAULT["atlas_vault<br/>Token-2022 shares"]
+    REB["atlas_rebalancer<br/>proof-gated"]
+    VER["atlas_verifier<br/>sp1-solana Groth16"]
+    KAM[(Kamino)]
+    DFT[(Drift v2)]
+    JUP[(Jupiter)]
+    MFI[(marginfi)]
+    REG -.read.-> REB
     REB -->|CPI verify| VER
-    REB -->|CPI execute| KAM
-    REB -->|CPI execute| DFT
-    REB -->|CPI execute| JUP
-    REB -->|CPI execute| MFI
     REB -->|CPI record| VAULT
-    REB -->|append leaf| ARC
-    VER -.->|read| REG
+    REB --> KAM
+    REB --> DFT
+    REB --> JUP
+    REB --> MFI
+```
 
-    WEB <--> WC
-    EXT <--> WC
-    IOS <--> WC
-    WEB --> PUBLIC
-    PUBLIC -.->|read-through| WH
+### Off-chain pipeline · 16 stages collapsed into 4 phases
 
-    classDef onchain fill:#1a1a2e,stroke:#7c5cff,stroke-width:2px,color:#fff
-    classDef offchain fill:#0a1929,stroke:#29d3ff,stroke-width:2px,color:#fff
-    classDef client fill:#2a0a2a,stroke:#ff5cf0,stroke-width:2px,color:#fff
-    classDef defi fill:#0a2a1a,stroke:#29d391,stroke-width:1px,color:#fff
-    classDef data fill:#2a1a0a,stroke:#f7c948,stroke-width:1px,color:#fff
-    class VAULT,REB,VER,REG,ALT,ARC,TRG,REC,PER,KEEP onchain
-    class ING,FEAT,RISK,AGT,ALC,EXP,SER,SP1,PLN,SIM,SUB,ARV offchain
-    class WEB,EXT,IOS,WC,OBS,PRF,DEC,LED client
-    class KAM,DFT,JUP,MFI defi
-    class BUS,WH,CEP,FOR,TRT,HEL,QN,RPF,PYT,SWB,BIR data
+```mermaid
+flowchart LR
+    ING["Ingest<br/>atlas-rpc-router<br/>atlas-pyth-post<br/>atlas-birdeye-overlay"]
+    DEC["Decide<br/>atlas-intelligence<br/>atlas-trigger-gate"]
+    PRV["Prove<br/>prover/zkvm-program<br/>prover/orchestrator"]
+    EXE["Execute<br/>atlas-execution-routes<br/>atlas-bundle"]
+    ING --> DEC --> PRV --> EXE
 ```
 
 ---
@@ -359,39 +328,28 @@ graph TB
         P5[strategy commitment hash]
     end
 
-    subgraph CONF["Confidential by default · Phase 14"]
+    subgraph SCOPED["Confidential / private · disclosure-gated"]
         C1[per-protocol notional]
         C2[total TVL]
         C3[payroll amounts]
-        C4[user shares]
+        C4[routing path]
+        C5[agent disagreement]
     end
 
-    subgraph PRIV["Private execution · Phase 18"]
-        E1[routing path]
-        E2[intermediate states]
-        E3[agent disagreement]
-        E4[trigger timing]
-    end
-
-    subgraph DISCLOSE["Selective disclosure"]
+    subgraph DISCLOSE["Selective disclosure scopes"]
         D1[PublicAuditor · aggregate only]
         D2[Operator · per-protocol]
         D3[FinanceAdmin · full]
-        D4[RegulatorTimeWindowed]
+        D4[Regulator · time-windowed]
         D5[Recipient · own only]
     end
 
-    CONF -.->|viewing key| DISCLOSE
-    PRIV -.->|ExecutionPath* keys| DISCLOSE
+    SCOPED -.->|viewing key| DISCLOSE
 
     classDef pub fill:#0a2a1a,stroke:#29d391,color:#fff
-    classDef conf fill:#3a1a1a,stroke:#ff5c5c,color:#fff
-    classDef priv fill:#2a0a3a,stroke:#a682ff,color:#fff
-    classDef disc fill:#3a3a1a,stroke:#f7c948,color:#fff
+    classDef scoped fill:#2a0a3a,stroke:#a682ff,color:#fff
     class P1,P2,P3,P4,P5 pub
-    class C1,C2,C3,C4 conf
-    class E1,E2,E3,E4 priv
-    class D1,D2,D3,D4,D5 disc
+    class C1,C2,C3,C4,C5 scoped
 ```
 
 Admin keys hold only `pause` / `unpause` / `set_tvl_cap` (per I-1). Withdraws are **never** gated on proofs. Privacy is selective, not anonymous — sanctioned by viewing-key disclosure scopes.

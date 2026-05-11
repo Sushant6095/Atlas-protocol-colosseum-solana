@@ -1,0 +1,23 @@
+web/components/nav/HeaderNav.tsx
+  s_c3576656714da0::t_947a3fea5ca695 16-23
+  s_c3576656714da0::t_1567976804c583 49-50,53,58-59,63-68
+  s_c3576656714da0::t_a1257d3cb2dbea 257,260-267,271,277,282-368
+  s_c3576656714da0::t_4fa2cad18275ff 90,92-96,101,103-107,112,114-118,123,125-129,138-145
+  s_c3576656714da0::t_9a453ea68c9a6c 134-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "294fbd72a04f432648322d6416e2fdd1df60f5ca",
+  "prompts": {},
+  "sessions": {
+    "s_c3576656714da0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "245fcb3f-dd64-443c-be2b-c5e57c836330",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Sushant6095 <sj317772@gmail.com>"
+    }
+  }
+}

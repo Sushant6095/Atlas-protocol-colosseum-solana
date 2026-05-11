@@ -19,9 +19,24 @@ export default function Page() {
         </h1>
         <p className="mt-6 max-w-[760px] text-[14px] text-[color:var(--color-ink-secondary)]">
           Atlas does not require trust. It is structurally checkable.
-          The 25 invariants below are the contract; their file links
+          The 26 invariants below are the contract; their file links
           are the source of truth. Auditors read this page first.
         </p>
+
+        {/* verifier program status */}
+        <div className="mt-8 inline-flex items-center gap-3 rounded-[var(--radius-md)] border border-[color:var(--color-line-soft)] bg-[color:var(--color-surface-raised)] px-4 py-3">
+          <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em]"
+            style={{
+              color: "var(--color-accent-zk)",
+              borderColor: "color-mix(in oklab, var(--color-accent-zk) 35%, transparent)",
+              background: "color-mix(in oklab, var(--color-accent-zk) 10%, transparent)",
+            }}>
+            verifier program
+          </span>
+          <p className="font-mono text-[12px] text-[color:var(--color-ink-secondary)]">
+            designed · <span className="text-[color:var(--color-accent-warn)]">sp1-solana audit gating mainnet</span>
+          </p>
+        </div>
       </header>
 
       <Section
@@ -134,6 +149,45 @@ export default function Page() {
 
       <Section
         no="6"
+        title="Adversarial corpus"
+        body={
+          <div className="space-y-4">
+            <p className="text-[13px] text-[color:var(--color-ink-secondary)]">
+              Three concentric test layers verify the invariants above
+              under hostile load. Counts pulled from the workspace
+              CHANGELOG.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { stat: "26",  label: "invariants tracked",    sub: "I-1..I-26" },
+                { stat: "10",  label: "adversarial scenarios", sub: "tests/adversarial · directive §12" },
+                { stat: "256", label: "proptest cases",         sub: "tests/invariants · n ∈ [2,8] protocols" },
+                { stat: "8",   label: "chaos game days",        sub: "ops/runbooks" },
+              ].map((m) => (
+                <Panel key={m.label} surface="raised" density="dense" className="text-center">
+                  <p className="font-mono text-[24px] text-[color:var(--color-accent-electric)] tabular-nums">
+                    {m.stat}
+                  </p>
+                  <p className="text-[11px] text-[color:var(--color-ink-secondary)] mt-1">
+                    {m.label}
+                  </p>
+                  <p className="font-mono text-[10px] text-[color:var(--color-ink-tertiary)] mt-1">
+                    {m.sub}
+                  </p>
+                </Panel>
+              ))}
+            </div>
+            <p className="text-[12px] text-[color:var(--color-ink-tertiary)] font-mono">
+              · atlas-invariants-tests: 6 crate-level tests
+              {" · "} atlas-adversarial-tests: 10 hostile-scenario tests
+              {" · "} 256-case proptest sweep on the consensus root
+            </p>
+          </div>
+        }
+      />
+
+      <Section
+        no="7"
         title="Audit history"
         body={
           <div className="space-y-2 text-[13px] text-[color:var(--color-ink-secondary)]">
@@ -147,7 +201,7 @@ export default function Page() {
       />
 
       <Section
-        no="7"
+        no="8"
         title="Bug bounty"
         body={
           <p className="text-[13px] text-[color:var(--color-ink-secondary)]">
@@ -177,12 +231,19 @@ function Section({ no, title, body }: { no: string; title: string; body: React.R
 
 const INVARIANTS = [
   { id: "I-1",  area: "info" as const, severity: "info" as const, text: "Strategy is committed at vault creation; no mid-life flip.", source: "atlas-vault" },
-  { id: "I-2",  area: "info" as const, severity: "info" as const, text: "Feature-store reads are point-in-time; no leakage.", source: "atlas-warehouse" },
-  { id: "I-3",  area: "proof" as const, severity: "info" as const, text: "Proofs older than MAX_STALE_SLOTS rejected on-chain.", source: "atlas-verifier" },
+  { id: "I-2",  area: "info" as const, severity: "info" as const, text: "Proof-gated state movement — only execute_rebalance can move principal.", source: "atlas-rebalancer" },
+  { id: "I-3",  area: "proof" as const, severity: "info" as const, text: "Three-gate rebalance — manifest, simulation, proof must all clear.", source: "atlas-rebalancer" },
   { id: "I-4",  area: "proof" as const, severity: "info" as const, text: "Public input layout is fixed-size; no Borsh on the verifier path.", source: "atlas-public-input" },
-  { id: "I-5",  area: "info" as const, severity: "info" as const, text: "Replay reproduces every rebalance byte-for-byte from the warehouse.", source: "atlas-replay" },
-  { id: "I-7",  area: "info" as const, severity: "info" as const, text: "Bus events are content-addressed via blake3.", source: "atlas-bus" },
+  { id: "I-5",  area: "info" as const, severity: "info" as const, text: "No floats in proof inputs — bps-scaled AllocationVectorBps only.", source: "atlas-public-input" },
+  { id: "I-6",  area: "info" as const, severity: "info" as const, text: "Deterministic ordering — BTreeMap + clippy ban on HashMap/HashSet.", source: "clippy.toml" },
+  { id: "I-7",  area: "info" as const, severity: "info" as const, text: "No silent fallbacks — every Stage::run returns Result.", source: "atlas-runtime" },
   { id: "I-8",  area: "info" as const, severity: "info" as const, text: "Archival writes are atomic with rebalance commits.", source: "atlas-warehouse" },
+  { id: "I-9",  area: "proof" as const, severity: "info" as const, text: "Single source of public-input truth — atlas-public-input is canonical.", source: "atlas-public-input" },
+  { id: "I-10", area: "info" as const, severity: "info" as const, text: "Cross-program invariant assertions on every CPI.", source: "atlas-rebalancer" },
+  { id: "I-11", area: "ok" as const, severity: "ok" as const, text: "Token-2022 awareness declared in vault strategy commitment.", source: "atlas-vault" },
+  { id: "I-12", area: "info" as const, severity: "info" as const, text: "No unwrap/expect/panic on production paths — clippy enforced.", source: "clippy.toml" },
+  { id: "I-13", area: "info" as const, severity: "info" as const, text: "Bus events are content-addressed via blake3.", source: "atlas-bus" },
+  { id: "I-14", area: "info" as const, severity: "info" as const, text: "Replay reproduces every rebalance byte-for-byte from the warehouse.", source: "atlas-replay" },
   { id: "I-15", area: "zk" as const, severity: "zk" as const, text: "Public input v3 carries the confidential-mode flag at offset 2.", source: "atlas-confidential" },
   { id: "I-16", area: "zk" as const, severity: "zk" as const, text: "Confidentiality pattern (A vs B) is per-vault and lifelong.", source: "atlas-confidential" },
   { id: "I-17", area: "info" as const, severity: "info" as const, text: "Disclosure events are Bubblegum-anchored with tamper-detect ids.", source: "atlas-confidential" },
@@ -194,6 +255,7 @@ const INVARIANTS = [
   { id: "I-23", area: "zk" as const, severity: "zk" as const, text: "Verifier accepts only ER-rooted post-states.", source: "atlas-per" },
   { id: "I-24", area: "zk" as const, severity: "zk" as const, text: "Execution privacy is per-vault and lifelong.", source: "atlas-per" },
   { id: "I-25", area: "zk" as const, severity: "zk" as const, text: "PrivateER vaults must declare an ExecutionPath* disclosure scope.", source: "atlas-per" },
+  { id: "I-26", area: "ok" as const, severity: "ok" as const, text: "PUSD-native — non-PUSD legs > 12h fail the workspace build.", source: "atlas-vault-templates" },
 ];
 
 const GAME_DAYS = [

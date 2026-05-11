@@ -205,7 +205,7 @@ function Hero(): JSX.Element {
 
       <div className="relative px-20 pt-20 pb-32 max-w-[1440px] mx-auto">
         {/* Live counters — top right, mono. */}
-        <HeroCounters className="absolute top-12 right-20 hidden md:block w-[520px]" />
+        <HeroCounters className="absolute top-12 right-20 hidden md:block w-[640px] xl:w-[720px]" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center pt-24">
           <div className="lg:col-span-7">

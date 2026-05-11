@@ -145,7 +145,7 @@ export default function PusdVaultPage(): JSX.Element {
           style={{ color: "var(--color-ink-secondary)" }}
         >
           Not <em className="not-italic opacity-70">"we also support PUSD"</em>.
-          12 strategies × 3 risk bands = 12 vault recipes, every recipe
+          4 strategies × 3 risk bands = 12 vault recipes, every recipe
           denominated, settled, and rebalanced in PUSD with a Token-2022
           extension manifest and a hard <code>atlas-drift-check</code> CI gate.
         </p>

@@ -34,6 +34,7 @@ import { findVault, type AtlasVaultMeta, type StrategyLeg } from "@/lib/vaults";
 import { fetchPoolChart, formatApy, formatTvl, type DLChartPoint } from "@/lib/markets";
 import { ConnectButton } from "@/components/ConnectButton";
 import { DepositCard } from "@/components/DepositCard";
+import { PrewarmDemo } from "@/components/vaults/PrewarmDemo";
 import { useSolBalance } from "@/hooks/useSolBalance";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { fmtSol, CLUSTER } from "@/lib/atlas";
@@ -110,6 +111,11 @@ export default function VaultDetailPage() {
           <Stat label="TVL" value={`$${v.tvl.toLocaleString()}`} />
           <Stat label="Risk score" value={`${v.riskScore} / 5`} accent={v.riskScore >= 4 ? "#ff5cf0" : "#7c5cff"} />
         </div>
+      </section>
+
+      {/* payment pre-warm — Dodo integration demo */}
+      <section className="mx-auto max-w-6xl px-6 pb-6">
+        <PrewarmDemo />
       </section>
 
       {/* main grid */}

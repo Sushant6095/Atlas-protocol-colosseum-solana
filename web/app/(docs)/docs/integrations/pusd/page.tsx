@@ -23,7 +23,7 @@ description: "Atlas is PUSD-native. Not 'we also support PUSD'."
 ---
 # Atlas is PUSD-native
 
-12 strategies × 3 risk bands = 12 vault recipes, every recipe
+4 strategies × 3 risk bands = 12 vault recipes, every recipe
 denominated, settled, and rebalanced in PUSD.
 
 ## Declared hard rule
@@ -122,7 +122,7 @@ export default function PusdIntegrationPage(): JSX.Element {
   return (
     <DocPage
       title="Atlas is PUSD-native"
-      description='Not "we also support PUSD" — 12 strategies × 3 risk bands = 12 vault recipes, every recipe denominated, settled, and rebalanced in PUSD.'
+      description='Not "we also support PUSD" — 4 strategies × 3 risk bands = 12 vault recipes, every recipe denominated, settled, and rebalanced in PUSD.'
       markdown={MARKDOWN_SOURCE}
     >
       {/* hero pills */}

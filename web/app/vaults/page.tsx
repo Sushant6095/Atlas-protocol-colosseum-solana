@@ -279,7 +279,7 @@ function PusdFeaturedCard(): JSX.Element {
               <br className="hidden md:block" /> Not <em className="not-italic opacity-70">"we also support PUSD"</em>.
             </h2>
             <p className="mt-3 text-sm leading-[1.55]" style={{ color: "var(--color-ink-secondary)" }}>
-              12 strategies × 3 risk bands = 12 vault recipes. Every recipe
+              4 strategies × 3 risk bands = 12 vault recipes. Every recipe
               denominated, settled, and rebalanced in PUSD with a Token-2022
               extension manifest and a hard <code>atlas-drift-check</code>
               CI gate.
@@ -319,10 +319,10 @@ function PusdFeaturedCard(): JSX.Element {
               className="mt-1 font-display text-3xl font-semibold tabular-nums leading-none"
               style={{ color: "var(--color-ink-primary)" }}
             >
-              12 × 3 <span className="text-base opacity-60">=</span> 12
+              4 × 3 <span className="text-base opacity-60">=</span> 12
             </p>
             <p className="mt-1 text-[11px]" style={{ color: "var(--color-ink-secondary)" }}>
-              strategies × risk bands = vault recipes
+              12 vault templates · 4 strategies × 3 risk bands
             </p>
 
             <div className="mt-4 space-y-1.5 font-mono text-[11px]" style={{ color: "var(--color-ink-secondary)" }}>
